@@ -1,0 +1,155 @@
+/* public/css/style.css */
+
+/* Ogólne style dla ciemnego motywu */
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.welcome-container {
+    text-align: center;
+}
+
+.welcome-container h1 {
+    font-size: 4rem;
+    color: #ffffff;
+}
+
+/* Stylizacja paska bocznego */
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    background-color: #1f1f1f;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.sidebar a {
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    color: #f1f1f1;
+}
+
+.sidebar .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+#sidebarBtn {
+    font-size: 30px;
+    cursor: pointer;
+    color: white;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    position: fixed;
+    top: 15px;
+    right: 15px;
+}
+
+/* Stylizacja logo */
+.navbar-brand {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* Stylizacja centralnego logowania i rejestracji */
+.container-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container-center .card {
+    width: 100%;
+    max-width: 500px;
+}
+
+.card-header {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Stylizacja formularza logowania */
+.form-group {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.form-control {
+    width: 100%;
+    margin: 5px 0;
+    display: block;
+}
+
+.btn-primary, .register-button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    display: block;
+    text-align: center;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover, .register-button:hover {
+    background-color: #0056b3;
+}
+
+.register-button {
+    background-color: #007bff;
+}
+
+.form-check {
+    display: flex;
+    justify-content: flex-start;
+    margin: 10px 0;
+}
+
+.btn-link {
+    color: #982edf;
+    text-align: center;
+    display: block;
+    margin: 0 auto;
+}
+
+.btn-link:hover {
+    color: #0056b3;
+}
+
+/* Stylizacja komunikatu błędu */
+.alert-danger {
+    color: #ff0000;
+    background-color: transparent;
+    border-color: transparent;
+}
