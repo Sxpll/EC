@@ -26,8 +26,8 @@ body {
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
-    width: 100%;  /* Ustaw szerokość na 100% */
-    max-width: 400px;  /* Zwiększ maksymalną szerokość */
+    width: 100%;
+    max-width: 600px; 
     margin: 0 auto;
 }
 
@@ -48,22 +48,18 @@ body {
 
 .form-group {
     margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    color: #ffffff;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .form-control {
-    width: 100%; 
+    width: calc(100% - 20px);
     border: none;
     border-radius: 5px;
     margin-top: 5px;
     background-color: #3b3b4b;
     color: #ffffff;
     padding: 10px;
-    box-sizing: border-box; /* Upewnij się, że padding jest wliczany w szerokość */
 }
 
 .form-control:focus {
@@ -75,14 +71,15 @@ body {
     background-color: #1abc9c;
     border: none;
     padding: 10px;
-    width: 100%; 
+    width: calc(100% - 20px);
     border-radius: 5px;
     color: #ffffff;
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
     margin-top: 5px;
-    box-sizing: border-box; /* Upewnij się, że padding jest wliczany w szerokość */
+    margin-left: 10px; /* Dodaj marginesy wewnętrzne */
+    margin-right: 10px; /* Dodaj marginesy wewnętrzne */
 }
 
 .btn-primary:hover {
@@ -163,13 +160,4 @@ body {
     left: 15px;
     display: flex;
     align-items: center;
-}
-
-.form-check {
-    display: flex;
-    align-items: center;
-}
-
-.form-check-input {
-    margin-right: 10px;
 }
