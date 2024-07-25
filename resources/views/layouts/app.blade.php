@@ -19,7 +19,7 @@
         <!-- Sidebar -->
         <div id="mySidebar" class="sidebar">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-            <a href="{{ url('/') }}">Home</a>
+            <a href="{{ url('/home') }}">Home</a>
             @guest
                 <a href="{{ route('login') }}">Login</a>
                 <a href="{{ route('register') }}">Register</a>
@@ -54,6 +54,13 @@
         function closeNav() {
             document.getElementById("mySidebar").style.width = "0";
         }
+
+        // Zamknij sidebar po kliknięciu w link
+        document.querySelectorAll('#mySidebar a').forEach(link => {
+            link.addEventListener('click', function() {
+                closeNav();
+            });
+        });
     </script>
 </body>
 </html>
