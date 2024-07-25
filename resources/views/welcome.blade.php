@@ -23,10 +23,15 @@
         <!-- Sidebar -->
         <div id="mySidebar" class="sidebar">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-            <a href="{{ route('login') }}">Login</a>
-            <a href="{{ route('register') }}">Register</a>
-            @auth
-                <a href="{{ url('/home') }}">My Account</a>
+            @guest
+                <a href="{{ route('login') }}">Login</a>
+                <a href="{{ route('register') }}">Register</a>
+            @else
+                <a href="{{ url('/home') }}">Home</a>
+                <a href="{{ route('account.edit') }}">My Account</a>
+                @if(Auth::user()->role === 'admin')
+                    <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
+                @endif
                 <a href="{{ route('logout') }}"
                    onclick="event.preventDefault();
                                  document.getElementById('logout-form').submit();">
@@ -35,7 +40,7 @@
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                     @csrf
                 </form>
-            @endauth
+            @endguest
         </div>
 
         <button id="sidebarBtn" onclick="openNav()">&#9776;</button>

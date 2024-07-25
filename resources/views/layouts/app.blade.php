@@ -16,14 +16,24 @@
 </head>
 <body>
     <div id="app">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url('/') }}">
+                    <img src="{{ asset('img/logo.png') }}" alt="Logo" style="height: 40px;">
+                </a>
+            </div>
+        </nav>
+
         <!-- Sidebar -->
         <div id="mySidebar" class="sidebar">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-            <a href="{{ url('/home') }}">Home</a>
             @guest
                 <a href="{{ route('login') }}">Login</a>
                 <a href="{{ route('register') }}">Register</a>
             @else
+                <!-- <a href="{{ url('/') }}">Welcome</a> -->
+                <a href="{{ url('/home') }}">Home</a>
                 <a href="{{ route('account.edit') }}">My Account</a>
                 @if(Auth::user()->role === 'admin')
                     <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
