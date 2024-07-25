@@ -3,23 +3,110 @@
 /* Ogólne style dla ciemnego motywu */
 body {
     font-family: 'Nunito', sans-serif;
-    background-color: #121212;
+    background-color: #1e1e2f;
     color: #ffffff;
     margin: 0;
     padding: 0;
-    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100vh;
 }
 
-.welcome-container {
+.container-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+}
+
+.login-card {
+    background-color: #2b2b3b;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 100%;  /* Ustaw szerokość na 100% */
+    max-width: 400px;  /* Zwiększ maksymalną szerokość */
+    margin: 0 auto;
+}
+
+.card-header {
     text-align: center;
+    margin-bottom: 20px;
 }
 
-.welcome-container h1 {
-    font-size: 4rem;
+.card-header h1 {
+    font-size: 24px;
     color: #ffffff;
+}
+
+.card-header p {
+    font-size: 14px;
+    color: #cccccc;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    color: #ffffff;
+}
+
+.form-control {
+    width: 100%; 
+    border: none;
+    border-radius: 5px;
+    margin-top: 5px;
+    background-color: #3b3b4b;
+    color: #ffffff;
+    padding: 10px;
+    box-sizing: border-box; /* Upewnij się, że padding jest wliczany w szerokość */
+}
+
+.form-control:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.btn-primary {
+    background-color: #1abc9c;
+    border: none;
+    padding: 10px;
+    width: 100%; 
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+    box-sizing: border-box; /* Upewnij się, że padding jest wliczany w szerokość */
+}
+
+.btn-primary:hover {
+    background-color: #16a085;
+}
+
+.btn-link {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: #1abc9c;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.btn-link:hover {
+    color: #16a085;
+}
+
+.alert-danger {
+    color: #ff6b6b;
+    background-color: #2b2b3b;
+    border-color: transparent;
+    text-align: center;
 }
 
 /* Stylizacja paska bocznego */
@@ -30,7 +117,7 @@ body {
     z-index: 1;
     top: 0;
     right: 0;
-    background-color: #1f1f1f;
+    background-color: #2b2b3b;
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
@@ -40,13 +127,13 @@ body {
     padding: 10px 15px;
     text-decoration: none;
     font-size: 25px;
-    color: #818181;
+    color: #ffffff;
     display: block;
     transition: 0.3s;
 }
 
 .sidebar a:hover {
-    color: #f1f1f1;
+    color: #1abc9c;
 }
 
 .sidebar .closebtn {
@@ -78,94 +165,11 @@ body {
     align-items: center;
 }
 
-/* Stylizacja centralnego logowania i rejestracji */
-.container-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.container-center .card {
-    width: 100%;
-    max-width: 500px;
-}
-
-.card-header {
-    text-align: center;
-    font-size: 24px;
-    font-weight: bold;
-}
-
-/* Stylizacja formularza logowania */
-.form-group {
-    text-align: center;
-    margin: 10px 0;
-}
-
-.form-control {
-    width: 100%;
-    margin: 5px 0;
-    display: block;
-}
-
-.btn-primary, .register-button {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    display: block;
-    text-align: center;
-    border-radius: 5px;
-    text-decoration: none;
-    transition: background-color 0.3s;
-    background-color: #007bff;
-    border: none;
-}
-
-.btn-primary:hover, .register-button:hover {
-    background-color: #0056b3;
-}
-
-.register-button {
-    background-color: #007bff;
-}
-
 .form-check {
     display: flex;
-    justify-content: flex-start;
-    margin: 10px 0;
+    align-items: center;
 }
 
-.btn-link {
-    color: #982edf;
-    text-align: center;
-    display: block;
-    margin: 0 auto;
-}
-
-.btn-link:hover {
-    color: #0056b3;
-}
-
-/* Stylizacja komunikatu błędu */
-.alert-danger {
-    color: #ff0000;
-    background-color: transparent;
-    border-color: transparent;
-}
-
-/* Navbar linki */
-.navbar-nav .nav-link {
-    color: #ffffff !important;
-}
-
-.navbar-nav .nav-link:hover {
-    color: #f1f1f1 !important;
-    text-decoration: none !important;
-}
-
-.navbar-text {
-    position: fixed;
-    top: 35px;
-    right: 70px;
+.form-check-input {
+    margin-right: 10px;
 }

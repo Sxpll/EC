@@ -2,20 +2,18 @@
 
 @section('content')
 <div class="container-center">
-    <div class="card">
-        <div class="card-header"><h2>{{ __('Login') }}</h2></div>
-        <div class="card-body">
-            @if (session('error'))
-                <div class="alert alert-danger" role="alert">
-                    {{ session('error') }}
-                </div>
-            @endif
+    <div class="card login-card">
+        <div class="card-header">
+            <h1>NAZWA</h1>
+            <p>Welcome Back!</p>
+        </div>
 
+        <div class="card-body">
             <form method="POST" action="{{ route('login') }}">
                 @csrf
 
                 <div class="form-group">
-                    <label for="email">{{ __('Email Address') }}</label>
+                    <label for="email">Email</label>
                     <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
                     @error('email')
                         <span class="invalid-feedback" role="alert">
@@ -25,7 +23,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password">{{ __('Password') }}</label>
+                    <label for="password">Password</label>
                     <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
                     @error('password')
                         <span class="invalid-feedback" role="alert">
@@ -34,24 +32,29 @@
                     @enderror
                 </div>
 
-                <div class="form-check">
+                <div class="form-group form-check">
                     <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
                     <label class="form-check-label" for="remember">
                         {{ __('Remember Me') }}
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-primary">
-                    {{ __('Login') }}
-                </button>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        {{ __('Sign in') }}
+                    </button>
+                </div>
 
                 @if (Route::has('password.request'))
                     <a class="btn btn-link" href="{{ route('password.request') }}">
                         {{ __('Forgot Your Password?') }}
                     </a>
                 @endif
+
+                <a class="btn btn-link" href="{{ route('register') }}">
+                    {{ __('Request An Account') }}
+                </a>
             </form>
-            <a href="{{ route('register') }}" class="register-button">Don't have an account? Register</a>
         </div>
     </div>
 </div>
