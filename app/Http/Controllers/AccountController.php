@@ -49,3 +49,4 @@ class AccountController extends Controller
         return redirect()->route('account.edit')->with('status', 'Account updated successfully.');
     }
 }
+    
