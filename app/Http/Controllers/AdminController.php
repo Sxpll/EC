@@ -2,49 +2,65 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('admin');
-    }
-
     public function dashboard()
     {
-        Log::info('AdminController: Accessing dashboard');
-        return view('admin.dashboard');
+        if (auth()->user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
+        $totalUsers = User::count();
+        $activeUsers = User::where('isActive', true)->count();
+        $inactiveUsers = User::where('isActive', false)->count();
+
+        return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers'));
     }
 
     public function manageUsers()
     {
-        Log::info('AdminController: Accessing manageUsers');
+        if (auth()->user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
         $users = User::all();
         return view('admin.manage-users', compact('users'));
     }
 
     public function updateUser(Request $request, $id)
     {
-        Log::info('AdminController: Updating user');
+        if (auth()->user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
         $user = User::findOrFail($id);
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
-            'role' => 'required|string|in:user,admin',
-            'is_active' => 'required|boolean',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'isActive' => 'nullable|boolean',
         ]);
 
-        $user->update($request->all());
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'isActive' => $request->input('isActive') ? true : false,
+
+        ]);
 
         return redirect()->route('admin.manageUsers')->with('success', 'User updated successfully');
     }
 
     public function destroy($id)
     {
-        Log::info('AdminController: Deleting user');
+        if (auth()->user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
         $user = User::findOrFail($id);
         $user->delete();
         return redirect()->route('admin.manageUsers')->with('success', 'User deleted successfully');

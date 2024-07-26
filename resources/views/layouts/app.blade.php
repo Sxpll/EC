@@ -18,6 +18,8 @@
     <div id="app">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm">
+            <!-- resources/views/layouts/app.blade.php -->
+
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="{{ asset('img/logo.png') }}" alt="Logo" style="height: 40px;">
@@ -32,7 +34,6 @@
                 <a href="{{ route('login') }}">Login</a>
                 <a href="{{ route('register') }}">Register</a>
             @else
-                <!-- <a href="{{ url('/') }}">Welcome</a> -->
                 <a href="{{ url('/home') }}">Home</a>
                 <a href="{{ route('account.edit') }}">My Account</a>
                 @if(Auth::user()->role === 'admin')

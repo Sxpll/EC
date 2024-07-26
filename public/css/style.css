@@ -78,7 +78,6 @@ body {
     cursor: pointer;
     transition: background-color 0.3s;
     margin-top: 5px;
-    
 }
 
 .btn-primary:hover {
@@ -117,7 +116,7 @@ body {
     overflow-x: hidden;
     transition: width 0.5s;
     padding-top: 60px;
-    white-space: nowrap; /* Dodane, aby tekst był zawsze w jednej linii */
+    white-space: nowrap;
 }
 
 .sidebar a {
@@ -127,7 +126,7 @@ body {
     color: #ffffff;
     display: block;
     transition: color 0.3s;
-    white-space: nowrap; /* Dodane, aby tekst był zawsze w jednej linii */
+    white-space: nowrap;
 }
 
 .sidebar a:hover {
@@ -154,7 +153,6 @@ body {
     right: 15px;
 }
 
-
 /* Stylizacja logo */
 .navbar-brand {
     position: fixed;
@@ -162,4 +160,83 @@ body {
     left: 15px;
     display: flex;
     align-items: center;
+}
+
+/* Dodane style do tabeli */
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.table {
+    background-color: #2b2b3b;
+    border-radius: 10px;
+    color: #ffffff;
+}
+
+.table th,
+.table td {
+    border-color: #3b3b4b;
+    padding: 10px;
+}
+
+.table th {
+    background-color: #3b3b4b;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #323246;
+}
+
+.table tbody tr:hover {
+    background-color: #1abc9c;
+}
+
+.btn-success {
+    background-color: #1abc9c;
+    border: none;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-success:hover {
+    background-color: #16a085;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    border: none;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Style dla kart na dashboardzie */
+.card {
+    background-color: #2b2b3b;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-align: center;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
 }

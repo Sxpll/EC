@@ -7,28 +7,60 @@
             <h1>Manage Users</h1>
         </div>
         <div class="card-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($users as $user)
-                    <tr>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->role }}</td>
-                        <td>
-                            <!-- Actions like edit, deactivate -->
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+                <script>
+                    setTimeout(() => {
+                        document.querySelector('.alert-success').style.display = 'none';
+                    }, 2000);
+                </script>
+            @endif
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($users as $user)
+                            <tr>
+                                <form action="{{ route('admin.updateUser', $user->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <td>
+                                        <input type="text" name="name" value="{{ $user->name }}" class="form-control">
+                                    </td>
+                                    <td>
+                                        <input type="email" name="email" value="{{ $user->email }}" class="form-control">
+                                    </td>
+                                    <td>{{ $user->role }}</td>
+                                    <td>
+                                        <input type="hidden" name="isActive" value="0">
+                                        <input type="checkbox" name="isActive" value="1" {{ $user->isActive ? 'checked' : '' }}>
+                                    </td>
+                                    <td>
+                                        <button type="submit" class="btn btn-success">Update</button>
+                                    </td>
+                                </form>
+                                <td>
+                                    <form action="{{ route('admin.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?');" style="display:inline-block;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
