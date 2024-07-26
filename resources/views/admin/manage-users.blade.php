@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-center">
-    <div class="card login-card">
+<div class="container-admin">
+    <div class="card-admin">
         <div class="card-header">
             <h1>Manage Users</h1>
         </div>
@@ -25,7 +25,7 @@
                             <th>Email</th>
                             <th>Role</th>
                             <th>Active</th>
-                            <th>Actions</th>
+                            <th colspan="2">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,7 +40,12 @@
                                     <td>
                                         <input type="email" name="email" value="{{ $user->email }}" class="form-control">
                                     </td>
-                                    <td>{{ $user->role }}</td>
+                                    <td>
+                                        <select name="role" class="form-control">
+                                            <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>user</option>
+                                            <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>admin</option>
+                                        </select>
+                                    </td>
                                     <td>
                                         <input type="hidden" name="isActive" value="0">
                                         <input type="checkbox" name="isActive" value="1" {{ $user->isActive ? 'checked' : '' }}>

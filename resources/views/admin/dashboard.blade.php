@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-center">
-    <div class="card login-card">
+<div class="container-admin-dashboard">
+    <div class="card-admin-dashboard">
         <div class="card-header">
             <h1>Admin Dashboard</h1>
             <p>Welcome, Admin!</p>
@@ -34,8 +34,8 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-4">
-                <div class="col-md-12">
+            <div class="row mt-4 justify-content-center">
+                <div class="col-md-6 text-center">
                     <a href="{{ route('admin.manageUsers') }}" class="btn btn-primary btn-block">Manage Users</a>
                 </div>
             </div>

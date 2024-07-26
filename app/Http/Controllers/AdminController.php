@@ -43,13 +43,14 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'isActive' => 'nullable|boolean',
+            'role' => 'required|string|in:admin,user',
         ]);
 
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
+            'role' => $request->role,
             'isActive' => $request->input('isActive') ? true : false,
-
         ]);
 
         return redirect()->route('admin.manageUsers')->with('success', 'User updated successfully');
