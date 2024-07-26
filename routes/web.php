@@ -23,5 +23,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/user/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
     Route::delete('/admin/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
 
+    Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.storeUser');
+    Route::get('/admin/history', [AdminController::class, 'showHistory'])->name('admin.history');
+
+    
+    
+
+
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 });
