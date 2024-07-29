@@ -1,9 +1,7 @@
-<!-- resources/views/admin/manage-users.blade.php -->
-
 @extends('layouts.app')
 
 @section('content')
-<div class="container-admin">
+<div class="container-admin manage-users-container">
     <div class="card-admin">
         <div class="card-header">
             <h1>Manage Users</h1>
@@ -48,11 +46,6 @@
                                 <td>{{ $user->email }}</td>
                                 <td>
                                     <button class="btn btn-primary btn-view" data-id="{{ $user->id }}">View</button>
-                                    <form action="{{ route('admin.destroy', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
                                 </td>
                             </tr>
                         @endforeach
@@ -106,29 +99,40 @@
 <div id="viewUserModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>View User</h2>
-        <form id="viewUserForm">
+        <h2>Edit User</h2>
+        <form id="viewUserForm" method="POST" action="{{ route('admin.updateUser', '') }}">
+            @csrf
+            @method('PUT')
+            <input type="hidden" id="viewUserId" name="id">
             <div class="form-group">
                 <label for="viewName">Name:</label>
-                <input type="text" id="viewName" class="form-control" readonly>
+                <input type="text" id="viewName" name="name" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="viewLastname">Last Name:</label>
-                <input type="text" id="viewLastname" class="form-control" readonly>
+                <input type="text" id="viewLastname" name="lastname" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="viewEmail">Email:</label>
-                <input type="email" id="viewEmail" class="form-control" readonly>
+                <input type="email" id="viewEmail" name="email" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="viewRole">Role:</label>
-                <input type="text" id="viewRole" class="form-control" readonly>
+                <select id="viewRole" name="role" class="form-control" required>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="viewActive">Active:</label>
-                <input type="checkbox" id="viewActive" disabled>
+                <input type="checkbox" id="viewActive" name="isActive" value="1">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Update User</button>
+                <button type="button" id="deleteUserBtn" class="btn btn-danger" style="white-space: nowrap;">Delete User</button>
             </div>
         </form>
+        
     </div>
 </div>
 
@@ -138,6 +142,7 @@
     var addUserBtn = document.getElementById("openModalBtn");
     var closeBtns = document.getElementsByClassName("close");
     var viewBtns = document.getElementsByClassName("btn-view");
+    var deleteUserBtn = document.getElementById("deleteUserBtn");
 
     addUserBtn.onclick = function() {
         addUserModal.style.display = "block";
@@ -165,17 +170,35 @@
             fetch(`/admin/user/${userId}`)
                 .then(response => response.json())
                 .then(data => {
+                    var updateForm = document.getElementById('viewUserForm');
+                    updateForm.action = `/admin/user/${userId}`;
+                    document.getElementById("viewUserId").value = data.id;
                     document.getElementById("viewName").value = data.name;
                     document.getElementById("viewLastname").value = data.lastname;
                     document.getElementById("viewEmail").value = data.email;
                     document.getElementById("viewRole").value = data.role;
                     document.getElementById("viewActive").checked = data.isActive;
+                    deleteUserBtn.onclick = function() {
+                        if (confirm('Are you sure you want to delete this user?')) {
+                            fetch(`/admin/user/${userId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                }
+                            }).then(response => {
+                                if (response.ok) {
+                                    location.reload();
+                                } else {
+                                    alert('Error deleting user');
+                                }
+                            });
+                        }
+                    };
                     viewUserModal.style.display = "block";
                 });
         }
     });
 
-    // Skrypt do obsługi wyszukiwania
     document.getElementById('search').addEventListener('input', function() {
         let query = this.value.toLowerCase();
         let rows = document.querySelectorAll('#users-table tr');

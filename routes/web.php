@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\HomeController;
@@ -21,18 +20,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/manage-users', [AdminController::class, 'manageUsers'])->name('admin.manageUsers');
     Route::put('/admin/user/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
-    Route::delete('/admin/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
+    Route::delete('/admin/user/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
 
     Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.storeUser');
     Route::get('/admin/history', [AdminController::class, 'showHistory'])->name('admin.history');
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
-    Route::get('/admin/user/{id}/view', [AdminController::class, 'viewUser'])->name('admin.viewUser');
 
-
-
-    
-    
-
+    // Zakomentowane trasy, które mogą być zbędne
+    // Route::put('/admin/user/{user}', [UserController::class, 'update'])->name('admin.update');
+    // Route::delete('/admin/user/{user}', [UserController::class, 'destroy'])->name('admin.destroy');
 
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 });
