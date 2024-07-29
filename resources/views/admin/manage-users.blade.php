@@ -117,6 +117,10 @@
                 <input type="email" id="viewEmail" name="email" class="form-control" required>
             </div>
             <div class="form-group">
+                <label for="viewPassword">Password:</label>
+                <input type="password" id="viewPassword" name="password" class="form-control">
+            </div>
+            <div class="form-group">
                 <label for="viewRole">Role:</label>
                 <select id="viewRole" name="role" class="form-control" required>
                     <option value="user">User</option>
@@ -176,6 +180,7 @@
                     document.getElementById("viewName").value = data.name;
                     document.getElementById("viewLastname").value = data.lastname;
                     document.getElementById("viewEmail").value = data.email;
+                    document.getElementById("viewPassword").value = ''; // Clear password field
                     document.getElementById("viewRole").value = data.role;
                     document.getElementById("viewActive").checked = data.isActive;
                     deleteUserBtn.onclick = function() {

@@ -68,7 +68,7 @@
                     </button>
                 </div>
 
-                <a class="btn btn-link" href="{{ route('login') }}">
+                <a class="custom-link" href="{{ route('login') }}">
                     {{ __('Already have an account? Sign in') }}
                 </a>
             </form>

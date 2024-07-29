@@ -58,6 +58,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden; /* Usuń przewijanie wewnątrz karty */
+   
 }
 
 
@@ -339,3 +340,16 @@ body {
     box-sizing: border-box;
     text-align: center;
 }
+
+.custom-link {
+    color: #1abc9c; /* Zielony kolor, możesz zmienić na inny */
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    text-decoration: none;
+}
+
+.custom-link:hover {
+    color: #16a085; /* Trochę ciemniejszy zielony kolor na hover */
+}
+
