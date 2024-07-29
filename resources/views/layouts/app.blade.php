@@ -13,6 +13,10 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
 </head>
 <body>
     <div id="app" class="cos">
@@ -70,6 +74,9 @@
                 closeNav();
             });
         });
+
+
+        
     </script>
 </body>
 </html>

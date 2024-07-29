@@ -100,47 +100,89 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Edit User</h2>
-        <form id="viewUserForm" method="POST" action="{{ url('admin/user') }}">
-            @csrf
-            @method('PUT')
-            <input type="hidden" id="viewUserId" name="id">
-            <div class="form-group">
-                <label for="viewName">Name:</label>
-                <input type="text" id="viewName" name="name" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="viewLastname">Last Name:</label>
-                <input type="text" id="viewLastname" name="lastname" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="viewEmail">Email:</label>
-                <input type="email" id="viewEmail" name="email" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="viewPassword">Password (leave blank if not changing):</label>
-                <input type="password" id="viewPassword" name="password" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="viewRole">Role:</label>
-                <select id="viewRole" name="role" class="form-control" required>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="viewActive">Active:</label>
-                <input type="checkbox" id="viewActive" name="isActive" value="1">
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Update User</button>
-                <button type="button" id="deleteUserBtn" class="btn btn-danger" style="white-space: nowrap;">Delete User</button>
-            </div>
-        </form>
+        
+        <!-- Zakładki -->
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'Info')">Info</button>
+            <button class="tab-link" onclick="openTab(event, 'History')">History</button>
+        </div>
+        
+        <div id="Info" class="tab-content active">
+        <form id="viewUserForm" method="POST" action="{{ url('admin/user') }}/{{ $user->id }}">
+    @csrf
+    @method('PUT')
+    <input type="hidden" id="viewUserId" name="id">
+    <div class="form-group">
+        <label for="viewName">Name:</label>
+        <input type="text" id="viewName" name="name" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="viewLastname">Last Name:</label>
+        <input type="text" id="viewLastname" name="lastname" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="viewEmail">Email:</label>
+        <input type="email" id="viewEmail" name="email" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="viewPassword">Password:</label>
+        <input type="password" id="viewPassword" name="password" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="viewRole">Role:</label>
+        <select id="viewRole" name="role" class="form-control" required>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="viewActive">Active:</label>
+        <input type="checkbox" id="viewActive" name="isActive" value="1">
+    </div>
+    <div class="form-group d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary mx-2" style="white-space: nowrap;">Update User</button>
+        <button type="button" id="deleteUserBtn" class="btn btn-danger mx-2" style="white-space: nowrap;">Delete User</button>
+    </div>
+</form>
+
+        </div>
+        <div id="History" class="tab-content">
+            <!-- Treść drugiej zakładki -->
+            <table id="historyTable" class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Admin Name</th>
+                        <th>Admin Last Name</th>
+                        <th>Action</th>
+                        <th>Old Value</th>
+                        <th>New Value</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Wiersze będą wypełniane dynamicznie za pomocą JavaScript -->
+                </tbody>
+            </table>
+        </div>
         
     </div>
 </div>
 
 <script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
     var addUserModal = document.getElementById("addUserModal");
     var viewUserModal = document.getElementById("viewUserModal");
     var addUserBtn = document.getElementById("openModalBtn");
@@ -169,37 +211,86 @@
     }
 
     Array.from(viewBtns).forEach(function(btn) {
-        btn.onclick = function() {
-            var userId = this.getAttribute("data-id");
-            fetch(`/admin/user/${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("viewUserId").value = data.id;
-                    document.getElementById("viewName").value = data.name;
-                    document.getElementById("viewLastname").value = data.lastname;
-                    document.getElementById("viewEmail").value = data.email;
-                    document.getElementById("viewRole").value = data.role;
-                    document.getElementById("viewActive").checked = data.isActive;
-                    deleteUserBtn.onclick = function() {
-                        if (confirm('Are you sure you want to delete this user?')) {
-                            fetch(`/admin/user/${userId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                }
-                            }).then(response => {
-                                if (response.ok) {
-                                    location.reload();
-                                } else {
-                                    alert('Error deleting user');
-                                }
-                            });
-                        }
-                    };
-                    viewUserModal.style.display = "block";
-                });
-        }
-    });
+    btn.onclick = function() {
+        var userId = this.getAttribute("data-id");
+        fetch(`/admin/user/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("viewUserId").value = data.id;
+                document.getElementById("viewName").value = data.name;
+                document.getElementById("viewLastname").value = data.lastname;
+                document.getElementById("viewEmail").value = data.email;
+                document.getElementById("viewRole").value = data.role;
+                document.getElementById("viewActive").checked = data.isActive;
+
+                var viewUserForm = document.getElementById("viewUserForm");
+                viewUserForm.onsubmit = function(event) {
+                    event.preventDefault();
+                    var formData = new FormData(viewUserForm);
+
+                    axios.put(`/admin/user/${userId}`, formData)
+                        .then(response => {
+                            if (response.data.success) {
+                                alert('User updated successfully');
+                                location.reload();
+                            } else {
+                                alert('Error updating user');
+                                console.error(response.data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Update error:', error.response.data);
+                            alert('Error updating user');
+                        });
+                };
+
+                deleteUserBtn.onclick = function() {
+                    if (confirm('Are you sure you want to delete this user?')) {
+                        axios.delete(`/admin/user/${userId}`, {
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        }).then(response => {
+                            if (response.data.success) {
+                                location.reload();
+                            } else {
+                                alert('Error deleting user');
+                            }
+                        }).catch(error => {
+                            console.error(error);
+                            alert('Error deleting user');
+                        });
+                    }
+                };
+
+                // Fetch user history
+                fetch(`/admin/user/${userId}/history`)
+                    .then(response => response.json())
+                    .then(histories => {
+                        const historyTableBody = document.querySelector('#historyTable tbody');
+                        historyTableBody.innerHTML = '';
+                        histories.forEach(history => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${history.admin_name}</td>
+                                <td>${history.admin_lastname}</td>
+                                <td>${history.action}</td>
+                                <td>${history.old_value}</td>
+                                <td>${history.new_value}</td>
+                                <td>${new Date(history.created_at).toLocaleString()}</td>
+                            `;
+                            historyTableBody.appendChild(row);
+                        });
+                    });
+
+                viewUserModal.style.display = "block";
+            });
+    }
+});
+
+
+
+
 
     document.getElementById('search').addEventListener('input', function() {
         let query = this.value.toLowerCase();

@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\HomeController;
@@ -25,10 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.storeUser');
     Route::get('/admin/history', [AdminController::class, 'showHistory'])->name('admin.history');
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
-
-    // Zakomentowane trasy, które mogą być zbędne
-    // Route::put('/admin/user/{user}', [UserController::class, 'update'])->name('admin.update');
-    // Route::delete('/admin/user/{user}', [UserController::class, 'destroy'])->name('admin.destroy');
+    Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
 
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 });
