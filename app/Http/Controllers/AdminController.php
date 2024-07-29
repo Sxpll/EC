@@ -127,6 +127,17 @@ public function storeUser(Request $request)
 }
 
 
+public function getUser($id)
+{
+    if (auth()->user()->role !== 'admin') {
+        return response()->json(['error' => 'Unauthorized access'], 403);
+    }
+
+    $user = User::findOrFail($id);
+    return response()->json($user);
+}
+
+
 
 
 public function destroy($id)
