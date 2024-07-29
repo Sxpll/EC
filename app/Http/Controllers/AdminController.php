@@ -140,6 +140,8 @@ public function getUser($id)
 
 
 
+
+
 public function destroy($id)
 {
     if (auth()->user()->role !== 'admin') {

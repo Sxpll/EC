@@ -8,6 +8,7 @@
         <div class="card-header">
             <h1>Manage Users</h1>
             <button id="openModalBtn" class="btn btn-success">Add User</button>
+            <input type="text" id="search" placeholder="Search Users" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
         </div>
         <div class="card-body">
             @if (session('success'))
@@ -39,7 +40,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="users-table">
                         @foreach ($users as $user)
                             <tr>
                                 <td>{{ $user->name }}</td>
@@ -172,6 +173,24 @@
                     viewUserModal.style.display = "block";
                 });
         }
+    });
+
+    // Skrypt do obsługi wyszukiwania
+    document.getElementById('search').addEventListener('input', function() {
+        let query = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#users-table tr');
+        
+        rows.forEach(row => {
+            let name = row.cells[0].textContent.toLowerCase();
+            let lastname = row.cells[1].textContent.toLowerCase();
+            let email = row.cells[2].textContent.toLowerCase();
+
+            if (name.includes(query) || lastname.includes(query) || email.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     });
 </script>
 @endsection
