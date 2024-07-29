@@ -25,6 +25,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.storeUser');
     Route::get('/admin/history', [AdminController::class, 'showHistory'])->name('admin.history');
+    Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
+
 
     
     

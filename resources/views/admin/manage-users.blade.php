@@ -1,3 +1,5 @@
+<!-- resources/views/admin/manage-users.blade.php -->
+
 @extends('layouts.app')
 
 @section('content')
@@ -29,69 +31,39 @@
             @endif
             <div class="table-responsive">
                 <table class="table table-hover">
-                <thead>
-    <tr>
-        <th>Name</th>
-        <th>Last Name</th> <!-- Dodane -->
-        <th>Email</th>
-        <th>Password</th>
-        <th>Role</th>
-        <th>Active</th>
-        <th colspan="2">Actions</th>
-    </tr>
-</thead>
-<tbody>
-    @foreach ($users as $user)
-        <tr>
-            <form action="{{ route('admin.updateUser', $user->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <td>
-                    <input type="text" name="name" value="{{ $user->name }}" class="form-control">
-                </td>
-                <td>
-                    <input type="text" name="lastname" value="{{ $user->lastname }}" class="form-control"> <!-- Dodane -->
-                </td>
-                <td>
-                    <input type="email" name="email" value="{{ $user->email }}" class="form-control" readonly>
-                </td>
-                <td>
-                    <input type="password" name="password" placeholder="New password (optional)" class="form-control">
-                </td>
-                <td>
-                    <select name="role" class="form-control">
-                        <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User</option>
-                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="hidden" name="isActive" value="0">
-                    <input type="checkbox" name="isActive" value="1" {{ $user->isActive ? 'checked' : '' }}>
-                </td>
-                <td>
-                    <button type="submit" class="btn btn-success">Update</button>
-                </td>
-            </form>
-            <td>
-                <form action="{{ route('admin.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?');" style="display:inline-block;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
-    @endforeach
-</tbody>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($users as $user)
+                            <tr>
+                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->lastname }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-view" data-id="{{ $user->id }}">View</button>
+                                    <form action="{{ route('admin.destroy', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
-// resources/views/admin/manage-users.blade.php (dodaj w odpowiednim miejscu)
-
-<div id="myModal" class="modal">
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Add User</h2>
@@ -102,7 +74,7 @@
                 <input type="text" name="name" id="name" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="lastname">Last Name:</label> <!-- Dodane -->
+                <label for="lastname">Last Name:</label>
                 <input type="text" name="lastname" id="lastname" class="form-control" required>
             </div>
             <div class="form-group">
@@ -129,25 +101,77 @@
     </div>
 </div>
 
+<!-- View User Modal -->
+<div id="viewUserModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>View User</h2>
+        <form id="viewUserForm">
+            <div class="form-group">
+                <label for="viewName">Name:</label>
+                <input type="text" id="viewName" class="form-control" readonly>
+            </div>
+            <div class="form-group">
+                <label for="viewLastname">Last Name:</label>
+                <input type="text" id="viewLastname" class="form-control" readonly>
+            </div>
+            <div class="form-group">
+                <label for="viewEmail">Email:</label>
+                <input type="email" id="viewEmail" class="form-control" readonly>
+            </div>
+            <div class="form-group">
+                <label for="viewRole">Role:</label>
+                <input type="text" id="viewRole" class="form-control" readonly>
+            </div>
+            <div class="form-group">
+                <label for="viewActive">Active:</label>
+                <input type="checkbox" id="viewActive" disabled>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
-    // Skrypt do obsługi modala
-    var modal = document.getElementById("myModal");
-    var btn = document.getElementById("openModalBtn");
-    var span = document.getElementsByClassName("close")[0];
+    var addUserModal = document.getElementById("addUserModal");
+    var viewUserModal = document.getElementById("viewUserModal");
+    var addUserBtn = document.getElementById("openModalBtn");
+    var closeBtns = document.getElementsByClassName("close");
+    var viewBtns = document.getElementsByClassName("btn-view");
 
-    btn.onclick = function() {
-        modal.style.display = "block";
+    addUserBtn.onclick = function() {
+        addUserModal.style.display = "block";
     }
 
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
+    Array.from(closeBtns).forEach(function(btn) {
+        btn.onclick = function() {
+            addUserModal.style.display = "none";
+            viewUserModal.style.display = "none";
+        }
+    });
 
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
+        if (event.target == addUserModal) {
+            addUserModal.style.display = "none";
+        }
+        if (event.target == viewUserModal) {
+            viewUserModal.style.display = "none";
         }
     }
+
+    Array.from(viewBtns).forEach(function(btn) {
+        btn.onclick = function() {
+            var userId = this.getAttribute("data-id");
+            fetch(`/admin/user/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("viewName").value = data.name;
+                    document.getElementById("viewLastname").value = data.lastname;
+                    document.getElementById("viewEmail").value = data.email;
+                    document.getElementById("viewRole").value = data.role;
+                    document.getElementById("viewActive").checked = data.isActive;
+                    viewUserModal.style.display = "block";
+                });
+        }
+    });
 </script>
 @endsection
