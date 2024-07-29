@@ -100,7 +100,7 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Edit User</h2>
-        <form id="viewUserForm" method="POST" action="{{ route('admin.updateUser', '') }}">
+        <form id="viewUserForm" method="POST" action="{{ url('admin/user') }}">
             @csrf
             @method('PUT')
             <input type="hidden" id="viewUserId" name="id">
@@ -117,7 +117,7 @@
                 <input type="email" id="viewEmail" name="email" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="viewPassword">Password:</label>
+                <label for="viewPassword">Password (leave blank if not changing):</label>
                 <input type="password" id="viewPassword" name="password" class="form-control">
             </div>
             <div class="form-group">
@@ -174,13 +174,10 @@
             fetch(`/admin/user/${userId}`)
                 .then(response => response.json())
                 .then(data => {
-                    var updateForm = document.getElementById('viewUserForm');
-                    updateForm.action = `/admin/user/${userId}`;
                     document.getElementById("viewUserId").value = data.id;
                     document.getElementById("viewName").value = data.name;
                     document.getElementById("viewLastname").value = data.lastname;
                     document.getElementById("viewEmail").value = data.email;
-                    document.getElementById("viewPassword").value = ''; // Clear password field
                     document.getElementById("viewRole").value = data.role;
                     document.getElementById("viewActive").checked = data.isActive;
                     deleteUserBtn.onclick = function() {

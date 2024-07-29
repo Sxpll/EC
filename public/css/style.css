@@ -96,6 +96,7 @@ body {
     margin-bottom: 15px;
     padding-left: 10px;
     padding-right: 10px;
+    
 }
 
 .form-control {
@@ -127,6 +128,7 @@ body {
     margin-top: 5px;
     text-align: center;
     display: inline-block;
+   
 }
 
 .btn-primary:hover, .btn-success:hover, .btn-danger:hover {
@@ -352,4 +354,8 @@ body {
 .custom-link:hover {
     color: #16a085; /* Trochę ciemniejszy zielony kolor na hover */
 }
+
+
+
+
 
