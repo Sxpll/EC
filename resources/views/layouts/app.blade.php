@@ -15,11 +15,9 @@
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
+    <div id="app" class="cos">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm">
-            <!-- resources/views/layouts/app.blade.php -->
-
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="{{ asset('img/logo.png') }}" alt="Logo" style="height: 40px;">
