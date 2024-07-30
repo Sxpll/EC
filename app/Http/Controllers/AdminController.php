@@ -10,7 +10,7 @@ use App\Models\UserHistory;
 class AdminController extends Controller
 {
     public function dashboard()
-{
+    {
     if (auth()->user()->role !== 'admin') {
         return redirect('/home')->with('error', 'Unauthorized access');
     }
@@ -21,8 +21,10 @@ class AdminController extends Controller
     $inactiveUsers = User::where('is_deleted', false)->where('isActive', false)->count();
     $deletedUsers = User::where('is_deleted', true)->count();
 
-    return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers', 'deletedUsers'))
-}
+    return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers', 'deletedUsers'));
+    }
+
+
 
 
     public function manageUsers()
