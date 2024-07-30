@@ -50,19 +50,44 @@ class AdminController extends Controller
             'isActive' => 'nullable|boolean',
         ]);
 
-        // Aktualizuj dane użytkownika
-        $user->update($validatedData);
-
-        // Aktualizuj hasło tylko wtedy, gdy zostało podane
-        if ($request->filled('password')) {
-            $user->update(['password' => bcrypt($request->password)]);
+        // Zapisz zmiany w historii użytkownika
+        $changes = [];
+        foreach ($validatedData as $key => $value) {
+            if ($user->$key != $value) {
+                $changes[$key] = ['old' => $user->$key, 'new' => $value];
+            }
         }
 
+        if ($request->filled('password')) {
+            $changes['password'] = ['old' => 'hidden', 'new' => 'hidden'];
+            $validatedData['password'] = bcrypt($request->password);
+        }
+
+        $user->update($validatedData);
+
+        foreach ($changes as $field => $change) {
+            UserHistory::create([
+                'admin_id' => auth()->user()->id,
+                'admin_name' => auth()->user()->name,
+                'admin_lastname' => auth()->user()->lastname,
+                'action' => 'updated',
+                'user_id' => $user->id,
+                'user_name' => $user->name, // Dodaj to
+                'user_lastname' => $user->lastname, // Dodaj to
+                'field' => $field,
+                'old_value' => $change['old'],
+                'new_value' => $change['new'],
+            ]);
+        }
+
+        session()->flash('success', 'User updated successfully');
         return response()->json(['success' => true]);
     } catch (\Exception $e) {
         return response()->json(['success' => false, 'error' => $e->getMessage()]);
     }
 }
+
+    
 
     
     
@@ -120,27 +145,31 @@ class AdminController extends Controller
     }
 
     public function destroy($id)
-    {
-        if (auth()->user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Unauthorized access');
-        }
-
-        $user = User::findOrFail($id);
-        $user->update(['is_deleted' => true]);
-
-        UserHistory::create([
-            'admin_id' => auth()->user()->id,
-            'admin_name' => auth()->user()->name,
-            'admin_lastname' => auth()->user()->lastname,
-            'action' => 'deleted',
-            'user_id' => $user->id,
-            'user_name' => $user->name, // Nowa kolumna
-            'user_lastname' => $user->lastname, // Nowa kolumna
-            'old_value' => json_encode($user->only(['name', 'lastname', 'email', 'role', 'isActive'])),
-        ]);
-
-        return response()->json(['success' => true]);
+{
+    if (auth()->user()->role !== 'admin') {
+        return redirect('/home')->with('error', 'Unauthorized access');
     }
+
+    $user = User::findOrFail($id);
+    $oldData = $user->only(['name', 'lastname', 'email', 'role', 'isActive']);
+    $user->update(['is_deleted' => true]);
+
+    UserHistory::create([
+        'admin_id' => auth()->user()->id,
+        'admin_name' => auth()->user()->name,
+        'admin_lastname' => auth()->user()->lastname,
+        'action' => 'deleted',
+        'user_id' => $user->id,
+        'user_name' => $user->name,
+        'user_lastname' => $user->lastname,
+        'old_value' => json_encode($oldData),
+    ]);
+
+    session()->flash('success', 'User deleted successfully');
+    return response()->json(['success' => true]);
+}
+
+
 
     public function showHistory($id)
     {

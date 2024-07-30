@@ -249,7 +249,8 @@
                         axios.post(`/admin/user/${userId}`, updatedUser)
                             .then(response => {
                                 if (response.data.success) {
-                                    alert('User updated successfully');
+                                    sessionStorage.setItem('message', 'User updated successfully');
+                                    sessionStorage.setItem('messageType', 'success');
                                     location.reload();
                                 } else {
                                     alert('Error updating user');
@@ -270,6 +271,8 @@
                                 }
                             }).then(response => {
                                 if (response.data.success) {
+                                    sessionStorage.setItem('message', 'User deleted successfully');
+                                    sessionStorage.setItem('messageType', 'success');
                                     location.reload();
                                 } else {
                                     alert('Error deleting user');
@@ -325,7 +328,25 @@
             }
         });
     });
+
+    // Display message from sessionStorage
+    if (sessionStorage.getItem('message')) {
+        var message = sessionStorage.getItem('message');
+        var messageType = sessionStorage.getItem('messageType');
+        var alertBox = document.createElement('div');
+        alertBox.className = 'alert alert-' + messageType;
+        alertBox.textContent = message;
+
+        document.querySelector('.container-admin').prepend(alertBox);
+
+        setTimeout(() => {
+            alertBox.style.display = 'none';
+            sessionStorage.removeItem('message');
+            sessionStorage.removeItem('messageType');
+        }, 2000);
+    }
 });
+
 
 </script>
 @endsection
