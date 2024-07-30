@@ -21,7 +21,7 @@ class AdminController extends Controller
     $inactiveUsers = User::where('is_deleted', false)->where('isActive', false)->count();
     $deletedUsers = User::where('is_deleted', true)->count();
 
-    return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers', 'deletedUsers'));
+    return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers', 'deletedUsers'))
 }
 
 
