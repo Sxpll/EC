@@ -50,7 +50,6 @@ class AdminController extends Controller
             'isActive' => 'nullable|boolean',
         ]);
 
-        // Zapisz zmiany w historii użytkownika
         $changes = [];
         foreach ($validatedData as $key => $value) {
             if ($user->$key != $value) {
@@ -72,11 +71,10 @@ class AdminController extends Controller
                 'admin_lastname' => auth()->user()->lastname,
                 'action' => 'updated',
                 'user_id' => $user->id,
-                'user_name' => $user->name, // Dodaj to
-                'user_lastname' => $user->lastname, // Dodaj to
-                'field' => $field,
-                'old_value' => $change['old'],
-                'new_value' => $change['new'],
+                'user_name' => $user->name,
+                'user_lastname' => $user->lastname,
+                'old_value' => json_encode($change['old']),
+                'new_value' => json_encode($change['new']),
             ]);
         }
 
@@ -87,52 +85,51 @@ class AdminController extends Controller
     }
 }
 
-    
 
     
-    
-    
 
 
-    public function storeUser(Request $request)
-    {
-        if (auth()->user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Unauthorized access');
-        }
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'role' => 'required|string|in:admin,user',
-            'isActive' => 'nullable|boolean',
-        ]);
-
-        $isActive = $request->has('isActive') ? true : false;
-
-        $user = User::create([
-            'name' => $request->name,
-            'lastname' => $request->lastname,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => $request->role,
-            'isActive' => $isActive,
-        ]);
-
-        UserHistory::create([
-            'admin_id' => auth()->user()->id,
-            'admin_name' => auth()->user()->name,
-            'admin_lastname' => auth()->user()->lastname,
-            'action' => 'added',
-            'user_id' => $user->id,
-            'user_name' => $user->name, // Nowa kolumna
-            'user_lastname' => $user->lastname, // Nowa kolumna
-            'new_value' => json_encode($user->only(['name', 'lastname', 'email', 'role', 'isActive'])),
-        ]);
-
-        return redirect()->route('admin.manageUsers')->with('success', 'User added successfully');
+public function storeUser(Request $request)
+{
+    if (auth()->user()->role !== 'admin') {
+        return redirect('/home')->with('error', 'Unauthorized access');
     }
+
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'lastname' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8',
+        'role' => 'required|string|in:admin,user',
+        'isActive' => 'nullable|boolean',
+    ]);
+
+    $isActive = $request->has('isActive') ? true : false;
+
+    $user = User::create([
+        'name' => $request->name,
+        'lastname' => $request->lastname,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'role' => $request->role,
+        'isActive' => $isActive,
+    ]);
+
+    UserHistory::create([
+        'admin_id' => auth()->user()->id,
+        'admin_name' => auth()->user()->name,
+        'admin_lastname' => auth()->user()->lastname,
+        'action' => 'added',
+        'user_id' => $user->id,
+        'user_name' => $user->name,
+        'user_lastname' => $user->lastname,
+        'new_value' => 'Name: ' . $user->name . ', Email: ' . $user->email . ', Role: ' . $user->role,
+    ]);
+
+    return redirect()->route('admin.manageUsers')->with('success', 'User added successfully');
+}
+
 
     public function getUser($id)
     {
@@ -151,7 +148,7 @@ class AdminController extends Controller
     }
 
     $user = User::findOrFail($id);
-    $oldData = $user->only(['name', 'lastname', 'email', 'role', 'isActive']);
+    $oldData = 'Name: ' . $user->name . ', Email: ' . $user->email . ', Role: ' . $user->role;
     $user->update(['is_deleted' => true]);
 
     UserHistory::create([
@@ -162,7 +159,7 @@ class AdminController extends Controller
         'user_id' => $user->id,
         'user_name' => $user->name,
         'user_lastname' => $user->lastname,
-        'old_value' => json_encode($oldData),
+        'old_value' => $oldData,
     ]);
 
     session()->flash('success', 'User deleted successfully');
