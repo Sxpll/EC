@@ -134,6 +134,7 @@
                         <th>Admin Name</th>
                         <th>Admin Last Name</th>
                         <th>Action</th>
+                        <th>Field</th>
                         <th>Old Value</th>
                         <th>New Value</th>
                         <th>Date</th>
@@ -279,6 +280,7 @@
                                         <td>${history.admin_name}</td>
                                         <td>${history.admin_lastname}</td>
                                         <td>${history.action}</td>
+                                        <td>${history.field}</td> 
                                         <td>${history.old_value ? history.old_value : 'N/A'}</td>
                                         <td>${history.new_value ? history.new_value : 'N/A'}</td>
                                         <td>${new Date(history.created_at).toLocaleString()}</td>

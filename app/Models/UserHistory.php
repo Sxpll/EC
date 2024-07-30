@@ -17,6 +17,7 @@ class UserHistory extends Model
         'user_id',
         'user_name',
         'user_lastname',
+        'field',    
         'old_value',
         'new_value',
     ];
