@@ -10,17 +10,20 @@ use App\Models\UserHistory;
 class AdminController extends Controller
 {
     public function dashboard()
-    {
-        if (auth()->user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Unauthorized access');
-        }
-
-        $totalUsers = User::count();
-        $activeUsers = User::where('isActive', true)->count();
-        $inactiveUsers = User::where('isActive', false)->count();
-
-        return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers'));
+{
+    if (auth()->user()->role !== 'admin') {
+        return redirect('/home')->with('error', 'Unauthorized access');
     }
+
+    // Użytkownicy, którzy nie są usunięci
+    $totalUsers = User::where('is_deleted', false)->count();
+    $activeUsers = User::where('is_deleted', false)->where('isActive', true)->count();
+    $inactiveUsers = User::where('is_deleted', false)->where('isActive', false)->count();
+    $deletedUsers = User::where('is_deleted', true)->count();
+
+    return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers', 'deletedUsers'));
+}
+
 
     public function manageUsers()
     {
@@ -40,49 +43,49 @@ class AdminController extends Controller
 
     $user = User::findOrFail($id);
 
-    try {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8',
-            'role' => 'required|string|in:admin,user',
-            'isActive' => 'nullable|boolean',
-        ]);
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'lastname' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        'password' => 'nullable|string|min:8',
+        'role' => 'required|string|in:admin,user',
+        'isActive' => 'nullable|boolean',
+    ]);
 
-        $changes = [];
-        foreach ($validatedData as $key => $value) {
-            if ($user->$key != $value) {
-                $changes[$key] = ['old' => $user->$key, 'new' => $value];
-            }
+    $changes = [];
+    foreach ($validatedData as $key => $value) {
+        if ($user->$key != $value) {
+            $changes[$key] = ['old' => $user->$key, 'new' => $value];
         }
-
-        if ($request->filled('password')) {
-            $changes['password'] = ['old' => 'hidden', 'new' => 'hidden'];
-            $validatedData['password'] = bcrypt($request->password);
-        }
-
-        $user->update($validatedData);
-
-        foreach ($changes as $field => $change) {
-            UserHistory::create([
-                'admin_id' => auth()->user()->id,
-                'admin_name' => auth()->user()->name,
-                'admin_lastname' => auth()->user()->lastname,
-                'action' => 'updated',
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'user_lastname' => $user->lastname,
-                'old_value' => json_encode($change['old']),
-                'new_value' => json_encode($change['new']),
-            ]);
-        }
-
-        session()->flash('success', 'User updated successfully');
-        return response()->json(['success' => true]);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'error' => $e->getMessage()]);
     }
+
+    if ($request->filled('password')) {
+        $changes['password'] = ['old' => 'hidden', 'new' => 'hidden'];
+        $validatedData['password'] = bcrypt($request->password);
+    }
+
+    if (empty($changes)) {
+        return response()->json(['success' => true]);
+    }
+
+    $user->update($validatedData);
+
+    foreach ($changes as $field => $change) {
+        UserHistory::create([
+            'admin_id' => auth()->user()->id,
+            'admin_name' => auth()->user()->name,
+            'admin_lastname' => auth()->user()->lastname,
+            'action' => 'updated',
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'user_lastname' => $user->lastname,
+            'old_value' => json_encode($change['old']),
+            'new_value' => json_encode($change['new']),
+        ]);
+    }
+
+    session()->flash('success', 'User updated successfully');
+    return response()->json(['success' => true]);
 }
 
 
@@ -94,7 +97,7 @@ public function storeUser(Request $request)
         return response()->json(['error' => 'Unauthorized access'], 403);
     }
 
-    $request->validate([
+    $validatedData = $request->validate([
         'name' => 'required|string|max:255',
         'lastname' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users',
@@ -106,11 +109,11 @@ public function storeUser(Request $request)
     $isActive = $request->has('isActive') ? true : false;
 
     $user = User::create([
-        'name' => $request->name,
-        'lastname' => $request->lastname,
-        'email' => $request->email,
-        'password' => bcrypt($request->password),
-        'role' => $request->role,
+        'name' => $validatedData['name'],
+        'lastname' => $validatedData['lastname'],
+        'email' => $validatedData['email'],
+        'password' => bcrypt($validatedData['password']),
+        'role' => $validatedData['role'],
         'isActive' => $isActive,
     ]);
 
@@ -127,6 +130,7 @@ public function storeUser(Request $request)
 
     return response()->json(['success' => true, 'message' => 'User added successfully']);
 }
+
 
 
 

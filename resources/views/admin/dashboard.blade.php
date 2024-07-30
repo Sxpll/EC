@@ -33,6 +33,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Deleted Users</h3>
+                            <p>{{ $deletedUsers }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="row mt-4 justify-content-center">
                 <div class="col-md-6 text-center">

@@ -1,18 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .table td {
-        white-space: normal; /* Enable word wrap */
-        word-break: break-word; /* Break words that are too long */
-    }
-
-    .modal-content {
-        width: 80%; /* Adjust the width as needed */
-        max-height: 90vh; /* Adjust the max height as needed */
-        overflow-y: auto; /* Enable vertical scroll if content is too long */
-    }
-</style>
 <div class="container-admin manage-users-container">
     <div class="card-admin">
         <div class="card-header">
@@ -183,37 +171,35 @@
 
         addUserBtn.onclick = function() {
             addUserModal.style.display = "block";
+            document.body.classList.add('modal-open');
         }
 
         Array.from(closeBtns).forEach(function(btn) {
             btn.onclick = function() {
                 addUserModal.style.display = "none";
                 viewUserModal.style.display = "none";
+                document.body.classList.remove('modal-open');
             }
         });
 
         window.onclick = function(event) {
             if (event.target == addUserModal) {
                 addUserModal.style.display = "none";
+                document.body.classList.remove('modal-open');
             }
             if (event.target == viewUserModal) {
                 viewUserModal.style.display = "none";
+                document.body.classList.remove('modal-open');
             }
         }
 
         Array.from(viewBtns).forEach(function(btn) {
             btn.onclick = function() {
                 var userId = this.getAttribute("data-id");
-                console.log("Fetching user with ID:", userId);
 
                 fetch(`/admin/user/${userId}`)
-                    .then(response => {
-                        console.log("Response status:", response.status);
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
-                        console.log("User data:", data);
-
                         document.getElementById("viewUserId").value = data.id;
                         document.getElementById("viewName").value = data.name;
                         document.getElementById("viewLastname").value = data.lastname;
@@ -231,7 +217,7 @@
                                 email: document.getElementById("viewEmail").value,
                                 role: document.getElementById("viewRole").value,
                                 isActive: document.getElementById("viewActive").checked,
-                                _method: 'PUT',  // Laravel wymaga tego do PUT/PATCH
+                                _method: 'PUT',
                                 _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                             };
 
@@ -248,12 +234,16 @@
                                         location.reload();
                                     } else {
                                         alert('Error updating user');
-                                        console.error("Server error:", response.data.error);
                                     }
                                 })
                                 .catch(error => {
-                                    console.error('Update error:', error.response ? error.response.data : error);
-                                    alert('Error updating user');
+                                    if (error.response && error.response.data && error.response.data.errors) {
+                                        sessionStorage.setItem('message', error.response.data.errors.email[0]);
+                                        sessionStorage.setItem('messageType', 'danger');
+                                        location.reload();
+                                    } else {
+                                        alert('Error updating user');
+                                    }
                                 });
                         };
 
@@ -272,7 +262,6 @@
                                         alert('Error deleting user');
                                     }
                                 }).catch(error => {
-                                    console.error(error);
                                     alert('Error deleting user');
                                 });
                             }
@@ -299,6 +288,7 @@
                             });
 
                         viewUserModal.style.display = "block";
+                        document.body.classList.add('modal-open');
                     })
                     .catch(error => {
                         console.error('Fetch error:', error);
@@ -309,7 +299,7 @@
         document.getElementById('search').addEventListener('input', function() {
             let query = this.value.toLowerCase();
             let rows = document.querySelectorAll('#users-table tr');
-            
+
             rows.forEach(row => {
                 let name = row.cells[0].textContent.toLowerCase();
                 let lastname = row.cells[1].textContent.toLowerCase();
@@ -324,11 +314,9 @@
         });
 
         // Display message from sessionStorage
-        console.log("Checking sessionStorage for messages...");
         if (sessionStorage.getItem('message')) {
             var message = sessionStorage.getItem('message');
             var messageType = sessionStorage.getItem('messageType');
-            console.log("Found message:", message, "with type:", messageType);
 
             var alertBox = document.createElement('div');
             alertBox.className = 'alert alert-' + messageType;
@@ -355,17 +343,29 @@
                     if (response.data.success) {
                         sessionStorage.setItem('message', response.data.message);
                         sessionStorage.setItem('messageType', 'success');
+                        addUserModal.style.display = "none";
+                        document.body.classList.remove('modal-open');
                         location.reload();
                     } else {
                         alert('Error adding user');
-                        console.error("Server error:", response.data.error);
                     }
                 })
                 .catch(error => {
-                    console.error('Add error:', error.response ? error.response.data : error);
-                    alert('Error adding user');
+                    if (error.response && error.response.data && error.response.data.errors) {
+                        var errorMessage = Object.values(error.response.data.errors).flat().join(' ');
+                        sessionStorage.setItem('message', errorMessage);
+                        sessionStorage.setItem('messageType', 'danger');
+                        addUserModal.style.display = "none";
+                        document.body.classList.remove('modal-open');
+                        location.reload();
+                    } else {
+                        alert('Error adding user');
+                    }
                 });
         };
     });
+
+    
 </script>
+
 @endsection

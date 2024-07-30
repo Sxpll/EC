@@ -15,6 +15,41 @@
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+    <style>
+    .table td {
+        white-space: normal; /* Enable word wrap */
+        word-break: break-word; /* Break words that are too long */
+    }
+
+    .modal-content {
+        width: 80%; /* Adjust the width as needed */
+        max-height: 90vh; /* Adjust the max height as needed */
+        overflow-y: auto; /* Enable vertical scroll if content is too long */
+    }
+
+    .table-responsive {
+        max-height: 60vh; /* Ensure table does not exceed certain height */
+        overflow-y: auto; /* Add vertical scroll if table content is too long */
+    }
+
+
+    
+    body.modal-open {
+        overflow: hidden;
+    }
+    .table td {
+        white-space: normal; /* Enable word wrap */
+        word-break: break-word; /* Break words that are too long */
+    }
+
+    .modal-content {
+        width: 80%; /* Adjust the width as needed */
+        max-height: 90vh; /* Adjust the max height as needed */
+        overflow-y: auto; /* Enable vertical scroll if content is too long */
+    }
+
+
+</style>
 
 
 </head>
