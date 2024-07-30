@@ -108,46 +108,44 @@
         </div>
         
         <div id="Info" class="tab-content active">
-        <form id="viewUserForm" method="POST" action="{{ url('admin/user') }}/{{ $user->id }}">
-    @csrf
-    @method('PUT')
-    <input type="hidden" id="viewUserId" name="id">
-    <div class="form-group">
-        <label for="viewName">Name:</label>
-        <input type="text" id="viewName" name="name" class="form-control" required>
-    </div>
-    <div class="form-group">
-        <label for="viewLastname">Last Name:</label>
-        <input type="text" id="viewLastname" name="lastname" class="form-control" required>
-    </div>
-    <div class="form-group">
-        <label for="viewEmail">Email:</label>
-        <input type="email" id="viewEmail" name="email" class="form-control" required>
-    </div>
-    <div class="form-group">
-        <label for="viewPassword">Password:</label>
-        <input type="password" id="viewPassword" name="password" class="form-control">
-    </div>
-    <div class="form-group">
-        <label for="viewRole">Role:</label>
-        <select id="viewRole" name="role" class="form-control" required>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="viewActive">Active:</label>
-        <input type="checkbox" id="viewActive" name="isActive" value="1">
-    </div>
-    <div class="form-group d-flex justify-content-center">
-        <button type="submit" class="btn btn-primary mx-2" style="white-space: nowrap;">Update User</button>
-        <button type="button" id="deleteUserBtn" class="btn btn-danger mx-2" style="white-space: nowrap;">Delete User</button>
-    </div>
-</form>
-
+            <form id="viewUserForm" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="viewUserId" name="id">
+                <div class="form-group">
+                    <label for="viewName">Name:</label>
+                    <input type="text" id="viewName" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="viewLastname">Last Name:</label>
+                    <input type="text" id="viewLastname" name="lastname" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="viewEmail">Email:</label>
+                    <input type="email" id="viewEmail" name="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="viewPassword">Password:</label>
+                    <input type="password" id="viewPassword" name="password" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="viewRole">Role:</label>
+                    <select id="viewRole" name="role" class="form-control" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="viewActive">Active:</label>
+                    <input type="checkbox" id="viewActive" name="isActive" value="1">
+                </div>
+                <div class="form-group d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary mx-2" style="white-space: nowrap;">Update User</button>
+                    <button type="button" id="deleteUserBtn" class="btn btn-danger mx-2" style="white-space: nowrap;">Delete User</button>
+                </div>
+            </form>
         </div>
         <div id="History" class="tab-content">
-            <!-- Treść drugiej zakładki -->
             <table id="historyTable" class="table table-hover">
                 <thead>
                     <tr>
@@ -160,11 +158,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Wiersze będą wypełniane dynamicznie za pomocą JavaScript -->
                 </tbody>
             </table>
         </div>
-        
     </div>
 </div>
 
@@ -183,6 +179,7 @@
         evt.currentTarget.className += " active";
     }
 
+    document.addEventListener("DOMContentLoaded", function() {
     var addUserModal = document.getElementById("addUserModal");
     var viewUserModal = document.getElementById("viewUserModal");
     var addUserBtn = document.getElementById("openModalBtn");
@@ -211,86 +208,106 @@
     }
 
     Array.from(viewBtns).forEach(function(btn) {
-    btn.onclick = function() {
-        var userId = this.getAttribute("data-id");
-        fetch(`/admin/user/${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("viewUserId").value = data.id;
-                document.getElementById("viewName").value = data.name;
-                document.getElementById("viewLastname").value = data.lastname;
-                document.getElementById("viewEmail").value = data.email;
-                document.getElementById("viewRole").value = data.role;
-                document.getElementById("viewActive").checked = data.isActive;
+        btn.onclick = function() {
+            var userId = this.getAttribute("data-id");
+            console.log("Fetching user with ID:", userId);
 
-                var viewUserForm = document.getElementById("viewUserForm");
-                viewUserForm.onsubmit = function(event) {
-                    event.preventDefault();
-                    var formData = new FormData(viewUserForm);
+            fetch(`/admin/user/${userId}`)
+                .then(response => {
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("User data:", data);
 
-                    axios.put(`/admin/user/${userId}`, formData)
-                        .then(response => {
-                            if (response.data.success) {
-                                alert('User updated successfully');
-                                location.reload();
-                            } else {
+                    document.getElementById("viewUserId").value = data.id;
+                    document.getElementById("viewName").value = data.name;
+                    document.getElementById("viewLastname").value = data.lastname;
+                    document.getElementById("viewEmail").value = data.email;
+                    document.getElementById("viewRole").value = data.role;
+                    document.getElementById("viewActive").checked = data.isActive;
+
+                    var viewUserForm = document.getElementById("viewUserForm");
+                    viewUserForm.onsubmit = function(event) {
+                        event.preventDefault();
+
+                        var updatedUser = {
+                            name: document.getElementById("viewName").value,
+                            lastname: document.getElementById("viewLastname").value,
+                            email: document.getElementById("viewEmail").value,
+                            role: document.getElementById("viewRole").value,
+                            isActive: document.getElementById("viewActive").checked,
+                            _method: 'PUT',  // Laravel wymaga tego do PUT/PATCH
+                            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        };
+
+                        var password = document.getElementById("viewPassword").value;
+                        if (password) {
+                            updatedUser.password = password;
+                        }
+
+                        axios.post(`/admin/user/${userId}`, updatedUser)
+                            .then(response => {
+                                if (response.data.success) {
+                                    alert('User updated successfully');
+                                    location.reload();
+                                } else {
+                                    alert('Error updating user');
+                                    console.error("Server error:", response.data.error);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Update error:', error.response ? error.response.data : error);
                                 alert('Error updating user');
-                                console.error(response.data.error);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Update error:', error.response.data);
-                            alert('Error updating user');
-                        });
-                };
+                            });
+                    };
 
-                deleteUserBtn.onclick = function() {
-                    if (confirm('Are you sure you want to delete this user?')) {
-                        axios.delete(`/admin/user/${userId}`, {
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            }
-                        }).then(response => {
-                            if (response.data.success) {
-                                location.reload();
-                            } else {
+                    deleteUserBtn.onclick = function() {
+                        if (confirm('Are you sure you want to delete this user?')) {
+                            axios.delete(`/admin/user/${userId}`, {
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                }
+                            }).then(response => {
+                                if (response.data.success) {
+                                    location.reload();
+                                } else {
+                                    alert('Error deleting user');
+                                }
+                            }).catch(error => {
+                                console.error(error);
                                 alert('Error deleting user');
-                            }
-                        }).catch(error => {
-                            console.error(error);
-                            alert('Error deleting user');
+                            });
+                        }
+                    };
+
+                    // Fetch user history
+                    fetch(`/admin/user/${userId}/history`)
+                        .then(response => response.json())
+                        .then(histories => {
+                            const historyTableBody = document.querySelector('#historyTable tbody');
+                            historyTableBody.innerHTML = '';
+                            histories.forEach(history => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${history.admin_name}</td>
+                                    <td>${history.admin_lastname}</td>
+                                    <td>${history.action}</td>
+                                    <td>${history.old_value}</td>
+                                    <td>${history.new_value}</td>
+                                    <td>${new Date(history.created_at).toLocaleString()}</td>
+                                `;
+                                historyTableBody.appendChild(row);
+                            });
                         });
-                    }
-                };
 
-                // Fetch user history
-                fetch(`/admin/user/${userId}/history`)
-                    .then(response => response.json())
-                    .then(histories => {
-                        const historyTableBody = document.querySelector('#historyTable tbody');
-                        historyTableBody.innerHTML = '';
-                        histories.forEach(history => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${history.admin_name}</td>
-                                <td>${history.admin_lastname}</td>
-                                <td>${history.action}</td>
-                                <td>${history.old_value}</td>
-                                <td>${history.new_value}</td>
-                                <td>${new Date(history.created_at).toLocaleString()}</td>
-                            `;
-                            historyTableBody.appendChild(row);
-                        });
-                    });
-
-                viewUserModal.style.display = "block";
-            });
-    }
-});
-
-
-
-
+                    viewUserModal.style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
+    });
 
     document.getElementById('search').addEventListener('input', function() {
         let query = this.value.toLowerCase();
@@ -308,5 +325,7 @@
             }
         });
     });
+});
+
 </script>
 @endsection

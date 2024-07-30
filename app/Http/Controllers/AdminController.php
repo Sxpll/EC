@@ -41,7 +41,7 @@ class AdminController extends Controller
     $user = User::findOrFail($id);
 
     try {
-        $request->validate([
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -50,57 +50,12 @@ class AdminController extends Controller
             'isActive' => 'nullable|boolean',
         ]);
 
-        $changes = [];
+        // Aktualizuj dane użytkownika
+        $user->update($validatedData);
 
-        if ($request->name !== $user->name) {
-            $changes['name'] = ['old' => $user->name, 'new' => $request->name];
-        }
-
-        if ($request->lastname !== $user->lastname) {
-            $changes['lastname'] = ['old' => $user->lastname, 'new' => $request->lastname];
-        }
-
-        if ($request->email !== $user->email) {
-            $changes['email'] = ['old' => $user->email, 'new' => $request->email];
-        }
-
-        if ($request->role !== $user->role) {
-            $changes['role'] = ['old' => $user->role, 'new' => $request->role];
-        }
-
-        if ($request->has('password')) {
-            $changes['password'] = ['old' => 'hidden', 'new' => 'hidden'];
-        }
-
-        if ($request->input('isActive') != $user->isActive) {
-            $changes['isActive'] = ['old' => $user->isActive, 'new' => $request->input('isActive') ? true : false];
-        }
-
-        $user->update([
-            'name' => $request->name,
-            'lastname' => $request->lastname,
-            'email' => $request->email,
-            'role' => $request->role,
-            'isActive' => $request->input('isActive') ? true : false,
-        ]);
-
-        if ($request->has('password')) {
-            $user->update([
-                'password' => bcrypt($request->password),
-            ]);
-        }
-
-        foreach ($changes as $field => $change) {
-            UserHistory::create([
-                'admin_id' => auth()->user()->id,
-                'admin_name' => auth()->user()->name,
-                'admin_lastname' => auth()->user()->lastname,
-                'action' => 'updated',
-                'user_id' => $user->id,
-                'field' => $field,
-                'old_value' => $change['old'],
-                'new_value' => $change['new'],
-            ]);
+        // Aktualizuj hasło tylko wtedy, gdy zostało podane
+        if ($request->filled('password')) {
+            $user->update(['password' => bcrypt($request->password)]);
         }
 
         return response()->json(['success' => true]);
@@ -109,6 +64,8 @@ class AdminController extends Controller
     }
 }
 
+    
+    
     
 
 

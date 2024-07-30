@@ -29,4 +29,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
 
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+    Route::put('/admin/user/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
+
 });
