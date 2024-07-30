@@ -47,6 +47,18 @@
         max-height: 90vh; /* Adjust the max height as needed */
         overflow-y: auto; /* Enable vertical scroll if content is too long */
     }
+    
+    .history-value {
+        white-space: pre-wrap; /* Preserve new lines */
+        word-break: break-word; /* Break long words to fit the container */
+    }
+    .history-table td {
+        vertical-align: top; /* Align top to ensure proper row alignment */
+    }
+    .history-table .new-value-column {
+        width: 300px; 
+
+
 
 
 </style>

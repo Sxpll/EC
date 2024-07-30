@@ -81,7 +81,7 @@ class AdminController extends Controller
             'user_id' => $user->id,
             'user_name' => $user->name,
             'user_lastname' => $user->lastname,
-            'field' => $field, 
+            'field' => $field,
             'old_value' => json_encode($change['old']),
             'new_value' => json_encode($change['new']),
         ]);
@@ -129,11 +129,12 @@ public function storeUser(Request $request)
         'user_name' => $user->name,
         'user_lastname' => $user->lastname,
         'new_value' => "Name: {$user->name}\nEmail: {$user->email}\nRole: {$user->role}",
-
     ]);
+    
 
     return response()->json(['success' => true, 'message' => 'User added successfully']);
 }
+
 
 
 
