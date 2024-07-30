@@ -86,14 +86,12 @@ class AdminController extends Controller
 }
 
 
-    
-
 
 
 public function storeUser(Request $request)
 {
     if (auth()->user()->role !== 'admin') {
-        return redirect('/home')->with('error', 'Unauthorized access');
+        return response()->json(['error' => 'Unauthorized access'], 403);
     }
 
     $request->validate([
@@ -127,8 +125,10 @@ public function storeUser(Request $request)
         'new_value' => 'Name: ' . $user->name . ', Email: ' . $user->email . ', Role: ' . $user->role,
     ]);
 
-    return redirect()->route('admin.manageUsers')->with('success', 'User added successfully');
+    return response()->json(['success' => true, 'message' => 'User added successfully']);
 }
+
+
 
 
     public function getUser($id)

@@ -162,171 +162,200 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        var addUserModal = document.getElementById("addUserModal");
-        var viewUserModal = document.getElementById("viewUserModal");
-        var addUserBtn = document.getElementById("openModalBtn");
-        var closeBtns = document.getElementsByClassName("close");
-        var viewBtns = document.getElementsByClassName("btn-view");
-        var deleteUserBtn = document.getElementById("deleteUserBtn");
+    var addUserModal = document.getElementById("addUserModal");
+    var viewUserModal = document.getElementById("viewUserModal");
+    var addUserBtn = document.getElementById("openModalBtn");
+    var closeBtns = document.getElementsByClassName("close");
+    var viewBtns = document.getElementsByClassName("btn-view");
+    var deleteUserBtn = document.getElementById("deleteUserBtn");
 
-        addUserBtn.onclick = function() {
-            addUserModal.style.display = "block";
+    addUserBtn.onclick = function() {
+        addUserModal.style.display = "block";
+    }
+
+    Array.from(closeBtns).forEach(function(btn) {
+        btn.onclick = function() {
+            addUserModal.style.display = "none";
+            viewUserModal.style.display = "none";
         }
+    });
 
-        Array.from(closeBtns).forEach(function(btn) {
-            btn.onclick = function() {
-                addUserModal.style.display = "none";
-                viewUserModal.style.display = "none";
-            }
-        });
-
-        window.onclick = function(event) {
-            if (event.target == addUserModal) {
-                addUserModal.style.display = "none";
-            }
-            if (event.target == viewUserModal) {
-                viewUserModal.style.display = "none";
-            }
+    window.onclick = function(event) {
+        if (event.target == addUserModal) {
+            addUserModal.style.display = "none";
         }
+        if (event.target == viewUserModal) {
+            viewUserModal.style.display = "none";
+        }
+    }
 
-        Array.from(viewBtns).forEach(function(btn) {
-            btn.onclick = function() {
-                var userId = this.getAttribute("data-id");
-                console.log("Fetching user with ID:", userId);
+    Array.from(viewBtns).forEach(function(btn) {
+        btn.onclick = function() {
+            var userId = this.getAttribute("data-id");
+            console.log("Fetching user with ID:", userId);
 
-                fetch(`/admin/user/${userId}`)
-                    .then(response => {
-                        console.log("Response status:", response.status);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("User data:", data);
+            fetch(`/admin/user/${userId}`)
+                .then(response => {
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("User data:", data);
 
-                        document.getElementById("viewUserId").value = data.id;
-                        document.getElementById("viewName").value = data.name;
-                        document.getElementById("viewLastname").value = data.lastname;
-                        document.getElementById("viewEmail").value = data.email;
-                        document.getElementById("viewRole").value = data.role;
-                        document.getElementById("viewActive").checked = data.isActive;
+                    document.getElementById("viewUserId").value = data.id;
+                    document.getElementById("viewName").value = data.name;
+                    document.getElementById("viewLastname").value = data.lastname;
+                    document.getElementById("viewEmail").value = data.email;
+                    document.getElementById("viewRole").value = data.role;
+                    document.getElementById("viewActive").checked = data.isActive;
 
-                        var viewUserForm = document.getElementById("viewUserForm");
-                        viewUserForm.onsubmit = function(event) {
-                            event.preventDefault();
+                    var viewUserForm = document.getElementById("viewUserForm");
+                    viewUserForm.onsubmit = function(event) {
+                        event.preventDefault();
 
-                            var updatedUser = {
-                                name: document.getElementById("viewName").value,
-                                lastname: document.getElementById("viewLastname").value,
-                                email: document.getElementById("viewEmail").value,
-                                role: document.getElementById("viewRole").value,
-                                isActive: document.getElementById("viewActive").checked,
-                                _method: 'PUT',  // Laravel wymaga tego do PUT/PATCH
-                                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            };
+                        var updatedUser = {
+                            name: document.getElementById("viewName").value,
+                            lastname: document.getElementById("viewLastname").value,
+                            email: document.getElementById("viewEmail").value,
+                            role: document.getElementById("viewRole").value,
+                            isActive: document.getElementById("viewActive").checked,
+                            _method: 'PUT',  // Laravel wymaga tego do PUT/PATCH
+                            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        };
 
-                            var password = document.getElementById("viewPassword").value;
-                            if (password) {
-                                updatedUser.password = password;
-                            }
+                        var password = document.getElementById("viewPassword").value;
+                        if (password) {
+                            updatedUser.password = password;
+                        }
 
-                            axios.post(`/admin/user/${userId}`, updatedUser)
-                                .then(response => {
-                                    if (response.data.success) {
-                                        sessionStorage.setItem('message', 'User updated successfully');
-                                        sessionStorage.setItem('messageType', 'success');
-                                        location.reload();
-                                    } else {
-                                        alert('Error updating user');
-                                        console.error("Server error:", response.data.error);
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Update error:', error.response ? error.response.data : error);
+                        axios.post(`/admin/user/${userId}`, updatedUser)
+                            .then(response => {
+                                if (response.data.success) {
+                                    sessionStorage.setItem('message', 'User updated successfully');
+                                    sessionStorage.setItem('messageType', 'success');
+                                    location.reload();
+                                } else {
                                     alert('Error updating user');
-                                });
-                        };
+                                    console.error("Server error:", response.data.error);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Update error:', error.response ? error.response.data : error);
+                                alert('Error updating user');
+                            });
+                    };
 
-                        deleteUserBtn.onclick = function() {
-                            if (confirm('Are you sure you want to delete this user?')) {
-                                axios.delete(`/admin/user/${userId}`, {
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                    }
-                                }).then(response => {
-                                    if (response.data.success) {
-                                        sessionStorage.setItem('message', 'User deleted successfully');
-                                        sessionStorage.setItem('messageType', 'success');
-                                        location.reload();
-                                    } else {
-                                        alert('Error deleting user');
-                                    }
-                                }).catch(error => {
-                                    console.error(error);
+                    deleteUserBtn.onclick = function() {
+                        if (confirm('Are you sure you want to delete this user?')) {
+                            axios.delete(`/admin/user/${userId}`, {
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                }
+                            }).then(response => {
+                                if (response.data.success) {
+                                    sessionStorage.setItem('message', 'User deleted successfully');
+                                    sessionStorage.setItem('messageType', 'success');
+                                    location.reload();
+                                } else {
                                     alert('Error deleting user');
-                                });
-                            }
-                        };
+                                }
+                            }).catch(error => {
+                                console.error(error);
+                                alert('Error deleting user');
+                            });
+                        }
+                    };
 
-                       // Fetch user history
-fetch(`/admin/user/${userId}/history`)
-    .then(response => response.json())
-    .then(histories => {
-        const historyTableBody = document.querySelector('#historyTable tbody');
-        historyTableBody.innerHTML = '';
-        histories.forEach(history => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${history.admin_name}</td>
-                <td>${history.admin_lastname}</td>
-                <td>${history.action}</td>
-                <td>${history.old_value ? history.old_value : 'N/A'}</td>
-                <td>${history.new_value ? history.new_value : 'N/A'}</td>
-                <td>${new Date(history.created_at).toLocaleString()}</td>
-            `;
-            historyTableBody.appendChild(row);
-        });
-    });
+                    // Fetch user history
+                    fetch(`/admin/user/${userId}/history`)
+                        .then(response => response.json())
+                        .then(histories => {
+                            const historyTableBody = document.querySelector('#historyTable tbody');
+                            historyTableBody.innerHTML = '';
+                            histories.forEach(history => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${history.admin_name}</td>
+                                    <td>${history.admin_lastname}</td>
+                                    <td>${history.action}</td>
+                                    <td>${history.old_value ? history.old_value : 'N/A'}</td>
+                                    <td>${history.new_value ? history.new_value : 'N/A'}</td>
+                                    <td>${new Date(history.created_at).toLocaleString()}</td>
+                                `;
+                                historyTableBody.appendChild(row);
+                            });
+                        });
 
-                        viewUserModal.style.display = "block";
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                    });
-            }
-        });
-
-        document.getElementById('search').addEventListener('input', function() {
-            let query = this.value.toLowerCase();
-            let rows = document.querySelectorAll('#users-table tr');
-            
-            rows.forEach(row => {
-                let name = row.cells[0].textContent.toLowerCase();
-                let lastname = row.cells[1].textContent.toLowerCase();
-                let email = row.cells[2].textContent.toLowerCase();
-
-                if (name.includes(query) || lastname.includes(query) || email.includes(query)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-
-        // Display message from sessionStorage
-        if (sessionStorage.getItem('message')) {
-            var message = sessionStorage.getItem('message');
-            var messageType = sessionStorage.getItem('messageType');
-            var alertBox = document.createElement('div');
-            alertBox.className = 'alert alert-' + messageType;
-            alertBox.textContent = message;
-
-            document.getElementById('alert-container').prepend(alertBox);
-
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-                sessionStorage.removeItem('message');
-                sessionStorage.removeItem('messageType');
-            }, 2000);
+                    viewUserModal.style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
         }
     });
+
+    document.getElementById('search').addEventListener('input', function() {
+        let query = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#users-table tr');
+        
+        rows.forEach(row => {
+            let name = row.cells[0].textContent.toLowerCase();
+            let lastname = row.cells[1].textContent.toLowerCase();
+            let email = row.cells[2].textContent.toLowerCase();
+
+            if (name.includes(query) || lastname.includes(query) || email.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Display message from sessionStorage
+    console.log("Checking sessionStorage for messages...");
+    if (sessionStorage.getItem('message')) {
+        var message = sessionStorage.getItem('message');
+        var messageType = sessionStorage.getItem('messageType');
+        console.log("Found message:", message, "with type:", messageType);
+
+        var alertBox = document.createElement('div');
+        alertBox.className = 'alert alert-' + messageType;
+        alertBox.textContent = message;
+
+        document.getElementById('alert-container').prepend(alertBox);
+
+        setTimeout(() => {
+            alertBox.style.display = 'none';
+            sessionStorage.removeItem('message');
+            sessionStorage.removeItem('messageType');
+        }, 2000);
+    }
+
+    // Form submission for adding user
+    var addUserForm = document.querySelector('#addUserModal form');
+    addUserForm.onsubmit = function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(addUserForm);
+
+        axios.post(addUserForm.action, formData)
+            .then(response => {
+                if (response.data.success) {
+                    sessionStorage.setItem('message', response.data.message);
+                    sessionStorage.setItem('messageType', 'success');
+                    location.reload();
+                } else {
+                    alert('Error adding user');
+                    console.error("Server error:", response.data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Add error:', error.response ? error.response.data : error);
+                alert('Error adding user');
+            });
+    };
+});
+
+
 </script>
 @endsection
