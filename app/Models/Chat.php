@@ -9,11 +9,12 @@ class Chat extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'admin_id', 'status'];
+    protected $table = 'user_chats';
+    protected $fillable = ['user_id', 'admin_id', 'status', 'is_taken'];
 
     public function messages()
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(Message::class, 'chat_id');
     }
 
     public function user()

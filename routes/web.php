@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\HomeController;
@@ -31,11 +30,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 
-    // Trasy dla chatu
-    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index'); // Dla adminów do przeglądania wszystkich otwartych chatów
-    Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats'); // Dla użytkowników do przeglądania ich chatów
-    Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show'); // Wyświetlenie konkretnego chatu
-    Route::post('/chat/{id}/send-message', [ChatController::class, 'sendMessage'])->name('chat.sendMessage'); // Wysłanie wiadomości w konkretnym chacie
-    Route::post('/chat/{id}/take', [ChatController::class, 'takeChat'])->name('chat.takeChat'); // Przejęcie chatu przez admina
-    Route::post('/chat/create', [ChatController::class, 'createChat'])->name('chat.createChat'); // Utworzenie nowego chatu przez użytkownika
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats');
+    Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show');
+    Route::post('/chat/{id}/send-message', [ChatController::class, 'sendMessage'])->name('chat.sendMessage');
+    Route::post('/chat/{id}/take', [ChatController::class, 'takeChat'])->name('chat.takeChat');
+    Route::post('/chat/create', [ChatController::class, 'createChat'])->name('chat.createChat');
+    
 });

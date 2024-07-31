@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Chat;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,16 +16,15 @@ class ChatController extends Controller
     }
 
     public function userChats()
-{
-    $chats = Chat::where('user_id', Auth::id())->get();
-    return view('chat.userChats', compact('chats'));
-}
-
+    {
+        $chats = Chat::where('user_id', Auth::id())->get();
+        return view('chat.userChats', compact('chats'));
+    }
 
     public function show($id)
     {
         $chat = Chat::findOrFail($id);
-        return view('chat.show', compact('chat'));
+        return response()->json($chat->messages);
     }
 
     public function sendMessage(Request $request, $id)
@@ -32,7 +33,7 @@ class ChatController extends Controller
         $message = new Message();
         $message->chat_id = $chat->id;
         $message->message = $request->message;
-        $message->is_from_user = Auth::user()->role === 'user';
+        $message->admin_id = Auth::user()->role === 'admin' ? Auth::id() : null;
         $message->save();
 
         return response()->json(['success' => true]);
@@ -43,6 +44,7 @@ class ChatController extends Controller
         $chat = Chat::findOrFail($id);
         if (Auth::user()->role === 'admin' && Auth::user()->is_hr) {
             $chat->admin_id = Auth::id();
+            $chat->is_taken = true;
             $chat->save();
             return response()->json(['success' => true]);
         }
@@ -51,7 +53,7 @@ class ChatController extends Controller
 
     public function createChat(Request $request)
     {
-        $existingChat = Chat::where('user_id', Auth::id())->where('admin_id', null)->first();
+        $existingChat = Chat::where('user_id', Auth::id())->where('is_taken', false)->first();
         if ($existingChat) {
             return redirect()->back()->with('error', 'You already have an open chat.');
         }
@@ -63,7 +65,6 @@ class ChatController extends Controller
         $message = new Message();
         $message->chat_id = $chat->id;
         $message->message = $request->message;
-        $message->is_from_user = true;
         $message->save();
 
         return redirect()->route('chat.userChats');
