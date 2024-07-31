@@ -403,5 +403,34 @@ body {
     display: block;
 }
 
+.container {
+    margin-top: 20px;
+}
+
+.list-group-item a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+#chat-window {
+    background-color: #9e8f8f;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    height: 600px;
+    overflow-y: scroll;
+}
+
+.message {
+    margin-bottom: 10px;
+}
+
+.message.admin {
+    text-align: right;
+}
+
+.message.user {
+    text-align: left;
+}
     
 

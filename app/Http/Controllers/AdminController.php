@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserHistory;
 
+
 class AdminController extends Controller
 {
     public function dashboard()
@@ -186,4 +187,29 @@ public function storeUser(Request $request)
         $histories = UserHistory::where('user_id', $id)->orderBy('created_at', 'desc')->get();
         return response()->json($histories);
     }
+    
+
+    
+
+    public function updateIsHrStatus(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        if ($user->role != 'admin') {
+            return response()->json(['error' => 'User must be an admin to have HR status'], 403);
+        }
+
+        $user->is_hr = $request->is_hr;
+        $user->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function index()
+    {
+        // Pobierz wszystkie wiadomości dla administratora
+        $messages = Message::all(); // Lub ogranicz tylko do wiadomości przypisanych do konkretnego admina
+        return view('chat.index', compact('messages'));
+    }
+
+
 }

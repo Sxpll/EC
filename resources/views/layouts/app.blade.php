@@ -16,57 +16,42 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <style>
-    .table td {
-        white-space: normal; /* Enable word wrap */
-        word-break: break-word; /* Break words that are too long */
-    }
+        .table td {
+            white-space: normal; /* Enable word wrap */
+            word-break: break-word; /* Break words that are too long */
+        }
 
-    .modal-content {
-        width: 80%; /* Adjust the width as needed */
-        max-height: 90vh; /* Adjust the max height as needed */
-        overflow-y: auto; /* Enable vertical scroll if content is too long */
-    }
+        .modal-content {
+            width: 80%; /* Adjust the width as needed */
+            max-height: 90vh; /* Adjust the max height as needed */
+            overflow-y: auto; /* Enable vertical scroll if content is too long */
+        }
 
-    .table-responsive {
-        max-height: 60vh; /* Ensure table does not exceed certain height */
-        overflow-y: auto; /* Add vertical scroll if table content is too long */
-    }
+        .table-responsive {
+            max-height: 60vh; /* Ensure table does not exceed certain height */
+            overflow-y: auto; /* Add vertical scroll if table content is too long */
+        }
 
+        body.modal-open {
+            overflow: hidden;
+        }
 
-    
-    body.modal-open {
-        overflow: hidden;
-    }
-    .table td {
-        white-space: normal; /* Enable word wrap */
-        word-break: break-word; /* Break words that are too long */
-    }
+        .history-value {
+            white-space: pre-wrap; /* Preserve new lines */
+            word-break: break-word; /* Break long words to fit the container */
+        }
 
-    .modal-content {
-        width: 80%; /* Adjust the width as needed */
-        max-height: 90vh; /* Adjust the max height as needed */
-        overflow-y: auto; /* Enable vertical scroll if content is too long */
-    }
-    
-    .history-value {
-        white-space: pre-wrap; /* Preserve new lines */
-        word-break: break-word; /* Break long words to fit the container */
-    }
-    .history-table td {
-        vertical-align: top; /* Align top to ensure proper row alignment */
-    }
-    .history-table .new-value-column {
-        width: 300px; 
+        .history-table td {
+            vertical-align: top; /* Align top to ensure proper row alignment */
+        }
 
-
-
-
-</style>
-
-
+        .history-table .new-value-column {
+            width: 300px;
+        }
+    </style>
 </head>
 <body>
-    <div id="app" class="cos">
+    <div id="app">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm">
             <div class="container">
@@ -88,6 +73,15 @@
                 @if(Auth::user()->role === 'admin')
                     <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
                 @endif
+
+                @if (auth()->check() && auth()->user()->role == 'admin' && auth()->user()->is_hr)
+                    <a href="{{ route('chat.index') }}">Chat</a>
+                @endif
+
+                @if(auth()->check() && auth()->user()->role == 'user')
+                    <a href="{{ route('chat.userChats') }}">Chat</a>
+                @endif
+
                 <a href="{{ route('logout') }}"
                    onclick="event.preventDefault();
                                  document.getElementById('logout-form').submit();">
@@ -123,9 +117,6 @@
                 closeNav();
             });
         });
-
-
-        
     </script>
 </body>
 </html>
