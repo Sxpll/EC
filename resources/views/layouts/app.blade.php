@@ -47,6 +47,34 @@
         .history-table .new-value-column {
             width: 300px;
         }
+
+        .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+#newChatModal .modal-content,
+#chatWindowModal .modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.chat-item {
+    margin-bottom: 10px;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chat-title {
+    font-weight: bold;
+}
+
+.chat-time {
+    font-size: 0.9em;
+    color: gray;
+}
     </style>
 </head>
 <body>

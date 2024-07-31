@@ -55,18 +55,19 @@ class ChatController extends Controller
     {
         $existingChat = Chat::where('user_id', Auth::id())->where('is_taken', false)->first();
         if ($existingChat) {
-            return redirect()->back()->with('error', 'You already have an open chat.');
+            return response()->json(['error' => 'You already have an open chat.']);
         }
 
         $chat = new Chat();
         $chat->user_id = Auth::id();
+        $chat->title = $request->title;
         $chat->save();
 
         $message = new Message();
         $message->chat_id = $chat->id;
-        $message->message = $request->message;
+        $message->message = 'Initial message';
         $message->save();
 
-        return redirect()->route('chat.userChats');
+        return response()->json(['success' => true, 'chat' => $chat]);
     }
 }
