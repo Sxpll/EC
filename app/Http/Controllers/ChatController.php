@@ -22,10 +22,11 @@ class ChatController extends Controller
     }
 
     public function show($id)
-    {
-        $chat = Chat::findOrFail($id);
-        return response()->json($chat->messages);
-    }
+{
+    $chat = Chat::with('messages')->findOrFail($id);
+    return response()->json($chat->messages);
+}
+
 
     public function sendMessage(Request $request, $id)
     {
@@ -52,12 +53,8 @@ class ChatController extends Controller
     }
 
     public function createChat(Request $request)
-    {
-        $existingChat = Chat::where('user_id', Auth::id())->where('is_taken', false)->first();
-        if ($existingChat) {
-            return response()->json(['error' => 'You already have an open chat.']);
-        }
-
+{
+    try {
         $chat = new Chat();
         $chat->user_id = Auth::id();
         $chat->title = $request->title;
@@ -69,5 +66,11 @@ class ChatController extends Controller
         $message->save();
 
         return response()->json(['success' => true, 'chat' => $chat]);
+    } catch (\Exception $e) {
+        // Log the exception message for debugging
+        \Log::error('Chat creation failed: ' . $e->getMessage());
+        return response()->json(['success' => false, 'error' => 'Chat creation failed'], 500);
     }
+}
+
 }

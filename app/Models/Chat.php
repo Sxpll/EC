@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,7 +10,7 @@ class Chat extends Model
 {
     use HasFactory;
 
-    protected $table = 'user_chats';
+    protected $table = 'user_chats';  
     protected $fillable = ['user_id', 'admin_id', 'status', 'is_taken', 'title'];
 
     public function messages()
@@ -27,4 +28,3 @@ class Chat extends Model
         return $this->belongsTo(User::class, 'admin_id');
     }
 }
-

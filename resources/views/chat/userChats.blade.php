@@ -21,7 +21,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">New Chat</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -32,11 +32,9 @@
             <label for="title">Title</label>
             <input type="text" class="form-control" name="title" id="title" required>
           </div>
-          <input type="hidden" name="message" value="Initial message">
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Start Chat</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </form>
     </div>
@@ -48,7 +46,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Chat</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -68,8 +66,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('newThreadButton').addEventListener('click', function() {
-        document.getElementById('newChatModal').style.display = 'block';
+    const newThreadButton = document.getElementById('newThreadButton');
+    const createChatForm = document.getElementById('createChatForm');
+    const newChatModal = document.getElementById('newChatModal');
+    const chatWindowModal = document.getElementById('chatWindowModal');
+    const chatWindow = document.getElementById('chat-window');
+
+    newThreadButton.addEventListener('click', function() {
+        newChatModal.style.display = 'block';
     });
 
     document.querySelectorAll('.chat-link').forEach(link => {
@@ -80,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(url)
                 .then(response => response.json())
                 .then(messages => {
-                    let chatWindow = document.getElementById('chat-window');
                     chatWindow.innerHTML = '';
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
@@ -88,12 +91,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         chatWindow.appendChild(messageDiv);
                     });
                     document.getElementById('sendMessageForm').action = url + '/send-message';
-                    document.getElementById('chatWindowModal').style.display = 'block';
+                    chatWindowModal.style.display = 'block';
                 });
         });
     });
 
-    document.getElementById('createChatForm').addEventListener('submit', function(e) {
+    createChatForm.addEventListener('submit', function(e) {
         e.preventDefault();
         let formData = new FormData(this);
         fetch(this.action, {
@@ -104,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData
         }).then(response => response.json())
         .then(data => {
+            console.log(data); // Logowanie danych
             if (data.success) {
                 let chatList = document.getElementById('chatList');
                 let newChatItem = document.createElement('li');
@@ -115,9 +119,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     </a>
                 `;
                 chatList.appendChild(newChatItem);
-                document.getElementById('newChatModal').style.display = 'none';
+                newChatModal.style.display = 'none';
                 document.getElementById('title').value = '';
+
+                newChatItem.querySelector('.chat-link').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let chatId = this.getAttribute('data-chat-id');
+                    let url = `/chat/${chatId}`;
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(messages => {
+                            chatWindow.innerHTML = '';
+                            messages.forEach(msg => {
+                                let messageDiv = document.createElement('div');
+                                messageDiv.innerHTML = '<strong>' + (msg.admin_id ? 'Admin' : 'User') + ':</strong> ' + msg.message;
+                                chatWindow.appendChild(messageDiv);
+                            });
+                            document.getElementById('sendMessageForm').action = url + '/send-message';
+                            chatWindowModal.style.display = 'block';
+                        });
+                });
             }
+        }).catch(error => console.error('Error:', error)); // Logowanie błędów
+    });
+
+    document.querySelectorAll('.close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.modal').style.display = 'none';
         });
     });
 
@@ -134,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }).then(response => response.json())
         .then(data => {
             if (data.success) {
-                let chatWindow = document.getElementById('chat-window');
                 let newMessage = document.createElement('div');
                 newMessage.innerHTML = '<strong>User:</strong> ' + message;
                 chatWindow.appendChild(newMessage);
