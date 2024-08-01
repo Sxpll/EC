@@ -407,30 +407,94 @@ body {
     margin-top: 20px;
 }
 
+.list-group-item {
+    background-color: #323252;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    list-style-type: none;
+}
+
 .list-group-item a {
     color: #007bff;
     text-decoration: none;
 }
 
 #chat-window {
-    background-color: #9e8f8f;
+    background-color: #2c2c2c; /* Change to a darker background color */
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 10px;
-    height: 600px;
+    height: 50vh;
     overflow-y: scroll;
 }
 
+
 .message {
     margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .message.admin {
-    text-align: right;
+    text-align: left;
+    background-color: #f03ad8;
+    color: #fff;
 }
 
 .message.user {
     text-align: left;
+    background-color: #007bff;
+    color: #fff;
 }
-    
 
+textarea.form-control {
+    width: calc(100% - 20px); /* Adjust width to match chat window */
+    margin: 0 10px;
+    box-sizing: border-box;
+    
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+
+@media (max-width: 768px) {
+    .chat-window, .user-list {
+        margin-top: 15px;
+    }
+
+    .chat-messages {
+        height: 40vh;
+    }
+}
+
+.elo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.new-chat-button {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    background-color: #1abc9c;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    max-width: 100px;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+    text-align: center;
+    margin-left: 40px;
+    text-wrap: wrap;
+}

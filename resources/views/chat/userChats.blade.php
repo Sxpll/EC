@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="container">
-    <h1>Your Chats</h1>
-    <button id="newThreadButton" class="btn btn-primary">New Chat</button>
+    <h1 class="elo" >Your Threads</h1>
+    <button id="newThreadButton" class="new-chat-button">New Chat</button>
     <ul class="list-group mt-3" id="chatList">
         @foreach($chats as $chat)
             <li class="list-group-item chat-item">
@@ -50,7 +50,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body" id="chat-window" style="height: 400px; overflow-y: scroll;">
+      <div class="modal-body" id="chat-window" style="height: 50vh; overflow-y: scroll;">
         <!-- Messages will be loaded here -->
       </div>
       <div class="modal-footer">
@@ -87,7 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     chatWindow.innerHTML = '';
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
-                        messageDiv.innerHTML = '<strong>' + (msg.admin_id ? 'Admin' : 'User') + ':</strong> ' + msg.message;
+                        let messageClass = msg.admin_id ? 'admin' : 'user';
+                        let messageSender = msg.admin_id ? 'Admin' : '{{ Auth::user()->name }}';
+                        messageDiv.classList.add('message', messageClass);
+                        messageDiv.innerHTML = `<strong>${messageSender}:</strong> ${msg.message}`;
                         chatWindow.appendChild(messageDiv);
                     });
                     document.getElementById('sendMessageForm').action = url + '/send-message';
@@ -132,7 +135,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             chatWindow.innerHTML = '';
                             messages.forEach(msg => {
                                 let messageDiv = document.createElement('div');
-                                messageDiv.innerHTML = '<strong>' + (msg.admin_id ? 'Admin' : 'User') + ':</strong> ' + msg.message;
+                                let messageClass = msg.admin_id ? 'admin' : 'user';
+                                let messageSender = msg.admin_id ? 'Admin' : '{{ Auth::user()->name }}';
+                                messageDiv.classList.add('message', messageClass);
+                                messageDiv.innerHTML = `<strong>${messageSender}:</strong> ${msg.message}`;
                                 chatWindow.appendChild(messageDiv);
                             });
                             document.getElementById('sendMessageForm').action = url + '/send-message';
@@ -163,7 +169,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 let newMessage = document.createElement('div');
-                newMessage.innerHTML = '<strong>User:</strong> ' + message;
+                newMessage.classList.add('message', 'user');
+                newMessage.innerHTML = `<strong>{{ Auth::user()->name }}:</strong> ${message}`;
                 chatWindow.appendChild(newMessage);
                 this.message.value = '';
             }
