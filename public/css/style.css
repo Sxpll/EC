@@ -292,16 +292,18 @@ body {
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-.close {
+.close-custom {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 36px;
+    cursor: pointer;
     color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
 }
 
-.close:hover,
-.close:focus {
-    color: #000;
+.close-custom:hover,
+.close-custom:focus {
+    color: #fff;
     text-decoration: none;
     cursor: pointer;
 }
@@ -422,8 +424,7 @@ body {
 }
 
 #chat-window {
-    background: rgb(2,0,36);
-background: linear-gradient(90deg, rgb(18, 11, 153) 0%, rgba(29, 138, 111, 0.866) 35%, rgb(13, 80, 94) 100%);/* Change to a darker background color */
+    background-color: #2c2c2c; /* Change to a darker background color */
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 10px;
@@ -445,67 +446,32 @@ background: linear-gradient(90deg, rgb(18, 11, 153) 0%, rgba(29, 138, 111, 0.866
 .message-time {
     font-size: 0.8em;
     color: #ccc;
+    display: none;
 }
-
 
 .message.admin {
     text-align: left;
     background-color: #f03ad8;
     color: #fff;
+    float: left;
 }
 
 .message.user {
     text-align: left;
     background-color: #007bff;
     color: #fff;
-}
-
-.modal-footer {
-    padding: 10px;
-    border-radius: 5px;
-    margin-left: -20px;
-    width: calc(100% - 33px);
-    resize: none;
+    float: right;
 }
 
 textarea.form-control {
     width: calc(100% - 20px); /* Adjust width to match chat window */
-    margin: 0 10px;
-    box-sizing: border-box;
     
-}
-
-.eloelo{
-    background-color: #1abc9c;
-    border: none;
-    padding: 10px;
-    width: 100%;
-    max-width: 100px;
-    border-radius: 5px;
-    color: #ffffff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 5px;
-    text-align: center;
-    display: inline-block;
-    text-wrap: wrap;
-    margin-left: 10px;
+    box-sizing: border-box;
+    resize: none; /* Disable resizing */
 }
 
 .modal-body {
     padding: 20px;
-}
-
-
-@media (max-width: 768px) {
-    .chat-window, .user-list {
-        margin-top: 15px;
-    }
-
-    .chat-messages {
-        height: 40vh;
-    }
 }
 
 .elo {
@@ -513,8 +479,6 @@ textarea.form-control {
     justify-content: center;
     align-items: center;
 }
-
-
 
 .new-chat-button {
     display: flex;
@@ -534,4 +498,8 @@ textarea.form-control {
     text-align: center;
     margin-left: 40px;
     text-wrap: wrap;
+}
+
+.new-chat-button:hover {
+    background-color: #16a085;
 }

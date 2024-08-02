@@ -21,7 +21,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">New Chat</h5>
-        <button type="button" class="close" aria-label="Close">
+        <button type="button" class="close-custom" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -46,7 +46,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="chatTitle">Chat</h5>
-        <span class="close">&times;</span>
+        <span class="close-custom">&times;</span>
       </div>
       <div class="modal-body" id="chat-window" style="height: 50vh; overflow-y: scroll;">
         <!-- Messages will be loaded here -->
@@ -55,7 +55,7 @@
         <form id="sendMessageForm" action="" method="POST">
             @csrf
             <textarea name="message" rows="3" class="form-control" required></textarea>
-            <button type="submit" class="eloelo">Send</button>
+            <button type="submit" class="btn btn-primary mt-2">Send</button>
         </form>
       </div>
     </div>
@@ -87,15 +87,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
                         let messageClass = msg.admin_id ? 'admin' : 'user';
-                        let messageSender = msg.admin_id ? 'Admin' : '{{ Auth::user()->name }}';
-                        let messageTime = new Date(msg.created_at).toLocaleTimeString();
                         messageDiv.classList.add('message', messageClass);
-                        messageDiv.innerHTML = `<strong>${messageSender}</strong> <span class="message-time">${messageTime}</span>: ${msg.message}`;
+                        messageDiv.innerHTML = `${msg.message}`;
+                        messageDiv.addEventListener('click', () => {
+                            let messageTime = document.createElement('div');
+                            messageTime.classList.add('message-time');
+                            messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            messageDiv.appendChild(messageTime);
+                            messageTime.style.display = 'block';
+                        });
                         chatWindow.appendChild(messageDiv);
                     });
                     document.getElementById('sendMessageForm').action = url + '/send-message';
                     chatWindowModal.style.display = 'block';
                     chatTitle.textContent = messages.length > 0 ? messages[0].chat.title : 'Chat';
+                    scrollToBottom(chatWindow);
                 });
         });
     });
@@ -137,21 +143,27 @@ document.addEventListener('DOMContentLoaded', function() {
                             messages.forEach(msg => {
                                 let messageDiv = document.createElement('div');
                                 let messageClass = msg.admin_id ? 'admin' : 'user';
-                                let messageSender = msg.admin_id ? 'Admin' : '{{ Auth::user()->name }}';
-                                let messageTime = new Date(msg.created_at).toLocaleTimeString();
                                 messageDiv.classList.add('message', messageClass);
-                                messageDiv.innerHTML = `<strong>${messageSender}</strong> <span class="message-time">${messageTime}</span>: ${msg.message}`;
+                                messageDiv.innerHTML = `${msg.message}`;
+                                messageDiv.addEventListener('click', () => {
+                                    let messageTime = document.createElement('div');
+                                    messageTime.classList.add('message-time');
+                                    messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                    messageDiv.appendChild(messageTime);
+                                    messageTime.style.display = 'block';
+                                });
                                 chatWindow.appendChild(messageDiv);
                             });
                             document.getElementById('sendMessageForm').action = url + '/send-message';
                             chatWindowModal.style.display = 'block';
+                            scrollToBottom(chatWindow);
                         });
                 });
             }
         }).catch(error => console.error('Error:', error)); // Logowanie błędów
     });
 
-    document.querySelectorAll('.close').forEach(button => {
+    document.querySelectorAll('.close-custom').forEach(button => {
         button.addEventListener('click', function() {
             this.closest('.modal').style.display = 'none';
         });
@@ -172,12 +184,24 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 let newMessage = document.createElement('div');
                 newMessage.classList.add('message', 'user');
-                newMessage.innerHTML = `<strong>{{ Auth::user()->name }}</strong> <span class="message-time">${new Date().toLocaleTimeString()}</span>: ${message}`;
+                newMessage.innerHTML = `${message}`;
+                newMessage.addEventListener('click', () => {
+                    let messageTime = document.createElement('div');
+                    messageTime.classList.add('message-time');
+                    messageTime.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    newMessage.appendChild(messageTime);
+                    messageTime.style.display = 'block';
+                });
                 chatWindow.appendChild(newMessage);
                 this.message.value = '';
+                scrollToBottom(chatWindow);
             }
         });
     });
+
+    function scrollToBottom(element) {
+        element.scrollTop = element.scrollHeight;
+    }
 });
 </script>
 @endsection
