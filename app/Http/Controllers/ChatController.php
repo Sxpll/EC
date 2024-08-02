@@ -73,4 +73,34 @@ class ChatController extends Controller
     }
 }
 
+public function updateChatStatus(Request $request, $id)
+{
+    $chat = Chat::findOrFail($id);
+    $chat->status = $request->status;
+    if ($request->has('is_taken')) {
+        $chat->is_taken = 1;
+        $chat->admin_id = auth()->user()->id;
+    } else {
+        $chat->is_taken = 0;
+        $chat->admin_id = null;
+    }
+    $chat->save();
+
+    return response()->json(['success' => true]);
+}
+
+
+// W kontrolerze, odpowiedzialnym za czaty
+public function manageChat(Request $request, $id)
+{
+    $chat = Chat::findOrFail($id);
+    $chat->status = $request->status;
+    $chat->is_taken = $request->is_taken;
+    $chat->admin_id = $request->admin_id;
+    $chat->save();
+
+    return response()->json(['success' => true]);
+}
+
+
 }

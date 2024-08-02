@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h1 class="elo" >Your Threads</h1>
+    <h1 class="elo">Your Threads</h1>
     <button id="newThreadButton" class="new-chat-button">New Chat</button>
     <ul class="list-group mt-3" id="chatList">
         @foreach($chats as $chat)
@@ -46,7 +46,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="chatTitle">Chat</h5>
-        <span class="close-custom">&times;</span>
+        <button type="button" class="close-custom" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body" id="chat-window" style="height: 50vh; overflow-y: scroll;">
         <!-- Messages will be loaded here -->
@@ -70,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatWindowModal = document.getElementById('chatWindowModal');
     const chatWindow = document.getElementById('chat-window');
     const chatTitle = document.getElementById('chatTitle');
+    const messageTextarea = document.querySelector('#sendMessageForm textarea');
 
     newThreadButton.addEventListener('click', function() {
         newChatModal.style.display = 'block';
@@ -89,12 +92,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         let messageClass = msg.admin_id ? 'admin' : 'user';
                         messageDiv.classList.add('message', messageClass);
                         messageDiv.innerHTML = `${msg.message}`;
+                        let messageTime = document.createElement('div');
+                        messageTime.classList.add('message-time');
+                        messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        messageTime.style.display = 'none';
+                        messageDiv.appendChild(messageTime);
                         messageDiv.addEventListener('click', () => {
-                            let messageTime = document.createElement('div');
-                            messageTime.classList.add('message-time');
-                            messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            messageDiv.appendChild(messageTime);
-                            messageTime.style.display = 'block';
+                            messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
                         });
                         chatWindow.appendChild(messageDiv);
                     });
@@ -145,18 +149,18 @@ document.addEventListener('DOMContentLoaded', function() {
                                 let messageClass = msg.admin_id ? 'admin' : 'user';
                                 messageDiv.classList.add('message', messageClass);
                                 messageDiv.innerHTML = `${msg.message}`;
+                                let messageTime = document.createElement('div');
+                                messageTime.classList.add('message-time');
+                                messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                messageTime.style.display = 'none';
+                                messageDiv.appendChild(messageTime);
                                 messageDiv.addEventListener('click', () => {
-                                    let messageTime = document.createElement('div');
-                                    messageTime.classList.add('message-time');
-                                    messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                    messageDiv.appendChild(messageTime);
-                                    messageTime.style.display = 'block';
+                                    messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
                                 });
                                 chatWindow.appendChild(messageDiv);
                             });
                             document.getElementById('sendMessageForm').action = url + '/send-message';
                             chatWindowModal.style.display = 'block';
-                            scrollToBottom(chatWindow);
                         });
                 });
             }
@@ -185,18 +189,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 let newMessage = document.createElement('div');
                 newMessage.classList.add('message', 'user');
                 newMessage.innerHTML = `${message}`;
+                let messageTime = document.createElement('div');
+                messageTime.classList.add('message-time');
+                messageTime.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                messageTime.style.display = 'none';
+                newMessage.appendChild(messageTime);
                 newMessage.addEventListener('click', () => {
-                    let messageTime = document.createElement('div');
-                    messageTime.classList.add('message-time');
-                    messageTime.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    newMessage.appendChild(messageTime);
-                    messageTime.style.display = 'block';
+                    messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
                 });
                 chatWindow.appendChild(newMessage);
                 this.message.value = '';
                 scrollToBottom(chatWindow);
             }
         });
+    });
+
+    messageTextarea.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            document.getElementById('sendMessageForm').dispatchEvent(new Event('submit'));
+        }
     });
 
     function scrollToBottom(element) {

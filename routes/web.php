@@ -37,4 +37,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat/{id}/send-message', [ChatController::class, 'sendMessage'])->name('chat.sendMessage');
     Route::post('/chat/{id}/take', [ChatController::class, 'takeChat'])->name('chat.takeChat');
     Route::post('/chat/create', [ChatController::class, 'createChat'])->name('chat.createChat');
+
+    Route::put('/chat/{id}/manage', 'ChatController@updateChatStatus')->name('chat.manage');
+    Route::put('/chat/{id}/manage', [ChatController::class, 'manageChat'])->name('chat.manage');
+    
+
+
 });
