@@ -62,7 +62,6 @@ class ChatController extends Controller
 
         $message = new Message();
         $message->chat_id = $chat->id;
-        $message->message = 'Initial message';
         $message->save();
 
         return response()->json(['success' => true, 'chat' => $chat]);

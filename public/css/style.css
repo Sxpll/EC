@@ -11,18 +11,7 @@ body {
     overflow: hidden; 
 }
 
-.container-admin {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Pełna wysokość widoku */
-    width: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    
-}
-
-.container-center,  .container-admin-dashboard {
+.container-admin, .container-center, .container-admin-dashboard {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -32,7 +21,7 @@ body {
     box-sizing: border-box;
 }
 
-.login-card, .manage-users-card,  .card-admin-dashboard {
+.login-card, .manage-users-card, .card-admin-dashboard {
     background-color: #2b2b3b;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -52,19 +41,17 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
     width: 100%;
-    max-width: 1000px; /* Ogranicz szerokość, jeśli potrzebne */
-    height: 95%; /* Pełna wysokość */
+    max-width: 1000px; 
+    height: 95%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Usuń przewijanie wewnątrz karty */
-   
+    overflow: hidden; 
 }
-
 
 .manage-users-container .card-admin {
     max-width: 1400px;
-    width: 120%; /* Zwiększenie szerokości tylko dla zarządzania użytkownikami */
+    width: 120%;
 }
 
 .content-wrapper {
@@ -96,7 +83,6 @@ body {
     margin-bottom: 15px;
     padding-left: 10px;
     padding-right: 10px;
-    
 }
 
 .form-control {
@@ -129,7 +115,6 @@ body {
     text-align: center;
     display: inline-block;
     text-wrap: wrap;
-   
 }
 
 .btn-primary:hover, .btn-success:hover, .btn-danger:hover {
@@ -164,7 +149,6 @@ body {
     background-color: #2b2b3b;
 }
 
-/* Stylizacja paska bocznego */
 .sidebar {
     height: 100%;
     width: 0;
@@ -222,7 +206,7 @@ body {
 
 .table-responsive {
     max-height: 75vh;
-    flex: 1; /* Zwiększ maksymalną wysokość */
+    flex: 1;
     overflow-y: auto;
 }
 
@@ -353,7 +337,7 @@ body {
 }
 
 .custom-link {
-    color: #1abc9c; /* Zielony kolor, możesz zmienić na inny */
+    color: #1abc9c;
     display: block;
     text-align: center;
     margin-top: 10px;
@@ -361,11 +345,9 @@ body {
 }
 
 .custom-link:hover {
-    color: #16a085; /* Trochę ciemniejszy zielony kolor na hover */
+    color: #16a085;
 }
 
-
-/* Style dla zakładek */
 .tabs {
     overflow: hidden;
     background-color: #2b2b3b;
@@ -424,14 +406,13 @@ body {
 }
 
 #chat-window {
-    background-color: #2c2c2c; /* Change to a darker background color */
+    background-color: #2c2c2c;
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 10px;
     height: 50vh;
     overflow-y: scroll;
 }
-
 
 .message {
     margin-bottom: 10px;
@@ -464,10 +445,9 @@ body {
 }
 
 textarea.form-control {
-    width: calc(100% - 20px); /* Adjust width to match chat window */
-    
+    width: calc(100% - 20px);
     box-sizing: border-box;
-    resize: none; /* Disable resizing */
+    resize: none;
 }
 
 .modal-body {
@@ -520,97 +500,6 @@ textarea.form-control {
     cursor: pointer;
 }
 
-
-.btn-primary.mt-2 {
-    background-color: #1abc9c;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    color: #ffffff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    width: fit-content;
-    margin-top: 10px;
-}
-
-.btn-primary.mt-2:hover {
-    background-color: #16a085;
-}
-
-
-.btn-success {
-    background-color: #28a745;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    color: #ffffff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    width: fit-content;
-    margin-top: 10px;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
-
-
-/* public/css/style.css */
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.message {
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    width: fit-content;
-    max-width: 70%;
-    word-wrap: break-word;
-    clear: both;
-}
-
-.message-time {
-    font-size: 0.8em;
-    color: #ccc;
-    display: none;
-}
-
-.message.admin {
-    text-align: left;
-    background-color: #f03ad8;
-    color: #fff;
-    float: left;
-}
-
-.message.user {
-    text-align: left;
-    background-color: #007bff;
-    color: #fff;
-    float: right;
-}
-
-textarea.form-control {
-    width: calc(100% - 20px); /* Adjust width to match chat window */
-    box-sizing: border-box;
-    resize: none; /* Disable resizing */
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.elo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .btn-primary.mt-2 {
     background-color: #1abc9c;
     border: none;
@@ -643,90 +532,18 @@ textarea.form-control {
     background-color: #218838;
 }
 
-
-/* public/css/style.css */
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.message {
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    width: fit-content;
-    max-width: 70%;
-    word-wrap: break-word;
-    clear: both;
-}
-
-.message-time {
-    font-size: 0.8em;
-    color: #ccc;
-    display: none;
-}
-
-.message.admin {
-    text-align: left;
-    background-color: #f03ad8;
-    color: #fff;
-    float: left;
-}
-
-.message.user {
-    text-align: left;
-    background-color: #007bff;
-    color: #fff;
-    float: right;
-}
-
-textarea.form-control {
-    width: calc(100% - 20px); /* Adjust width to match chat window */
-    box-sizing: border-box;
-    resize: none; /* Disable resizing */
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.elo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.btn-primary.mt-2 {
+.nav-tabs .nav-link.active {
     background-color: #1abc9c;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
     color: #ffffff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    width: fit-content;
-    margin-top: 10px;
+    border: none;
 }
 
-.btn-primary.mt-2:hover {
+.nav-tabs .nav-link {
+    color: #ffffff;
+    background-color: #2b2b3b;
+    border: none;
+}
+
+.nav-tabs .nav-link:hover {
     background-color: #16a085;
-}
-
-.close-custom {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #aaa;
-}
-
-.close-custom:hover, .close-custom:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
 }

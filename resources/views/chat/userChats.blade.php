@@ -4,14 +4,27 @@
 <div class="container">
     <h1 class="elo">Your Threads</h1>
     <button id="newThreadButton" class="new-chat-button">New Chat</button>
+    <select id="chatStatusFilter" class="form-control mt-3" style="max-width: 200px;">
+        <option value="open" selected>Open</option>
+        <option value="completed">Completed</option>
+    </select>
     <ul class="list-group mt-3" id="chatList">
         @foreach($chats as $chat)
-            <li class="list-group-item chat-item">
-                <a href="#" class="chat-link" data-chat-id="{{ $chat->id }}">
-                    <div class="chat-title">{{ $chat->title }}</div>
-                    <div class="chat-time">{{ $chat->created_at->format('Y-m-d H:i') }}</div>
-                </a>
-            </li>
+            @if($chat->status == 'open' || $chat->status == 'in progress')
+                <li class="list-group-item chat-item" data-status="open">
+                    <a href="#" class="chat-link" data-chat-id="{{ $chat->id }}">
+                        <div class="chat-title">{{ $chat->title }}</div>
+                        <div class="chat-time">{{ $chat->created_at->format('Y-m-d H:i') }}</div>
+                    </a>
+                </li>
+            @elseif($chat->status == 'completed')
+                <li class="list-group-item chat-item d-none" data-status="completed">
+                    <a href="#" class="chat-link" data-chat-id="{{ $chat->id }}">
+                        <div class="chat-title">{{ $chat->title }}</div>
+                        <div class="chat-time">{{ $chat->created_at->format('Y-m-d H:i') }}</div>
+                    </a>
+                </li>
+            @endif
         @endforeach
     </ul>
 </div>
@@ -73,9 +86,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatWindow = document.getElementById('chat-window');
     const chatTitle = document.getElementById('chatTitle');
     const messageTextarea = document.querySelector('#sendMessageForm textarea');
+    const chatStatusFilter = document.getElementById('chatStatusFilter');
+    const chatListItems = document.querySelectorAll('.chat-item');
 
     newThreadButton.addEventListener('click', function() {
         newChatModal.style.display = 'block';
+    });
+
+    chatStatusFilter.addEventListener('change', function() {
+        const selectedStatus = this.value;
+        chatListItems.forEach(item => {
+            if (item.getAttribute('data-status') === selectedStatus) {
+                item.classList.remove('d-none');
+            } else {
+                item.classList.add('d-none');
+            }
+        });
     });
 
     document.querySelectorAll('.chat-link').forEach(link => {
@@ -126,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let chatList = document.getElementById('chatList');
                 let newChatItem = document.createElement('li');
                 newChatItem.classList.add('list-group-item', 'chat-item');
+                newChatItem.setAttribute('data-status', 'open');
                 newChatItem.innerHTML = `
                     <a href="#" class="chat-link" data-chat-id="${data.chat.id}">
                         <div class="chat-title">${data.chat.title}</div>
@@ -161,6 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                             document.getElementById('sendMessageForm').action = url + '/send-message';
                             chatWindowModal.style.display = 'block';
+                            scrollToBottom(chatWindow);
                         });
                 });
             }
