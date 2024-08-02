@@ -54,7 +54,7 @@
       <div class="modal-footer">
         <form id="sendMessageForm" action="" method="POST">
             @csrf
-            <textarea name="message" rows="3" class="form-control" required></textarea>
+            <textarea name="message" rows="3" class="form-control" style="resize: none;" required></textarea>
             <button type="submit" class="btn btn-primary mt-2">Send</button>
         </form>
       </div>
