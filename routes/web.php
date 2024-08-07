@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/history', [AdminController::class, 'showHistory'])->name('admin.history');
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
+    
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filter');    
 
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
@@ -37,9 +38,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat/{id}/send-message', [ChatController::class, 'sendMessage'])->name('chat.sendMessage');
     Route::post('/chat/{id}/take', [ChatController::class, 'takeChat'])->name('chat.takeChat');
     Route::post('/chat/create', [ChatController::class, 'createChat'])->name('chat.createChat');
-
-    Route::put('/chat/{id}/manage', [ChatController::class, 'updateChatStatus'])->name('chat.manage');
     Route::put('/chat/{id}/manage', [ChatController::class, 'manageChat'])->name('chat.manage');
-    
-    
 });

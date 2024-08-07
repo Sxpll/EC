@@ -30,9 +30,9 @@
 <div id="chatWindowModal" class="modal">
     <div class="modal-content">
         <span class="close-custom">&times;</span>
-        <div class="modal-header">
+        <div class="modal-header d-flex justify-content-between align-items-center">
             <h5 class="chat-title" id="chatTitle">Chat</h5>
-            <button id="manageButton" class="btn btn-success">Manage</button>
+            <button id="manageButton" class="btn btn-view">Manage</button>
         </div>
         <div class="modal-body" id="chat-window" style="height: 50vh; overflow-y: scroll;">
             <!-- Messages will be loaded here -->
@@ -65,8 +65,11 @@
                         <option value="completed">Completed</option>
                     </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+                <div class="form-group d-flex justify-content-end">
+                    <button type="button" id="takeChatButton" class="btn btn-view">Take Chat</button>
                 </div>
             </form>
         </div>
@@ -144,6 +147,24 @@ document.addEventListener('DOMContentLoaded', function() {
         manageModal.style.display = 'block';
     });
 
+    document.querySelector('#takeChatButton').addEventListener('click', function() {
+        fetch(`/chat/${currentChatId}/take`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        }).then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Chat has been taken successfully.');
+                manageModal.style.display = 'none';
+                chatWindowModal.style.display = 'none';
+                location.reload();
+            }
+        });
+    });
+
     document.querySelectorAll('.close-custom').forEach(closeBtn => {
         closeBtn.addEventListener('click', function() {
             this.closest('.modal').style.display = 'none';
@@ -153,14 +174,13 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('manageForm').addEventListener('submit', function(e) {
         e.preventDefault();
         let status = document.getElementById('status').value;
-        let isTaken = true;
         fetch(this.action, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({ status: status, is_taken: isTaken, admin_id: {{ Auth::user()->id }} })
+            body: JSON.stringify({ status: status, is_taken: true, admin_id: {{ Auth::user()->id }} })
         }).then(response => response.json())
         .then(data => {
             if (data.success) {

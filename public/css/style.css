@@ -549,6 +549,7 @@ textarea.form-control {
 }
 
 
+
 #chatList {
     max-height: 60vh; /* Możesz dostosować wysokość według potrzeb */
     overflow-y: auto;
@@ -572,17 +573,20 @@ textarea.form-control {
 }
 
 .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     position: relative;
 }
 
 .close-custom {
     position: absolute;
-    top: -5px;
+    top: 10px;
     right: 10px;
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
-    color: #fff; 
+    color: #aaa; 
     background: none; 
     border: none; 
     padding: 0; 
@@ -590,7 +594,28 @@ textarea.form-control {
 }
 
 .close-custom:hover, .close-custom:focus {
-    color: #ccc; 
+    color: #fff; 
     text-decoration: none;
     outline: none; 
+}
+
+.btn-primary, .btn-view {
+    background-color: #1abc9c;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    max-width: 100px;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+    text-align: center;
+    display: inline-block;
+    text-wrap: wrap;
+}
+
+.btn-primary:hover, .btn-view:hover {
+    background-color: #16a085;
 }

@@ -10,29 +10,27 @@ use Illuminate\Support\Facades\Auth;
 class ChatController extends Controller
 {
     public function index()
-{
-    $chats = Chat::where('admin_id', null)
-        ->orWhere('admin_id', Auth::id())
-        ->orderBy('created_at', 'desc')
-        ->get();
-    return view('chat.index', compact('chats'));
-}
+    {
+        $chats = Chat::where('admin_id', null)
+            ->orWhere('admin_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return view('chat.index', compact('chats'));
+    }
 
-public function userChats()
-{
-    $chats = Chat::where('user_id', Auth::id())
-        ->orderBy('created_at', 'desc')
-        ->get();
-    return view('chat.userChats', compact('chats'));
-}
-
+    public function userChats()
+    {
+        $chats = Chat::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return view('chat.userChats', compact('chats'));
+    }
 
     public function show($id)
-{
-    $chat = Chat::with('messages')->findOrFail($id);
-    return response()->json($chat->messages);
-}
-
+    {
+        $chat = Chat::with('messages')->findOrFail($id);
+        return response()->json($chat->messages);
+    }
 
     public function sendMessage(Request $request, $id)
     {
@@ -49,7 +47,7 @@ public function userChats()
     public function takeChat($id)
     {
         $chat = Chat::findOrFail($id);
-        if (Auth::user()->role === 'admin' && Auth::user()->is_hr) {
+        if (Auth::user()->role === 'admin') {
             $chat->admin_id = Auth::id();
             $chat->is_taken = true;
             $chat->save();
@@ -65,12 +63,12 @@ public function userChats()
             $chat->user_id = Auth::id();
             $chat->title = $request->title;
             $chat->save();
-    
+
             $message = new Message();
             $message->chat_id = $chat->id;
             $message->message = 'Hello!'; 
             $message->save();
-    
+
             return response()->json(['success' => true, 'chat' => $chat]);
         } catch (\Exception $e) {
             // Log the exception message for debugging
@@ -78,58 +76,49 @@ public function userChats()
             return response()->json(['success' => false, 'error' => 'Chat creation failed'], 500);
         }
     }
-    
 
-public function updateChatStatus(Request $request, $id)
-{
-    $chat = Chat::findOrFail($id);
-    $chat->status = $request->status;
-    if ($request->has('is_taken')) {
-        $chat->is_taken = 1;
-        $chat->admin_id = auth()->user()->id;
-    } else {
-        $chat->is_taken = 0;
-        $chat->admin_id = null;
+    public function updateChatStatus(Request $request, $id)
+    {
+        $chat = Chat::findOrFail($id);
+        $chat->status = $request->status;
+        if ($request->has('is_taken')) {
+            $chat->is_taken = 1;
+            $chat->admin_id = auth()->user()->id;
+        } else {
+            $chat->is_taken = 0;
+            $chat->admin_id = null;
+        }
+        $chat->save();
+
+        return response()->json(['success' => true]);
     }
-    $chat->save();
 
-    return response()->json(['success' => true]);
-}
+    public function manageChat(Request $request, $id)
+    {
+        $chat = Chat::findOrFail($id);
+        $chat->status = $request->status;
+        $chat->is_taken = $request->is_taken;
+        $chat->admin_id = $request->admin_id;
+        $chat->save();
 
+        return response()->json(['success' => true]);
+    }
 
-// W kontrolerze, odpowiedzialnym za czaty
-public function manageChat(Request $request, $id)
-{
-    $chat = Chat::findOrFail($id);
-    $chat->status = $request->status;
-    $chat->is_taken = $request->is_taken;
-    $chat->admin_id = $request->admin_id;
-    $chat->save();
+    public function filterChats(Request $request)
+    {
+        $status = $request->get('status');
+        $user_id = Auth::id();
 
-    return response()->json(['success' => true]);
-}
+        $chats = Chat::where('user_id', $user_id)
+            ->where(function($query) use ($status) {
+                if ($status === 'open') {
+                    $query->whereIn('status', ['open', 'in progress']);
+                } elseif ($status === 'completed') {
+                    $query->where('status', 'completed');
+                }
+            })
+            ->get();
 
-// ChatController.php
-
-public function filterChats(Request $request)
-{
-    $status = $request->get('status');
-    $user_id = Auth::id();
-    
-    $chats = Chat::where('user_id', $user_id)
-        ->where(function($query) use ($status) {
-            if ($status === 'open') {
-                $query->whereIn('status', ['open', 'in progress']);
-            } elseif ($status === 'completed') {
-                $query->where('status', 'completed');
-            }
-        })
-        ->get();
-
-    return response()->json($chats);
-}
-
-
-
-
+        return response()->json($chats);
+    }
 }
