@@ -10,16 +10,22 @@ use Illuminate\Support\Facades\Auth;
 class ChatController extends Controller
 {
     public function index()
-    {
-        $chats = Chat::where('admin_id', null)->orWhere('admin_id', Auth::id())->get();
-        return view('chat.index', compact('chats'));
-    }
+{
+    $chats = Chat::where('admin_id', null)
+        ->orWhere('admin_id', Auth::id())
+        ->orderBy('created_at', 'desc')
+        ->get();
+    return view('chat.index', compact('chats'));
+}
 
-    public function userChats()
-    {
-        $chats = Chat::where('user_id', Auth::id())->get();
-        return view('chat.userChats', compact('chats'));
-    }
+public function userChats()
+{
+    $chats = Chat::where('user_id', Auth::id())
+        ->orderBy('created_at', 'desc')
+        ->get();
+    return view('chat.userChats', compact('chats'));
+}
+
 
     public function show($id)
 {
@@ -53,24 +59,26 @@ class ChatController extends Controller
     }
 
     public function createChat(Request $request)
-{
-    try {
-        $chat = new Chat();
-        $chat->user_id = Auth::id();
-        $chat->title = $request->title;
-        $chat->save();
-
-        $message = new Message();
-        $message->chat_id = $chat->id;
-        $message->save();
-
-        return response()->json(['success' => true, 'chat' => $chat]);
-    } catch (\Exception $e) {
-        // Log the exception message for debugging
-        \Log::error('Chat creation failed: ' . $e->getMessage());
-        return response()->json(['success' => false, 'error' => 'Chat creation failed'], 500);
+    {
+        try {
+            $chat = new Chat();
+            $chat->user_id = Auth::id();
+            $chat->title = $request->title;
+            $chat->save();
+    
+            $message = new Message();
+            $message->chat_id = $chat->id;
+            $message->message = 'Hello!'; 
+            $message->save();
+    
+            return response()->json(['success' => true, 'chat' => $chat]);
+        } catch (\Exception $e) {
+            // Log the exception message for debugging
+            \Log::error('Chat creation failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => 'Chat creation failed'], 500);
+        }
     }
-}
+    
 
 public function updateChatStatus(Request $request, $id)
 {
@@ -100,6 +108,28 @@ public function manageChat(Request $request, $id)
 
     return response()->json(['success' => true]);
 }
+
+// ChatController.php
+
+public function filterChats(Request $request)
+{
+    $status = $request->get('status');
+    $user_id = Auth::id();
+    
+    $chats = Chat::where('user_id', $user_id)
+        ->where(function($query) use ($status) {
+            if ($status === 'open') {
+                $query->whereIn('status', ['open', 'in progress']);
+            } elseif ($status === 'completed') {
+                $query->where('status', 'completed');
+            }
+        })
+        ->get();
+
+    return response()->json($chats);
+}
+
+
 
 
 }

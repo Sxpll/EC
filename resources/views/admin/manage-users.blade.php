@@ -1,4 +1,5 @@
 @extends('layouts.app')
+
 @section('content')
 <div class="container-admin manage-users-container">
     <div class="card-admin">
@@ -145,6 +146,9 @@
         </div>
     </div>
 </div>
+
+<!-- Include Axios Library -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
     
@@ -378,6 +382,3 @@ function openTab(evt, tabName) {
 
 
 @endsection
-
-
-

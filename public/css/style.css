@@ -547,3 +547,50 @@ textarea.form-control {
 .nav-tabs .nav-link:hover {
     background-color: #16a085;
 }
+
+
+#chatList {
+    max-height: 60vh; /* Możesz dostosować wysokość według potrzeb */
+    overflow-y: auto;
+    padding-right: 15px; /* Dodatkowy odstęp, aby zapobiec ukryciu zawartości pod paskiem przewijania */
+}
+
+
+.d-flex.align-items-center {
+    margin-left: auto; /* Przesunięcie na prawo */
+}
+
+.list-group {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.costest{
+    display: flex;
+    justify-content: space-between;
+    margin-right: 33px;
+}
+
+.modal-header {
+    position: relative;
+}
+
+.close-custom {
+    position: absolute;
+    top: -5px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #fff; 
+    background: none; 
+    border: none; 
+    padding: 0; 
+    z-index: 1000;
+}
+
+.close-custom:hover, .close-custom:focus {
+    color: #ccc; 
+    text-decoration: none;
+    outline: none; 
+}

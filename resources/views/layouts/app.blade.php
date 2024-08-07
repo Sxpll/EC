@@ -14,6 +14,8 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 
+    
+
     <style>
         .table td {
             white-space: normal; /* Enable word wrap */
@@ -128,6 +130,7 @@
     </div>
 
     <script>
+        
         function openNav() {
             document.getElementById("mySidebar").style.width = "250px";
         }
