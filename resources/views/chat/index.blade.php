@@ -77,8 +77,9 @@
         </div>
     </div>
 </div>
+@vite('resources/js/app.js')
 
-<script src="{{ mix('js/app.js') }}"></script>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

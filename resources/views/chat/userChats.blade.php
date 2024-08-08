@@ -72,7 +72,8 @@
   </div>    
 </div>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="{{ mix('js/app.js') }}"></script>
+@vite('resources/js/app.js')
+
 
 
 <script>

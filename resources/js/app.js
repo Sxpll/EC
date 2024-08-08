@@ -5,6 +5,7 @@
  */
 
 import './bootstrap';
+import '../sass/app.scss';
 import { createApp } from 'vue';
 
 axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -31,4 +32,6 @@ window.Echo = new Echo({
     forceTLS: false,
     disableStats: true,
 });
+
+console.log('App.js loaded');
 
