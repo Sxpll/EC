@@ -78,6 +78,8 @@
     </div>
 </div>
 
+<script src="{{ mix('js/app.js') }}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const chatWindowModal = document.getElementById('chatWindowModal');
@@ -118,6 +120,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     sendMessageForm.action = url + '/send-message';
                     chatWindowModal.style.display = 'block';
                     chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                    // Nasłuchiwanie eventów dla tego chatu
+                    window.Echo.private(`chat.${currentChatId}`)
+                        .listen('MessageSent', (e) => {
+                            console.log(e.message);
+                            let messageDiv = document.createElement('div');
+                            let messageClass = (e.message.admin_id || e.message.user_id === {{ Auth::user()->id }}) ? 'user' : 'admin';
+                            messageDiv.classList.add('message', messageClass);
+                            messageDiv.innerHTML = `${e.message.message} <span class="message-time">${new Date(e.message.created_at).toLocaleTimeString()}</span>`;
+                            chatWindow.appendChild(messageDiv);
+                            chatWindow.scrollTop = chatWindow.scrollHeight;
+                        });
                 })
                 .catch(error => {
                     console.error('Error fetching chat messages:', error);

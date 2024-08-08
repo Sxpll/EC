@@ -6,6 +6,7 @@ use App\Models\Chat;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\MessageSent;
 
 class ChatController extends Controller
 {
@@ -34,7 +35,9 @@ class ChatController extends Controller
     
 
 
-    public function sendMessage(Request $request, $id)
+
+
+public function sendMessage(Request $request, $id)
     {
         $chat = Chat::findOrFail($id);
         $message = new Message();
@@ -43,8 +46,11 @@ class ChatController extends Controller
         $message->admin_id = Auth::user()->role === 'admin' ? Auth::id() : null;
         $message->save();
 
+        broadcast(new MessageSent($message))->toOthers();
+
         return response()->json(['success' => true]);
     }
+
 
     public function takeChat($id)
     {

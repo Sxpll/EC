@@ -72,6 +72,7 @@
   </div>    
 </div>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ mix('js/app.js') }}"></script>
 
 
 <script>
@@ -85,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageTextarea = document.querySelector('#sendMessageForm textarea');
     const chatStatusFilter = document.getElementById('chatStatusFilter');
     const chatList = document.getElementById('chatList');
+    let currentChatId = null;
 
     newThreadButton.addEventListener('click', function() {
         newChatModal.style.display = 'block';
@@ -222,6 +224,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     chatTitle.textContent = 'Chat';
                 }
                 scrollToBottom(chatWindow);
+
+                
+                window.Echo.private(`chat.${chatId}`)
+                    .listen('MessageSent', (e) => {
+                        console.log(e.message);
+                        let messageDiv = document.createElement('div');
+                        let messageClass = (e.message.admin_id || e.message.user_id === {{ Auth::user()->id }}) ? 'user' : 'admin';
+                        messageDiv.classList.add('message', messageClass);
+                        messageDiv.innerHTML = `${e.message.message} <span class="message-time">${new Date(e.message.created_at).toLocaleTimeString()}</span>`;
+                        chatWindow.appendChild(messageDiv);
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                    });
             }).catch(error => console.error('Error:', error));
     }
 
