@@ -11,8 +11,7 @@ class ChatController extends Controller
 {
     public function index()
     {
-        $chats = Chat::where('admin_id', null)
-            ->orWhere('admin_id', Auth::id())
+        $chats = Chat::with('user')
             ->orderBy('created_at', 'desc')
             ->get();
         return view('chat.index', compact('chats'));
@@ -27,10 +26,13 @@ class ChatController extends Controller
     }
 
     public function show($id)
-    {
-        $chat = Chat::with('messages')->findOrFail($id);
-        return response()->json($chat->messages);
-    }
+{
+    $chat = Chat::with('messages', 'admin')->findOrFail($id);
+    return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
+}
+
+    
+
 
     public function sendMessage(Request $request, $id)
     {
@@ -66,12 +68,11 @@ class ChatController extends Controller
 
             $message = new Message();
             $message->chat_id = $chat->id;
-            $message->message = 'Hello!'; 
+            $message->message = 'Hello!';
             $message->save();
 
             return response()->json(['success' => true, 'chat' => $chat]);
         } catch (\Exception $e) {
-            // Log the exception message for debugging
             \Log::error('Chat creation failed: ' . $e->getMessage());
             return response()->json(['success' => false, 'error' => 'Chat creation failed'], 500);
         }
@@ -122,6 +123,5 @@ class ChatController extends Controller
         return response()->json($chats);
     }
 
-
-   
+    
 }
