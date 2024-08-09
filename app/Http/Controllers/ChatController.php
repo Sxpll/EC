@@ -26,17 +26,20 @@ class ChatController extends Controller
     }
 
     public function show($id)
-{
-    $chat = Chat::with('messages', 'admin')->findOrFail($id);
-    return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
-}
-
-    
-
+    {
+        $chat = Chat::with('messages', 'admin')->findOrFail($id);
+        return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
+    }
 
     public function sendMessage(Request $request, $id)
     {
         $chat = Chat::findOrFail($id);
+
+        if ($chat->status === 'completed') {
+            return response()->json(['success' => false, 'message' => 'Cannot send messages to a completed chat.']);
+        }
+    
+
         $message = new Message();
         $message->chat_id = $chat->id;
         $message->message = $request->message;
@@ -95,15 +98,15 @@ class ChatController extends Controller
     }
 
     public function manageChat(Request $request, $id)
-    {
-        $chat = Chat::findOrFail($id);
-        $chat->status = $request->status;
-        $chat->is_taken = $request->is_taken;
-        $chat->admin_id = $request->admin_id;
-        $chat->save();
+{
+    $chat = Chat::findOrFail($id);
+    $chat->status = $request->status;
+    $chat->is_taken = $request->input('is_taken', false);
+    $chat->admin_id = $request->input('admin_id', null);
+    $chat->save();
 
-        return response()->json(['success' => true]);
-    }
+    return redirect()->back()->with('success', 'Chat status has been successfully updated.');
+}
 
     public function filterChats(Request $request)
     {
@@ -124,29 +127,16 @@ class ChatController extends Controller
     }
 
     public function getMessages($id)
-{
-    $messages = Message::where('chat_id', $id)
-                       ->orderBy('created_at', 'asc')
-                       ->get();
+    {
+        $messages = Message::where('chat_id', $id)
+                           ->orderBy('created_at', 'asc')
+                           ->get();
 
-    return response()->json($messages);
-}
-
-
-public function checkNewMessages()
-{
-    $adminId = Auth::id();
-    $chats = Chat::where('admin_id', $adminId)->with('messages')->get();
-
-    $newMessages = [];
-    foreach ($chats as $chat) {
-        $latestMessage = $chat->messages()->latest()->first();
-        if ($latestMessage && $latestMessage->created_at->gt($chat->updated_at)) {
-            $newMessages[] = ['id' => $chat->id, 'title' => $chat->title];
-        }
+        return response()->json($messages);
     }
 
-    return response()->json(['newMessages' => $newMessages]);
-}
+   
+    
+    
     
 }

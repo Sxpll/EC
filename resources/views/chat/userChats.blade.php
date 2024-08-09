@@ -235,6 +235,8 @@ function startAutoRefresh(chatId) {
 
 
 
+
+
     document.querySelectorAll('.close-custom').forEach(button => {
         button.addEventListener('click', function() {
             this.closest('.modal').style.display = 'none';

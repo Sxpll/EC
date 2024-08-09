@@ -31,6 +31,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filter');
     Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
+    Route::post('/chat/{chatId}/mark-as-viewed', [ChatController::class, 'markAsViewed']);
+
+
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats');

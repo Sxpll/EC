@@ -16,7 +16,7 @@
             <tbody>
                 @foreach($chats as $chat)
                     <tr data-chat-id="{{ $chat->id }}">
-                        <td>{{ $chat->title }} <span class="new-message-dot" style="display:none;">•</span></td>
+                        <td>{{ $chat->title }}</td>
                         <td>{{ $chat->user->name }} {{ $chat->user->surname }}</td>
                         <td>{{ $chat->status }}</td>
                         <td class="text-center">
@@ -29,6 +29,7 @@
     </div>
 </div>
 
+<!-- Chat Modal -->
 <div id="chatWindowModal" class="modal">
     <div class="modal-content">
         <span class="close-custom">&times;</span>
@@ -89,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageInput = sendMessageForm.querySelector('textarea[name="message"]');
     const manageButton = document.getElementById('manageButton');
     const takeChatButton = document.getElementById('takeChatButton');
+    const userId = @json(Auth::id()); // Bezpieczne przekazanie identyfikatora użytkownika
     let currentChatId = null;
     let refreshInterval = null;
 
@@ -105,15 +107,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function openChatWindow(chatId) {
-        let url = `/chat/${chatId}`;
-        fetch(url)
+        fetch(`/chat/${chatId}`)
             .then(response => response.json())
             .then(data => {
                 chatWindow.innerHTML = '';
                 const messages = data.messages;
                 messages.forEach(msg => {
                     let messageDiv = document.createElement('div');
-                    let messageClass = (msg.admin_id || msg.user_id === {{ Auth::user()->id }}) ? 'user' : 'admin';
+                    let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
                     messageDiv.classList.add('message', messageClass);
                     messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
                     chatWindow.appendChild(messageDiv);
@@ -122,7 +123,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         timeSpan.style.display = timeSpan.style.display === 'block' ? 'none' : 'block';
                     });
                 });
-                sendMessageForm.action = url + '/send-message';
+
+                sendMessageForm.action = `/chat/${chatId}/send-message`;
                 chatWindowModal.style.display = 'block';
                 chatWindow.scrollTop = chatWindow.scrollHeight;
                 startAutoRefresh(chatId);
@@ -144,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     chatWindow.innerHTML = '';
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
-                        let messageClass = (msg.admin_id || msg.user_id === {{ Auth::user()->id }}) ? 'user' : 'admin';
+                        let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
                         messageDiv.classList.add('message', messageClass);
                         messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
                         chatWindow.appendChild(messageDiv);
@@ -154,25 +156,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => console.error('Error refreshing messages:', error));
         }, 3000);
     }
-
-    function checkNewMessages() {
-        fetch('/admin/check-new-messages')
-            .then(response => response.json())
-            .then(data => {
-                data.newMessages.forEach(chat => {
-                    const chatRow = document.querySelector(`[data-chat-id="${chat.id}"]`);
-                    if (chatRow) {
-                        const dot = chatRow.querySelector('.new-message-dot');
-                        if (dot) {
-                            dot.style.display = 'inline';
-                        }
-                    }
-                });
-            })
-            .catch(error => console.error('Error checking new messages:', error));
-    }
-
-    setInterval(checkNewMessages, 5000);
 
     if (manageButton) {
         manageButton.addEventListener('click', function() {
@@ -200,49 +183,23 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Chat has been taken successfully.');
+                toastr.success('Chat has been taken successfully.');
                 manageModal.style.display = 'none';
                 chatWindowModal.style.display = 'none';
                 location.reload();
+            } else {
+                toastr.error('Failed to take chat.');
             }
         })
         .catch(error => {
             console.error('Error taking chat:', error);
+            toastr.error('Error taking chat.');
         });
     });
 
     document.querySelectorAll('.close-custom').forEach(closeBtn => {
         closeBtn.addEventListener('click', function() {
             this.closest('.modal').style.display = 'none';
-        });
-    });
-
-    document.getElementById('manageForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (!currentChatId) {
-            console.error('Chat ID is not set');
-            return;
-        }
-        let status = document.getElementById('status').value;
-        fetch(this.action, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ status: status, is_taken: true, admin_id: {{ Auth::user()->id }} })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Chat status has been successfully updated.');
-                manageModal.style.display = 'none';
-                chatWindowModal.style.display = 'none';
-                location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('Error updating chat status:', error);
         });
     });
 
@@ -270,10 +227,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatWindow.appendChild(newMessage);
                 messageInput.value = '';
                 chatWindow.scrollTop = chatWindow.scrollHeight;
+            } else {
+                toastr.error('Failed to send message.');
             }
         })
         .catch(error => {
             console.error('Error sending message:', error);
+            toastr.error('Error sending message.');
         });
     });
 
@@ -284,5 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
 </script>
 @endsection

@@ -626,3 +626,9 @@ textarea.form-control {
     margin-bottom: 1rem;
     -webkit-overflow-scrolling: touch;
 }
+
+
+.new-message-dot {
+    color: red; /* Kolor kropki */
+    font-size: 20px; /* Rozmiar kropki */
+}
