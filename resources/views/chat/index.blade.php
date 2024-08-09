@@ -3,29 +3,32 @@
 @section('content')
 <div class="container">
     <h1 class="elo">All Chats</h1>
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Status</th>
-                <th class="text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($chats as $chat)
+    <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
+        <table class="table table-hover">
+            <thead>
                 <tr>
-                    <td>{{ $chat->title }}</td>
-                    <td>{{ $chat->user->name }} {{ $chat->user->surname }}</td>
-                    <td>{{ $chat->status }}</td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-view" data-chat-id="{{ $chat->id }}">View</button>
-                    </td>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Status</th>
+                    <th class="text-center">Actions</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach($chats as $chat)
+                    <tr>
+                        <td>{{ $chat->title }}</td>
+                        <td>{{ $chat->user->name }} {{ $chat->user->surname }}</td>
+                        <td>{{ $chat->status }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-primary btn-view" data-chat-id="{{ $chat->id }}">View</button>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
+
 
 <div id="chatWindowModal" class="modal">
     <div class="modal-content">

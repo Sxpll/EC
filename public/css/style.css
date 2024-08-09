@@ -619,3 +619,10 @@ textarea.form-control {
 .btn-primary:hover, .btn-view:hover {
     background-color: #16a085;
 }
+
+.table-responsive {
+    max-height: 60vh;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+}

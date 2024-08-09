@@ -198,8 +198,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let url = `/chat/${chatId}`;
         axios.get(url)
             .then(response => {
+                console.log(response.data); // Debugging line
                 chatWindow.innerHTML = '';
-                response.data.forEach(msg => {
+                let messages = response.data.messages; // Założenie, że response.data.messages to tablica wiadomości
+                messages.forEach(msg => {
                     let messageDiv = document.createElement('div');
                     let messageClass = msg.admin_id ? 'admin' : 'user';
                     messageDiv.classList.add('message', messageClass);
@@ -216,8 +218,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 document.getElementById('sendMessageForm').action = url + '/send-message';
                 chatWindowModal.style.display = 'block';
-                if (response.data.length > 0 && response.data[0].chat) {
-                    chatTitle.textContent = response.data[0].chat.title;
+                if (messages.length > 0 && messages[0].chat) {
+                    chatTitle.textContent = messages[0].chat.title;
                 } else {
                     chatTitle.textContent = 'Chat';
                 }
@@ -226,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function scrollToBottom(element) {
-        element.scrollTop = element.scrollHeight; //terqaweqeqe
+        element.scrollTop = element.scrollHeight; 
     }
 });
 
