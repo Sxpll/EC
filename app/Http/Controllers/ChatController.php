@@ -123,5 +123,14 @@ class ChatController extends Controller
         return response()->json($chats);
     }
 
+    public function getMessages($id)
+{
+    $messages = Message::where('chat_id', $id)
+                       ->orderBy('created_at', 'asc')
+                       ->get();
+
+    return response()->json($messages);
+}
+
     
 }

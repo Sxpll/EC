@@ -29,6 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
 
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filter');
+    Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
+
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats');

@@ -73,7 +73,6 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const newThreadButton = document.getElementById('newThreadButton');
@@ -108,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     chatList.appendChild(chatItem);
                     chatItem.querySelector('.chat-link').addEventListener('click', function(e) {
                         e.preventDefault();
-                        loadChatMessages(chat.id);
+                        openChatWindow(chat.id);
                     });
                 });
             })
@@ -122,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             let chatId = this.getAttribute('data-chat-id');
-            loadChatMessages(chatId);
+            openChatWindow(chatId);
         });
     });
 
@@ -131,7 +130,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let formData = new FormData(this);
         axios.post(this.action, formData)
             .then(response => {
-                console.log(response.data);
                 if (response.data.success) {
                     let newChatItem = document.createElement('li');
                     newChatItem.classList.add('list-group-item', 'chat-item');
@@ -148,13 +146,89 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     newChatItem.querySelector('.chat-link').addEventListener('click', function(e) {
                         e.preventDefault();
-                        let chatId = this.getAttribute('data-chat-id');
-                        loadChatMessages(chatId);
+                        openChatWindow(response.data.chat.id);
                     });
                 }
             })
             .catch(error => console.error('Error:', error));
     });
+
+    function openChatWindow(chatId) {
+    let url = `/chat/${chatId}`;
+    axios.get(url)
+        .then(response => {
+            chatWindow.innerHTML = '';
+
+            // Sprawdzenie, czy response.data zawiera wiadomości
+            if (response.data && response.data.messages) {
+                let messages = response.data.messages;
+                
+                // Dodajemy warunek sprawdzający, czy istnieje pierwszy element z tablicy messages
+                if (messages.length > 0 && messages[0].chat) {
+                    chatTitle.textContent = messages[0].chat.title;
+                } else {
+                    chatTitle.textContent = 'Chat';
+                }
+                
+                messages.forEach(msg => {
+                    let messageDiv = document.createElement('div');
+                    let messageClass = msg.admin_id ? 'admin' : 'user';
+                    messageDiv.classList.add('message', messageClass);
+                    messageDiv.innerHTML = `${msg.message}`;
+                    let messageTime = document.createElement('div');
+                    messageTime.classList.add('message-time');
+                    messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    messageTime.style.display = 'none';
+                    messageDiv.appendChild(messageTime);
+                    messageDiv.addEventListener('click', () => {
+                        messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
+                    });
+                    chatWindow.appendChild(messageDiv);
+                });
+            } else {
+                console.error('No messages found or no chat data in response:', response.data);
+                chatTitle.textContent = 'Chat';
+            }
+
+            document.getElementById('sendMessageForm').action = url + '/send-message';
+            chatWindowModal.style.display = 'block';
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            startAutoRefresh(chatId);
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+
+    function startAutoRefresh(chatId) {
+    setInterval(() => {
+        fetch(`/chat/${chatId}/messages`)
+            .then(response => response.json())
+            .then(messages => {
+                console.log('Fetched messages:', messages); // Dodaj to do debugowania
+                chatWindow.innerHTML = '';
+                messages.forEach(msg => {
+                    let messageDiv = document.createElement('div');
+                    let messageClass = msg.admin_id ? 'admin' : 'user';
+                    messageDiv.classList.add('message', messageClass);
+                    messageDiv.innerHTML = `${msg.message}`;
+                    let messageTime = document.createElement('div');
+                    messageTime.classList.add('message-time');
+                    messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    messageTime.style.display = 'none';
+                    messageDiv.appendChild(messageTime);
+                    messageDiv.addEventListener('click', () => {
+                        messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
+                    });
+                    chatWindow.appendChild(messageDiv);
+                });
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            })
+            .catch(error => console.error('Error refreshing messages:', error));
+    }, 3000);
+    }
+
+
+
 
     document.querySelectorAll('.close-custom').forEach(button => {
         button.addEventListener('click', function() {
@@ -193,39 +267,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('sendMessageForm').dispatchEvent(new Event('submit'));
         }
     });
-
-    function loadChatMessages(chatId) {
-        let url = `/chat/${chatId}`;
-        axios.get(url)
-            .then(response => {
-                console.log(response.data); // Debugging line
-                chatWindow.innerHTML = '';
-                let messages = response.data.messages; // Założenie, że response.data.messages to tablica wiadomości
-                messages.forEach(msg => {
-                    let messageDiv = document.createElement('div');
-                    let messageClass = msg.admin_id ? 'admin' : 'user';
-                    messageDiv.classList.add('message', messageClass);
-                    messageDiv.innerHTML = `${msg.message}`;
-                    let messageTime = document.createElement('div');
-                    messageTime.classList.add('message-time');
-                    messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    messageTime.style.display = 'none';
-                    messageDiv.appendChild(messageTime);
-                    messageDiv.addEventListener('click', () => {
-                        messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
-                    });
-                    chatWindow.appendChild(messageDiv);
-                });
-                document.getElementById('sendMessageForm').action = url + '/send-message';
-                chatWindowModal.style.display = 'block';
-                if (messages.length > 0 && messages[0].chat) {
-                    chatTitle.textContent = messages[0].chat.title;
-                } else {
-                    chatTitle.textContent = 'Chat';
-                }
-                scrollToBottom(chatWindow);
-            }).catch(error => console.error('Error:', error));
-    }
 
     function scrollToBottom(element) {
         element.scrollTop = element.scrollHeight; 

@@ -29,7 +29,6 @@
     </div>
 </div>
 
-
 <div id="chatWindowModal" class="modal">
     <div class="modal-content">
         <span class="close-custom">&times;</span>
@@ -96,37 +95,61 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             currentChatId = this.getAttribute('data-chat-id');
-            console.log('Current Chat ID:', currentChatId); // Debugging line
+            console.log('Current Chat ID:', currentChatId);
             if (!currentChatId) {
                 console.error('Chat ID is not defined');
                 return;
             }
-            let url = `/chat/${currentChatId}`;
-            fetch(url)
+            openChatWindow(currentChatId);
+        });
+    });
+
+    function openChatWindow(chatId) {
+        let url = `/chat/${chatId}`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                chatWindow.innerHTML = '';
+                const messages = data.messages;
+                messages.forEach(msg => {
+                    let messageDiv = document.createElement('div');
+                    let messageClass = (msg.admin_id || msg.user_id === {{ Auth::user()->id }}) ? 'user' : 'admin';
+                    messageDiv.classList.add('message', messageClass);
+                    messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
+                    chatWindow.appendChild(messageDiv);
+                    messageDiv.addEventListener('click', () => {
+                        const timeSpan = messageDiv.querySelector('.message-time');
+                        timeSpan.style.display = timeSpan.style.display === 'block' ? 'none' : 'block';
+                    });
+                });
+                sendMessageForm.action = url + '/send-message';
+                chatWindowModal.style.display = 'block';
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                startAutoRefresh(chatId);
+            })
+            .catch(error => {
+                console.error('Error fetching chat messages:', error);
+            });
+    }
+
+    function startAutoRefresh(chatId) {
+        setInterval(() => {
+            fetch(`/chat/${chatId}/messages`)
                 .then(response => response.json())
-                .then(data => {
+                .then(messages => {
                     chatWindow.innerHTML = '';
-                    const messages = data.messages;
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
                         let messageClass = (msg.admin_id || msg.user_id === {{ Auth::user()->id }}) ? 'user' : 'admin';
                         messageDiv.classList.add('message', messageClass);
                         messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
                         chatWindow.appendChild(messageDiv);
-                        messageDiv.addEventListener('click', () => {
-                            const timeSpan = messageDiv.querySelector('.message-time');
-                            timeSpan.style.display = timeSpan.style.display === 'block' ? 'none' : 'block';
-                        });
                     });
-                    sendMessageForm.action = url + '/send-message';
-                    chatWindowModal.style.display = 'block';
                     chatWindow.scrollTop = chatWindow.scrollHeight;
                 })
-                .catch(error => {
-                    console.error('Error fetching chat messages:', error);
-                });
-        });
-    });
+                .catch(error => console.error('Error refreshing messages:', error));
+        }, 3000);
+    }
 
     if (manageButton) {
         manageButton.addEventListener('click', function() {
@@ -134,14 +157,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Chat ID is not set');
                 return;
             }
-            console.log('Manage Button Clicked. Current Chat ID:', currentChatId); // Debugging line
             document.getElementById('manageForm').action = `/chat/${currentChatId}/manage`;
             manageModal.style.display = 'block';
         });
     }
 
     takeChatButton.addEventListener('click', function() {
-        console.log('Take Chat Button Clicked. Current Chat ID:', currentChatId); // Debugging line
         if (!currentChatId) {
             console.error('Chat ID is not set');
             return;
@@ -175,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('manageForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        console.log('Submit Manage Form. Current Chat ID:', currentChatId); // Debugging line
         if (!currentChatId) {
             console.error('Chat ID is not set');
             return;
@@ -205,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     sendMessageForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        console.log('Submit Message Form. Current Chat ID:', currentChatId); // Debugging line
         if (!currentChatId) {
             console.error('Chat ID is not set');
             return;
@@ -241,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sendMessageForm.dispatchEvent(new Event('submit'));
         }
     });
+
 });
 </script>
 @endsection
