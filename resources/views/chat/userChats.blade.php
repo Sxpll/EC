@@ -199,12 +199,18 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 
-    function startAutoRefresh(chatId) {
-    setInterval(() => {
+let refreshInterval = null;
+
+function startAutoRefresh(chatId) {
+    // Jeśli jest już aktywne odświeżanie, zatrzymaj je
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+
+    refreshInterval = setInterval(() => {
         fetch(`/chat/${chatId}/messages`)
             .then(response => response.json())
             .then(messages => {
-                console.log('Fetched messages:', messages); // Dodaj to do debugowania
                 chatWindow.innerHTML = '';
                 messages.forEach(msg => {
                     let messageDiv = document.createElement('div');
@@ -225,8 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Error refreshing messages:', error));
     }, 3000);
-    }
-
+}
 
 
 

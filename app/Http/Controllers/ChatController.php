@@ -132,5 +132,21 @@ class ChatController extends Controller
     return response()->json($messages);
 }
 
+
+public function checkNewMessages()
+{
+    $adminId = Auth::id();
+    $chats = Chat::where('admin_id', $adminId)->with('messages')->get();
+
+    $newMessages = [];
+    foreach ($chats as $chat) {
+        $latestMessage = $chat->messages()->latest()->first();
+        if ($latestMessage && $latestMessage->created_at->gt($chat->updated_at)) {
+            $newMessages[] = ['id' => $chat->id, 'title' => $chat->title];
+        }
+    }
+
+    return response()->json(['newMessages' => $newMessages]);
+}
     
 }

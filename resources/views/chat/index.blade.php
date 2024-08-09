@@ -15,8 +15,8 @@
             </thead>
             <tbody>
                 @foreach($chats as $chat)
-                    <tr>
-                        <td>{{ $chat->title }}</td>
+                    <tr data-chat-id="{{ $chat->id }}">
+                        <td>{{ $chat->title }} <span class="new-message-dot" style="display:none;">•</span></td>
                         <td>{{ $chat->user->name }} {{ $chat->user->surname }}</td>
                         <td>{{ $chat->status }}</td>
                         <td class="text-center">
@@ -90,12 +90,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const manageButton = document.getElementById('manageButton');
     const takeChatButton = document.getElementById('takeChatButton');
     let currentChatId = null;
+    let refreshInterval = null;
 
     document.querySelectorAll('.btn-view').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             currentChatId = this.getAttribute('data-chat-id');
-            console.log('Current Chat ID:', currentChatId);
             if (!currentChatId) {
                 console.error('Chat ID is not defined');
                 return;
@@ -133,7 +133,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function startAutoRefresh(chatId) {
-        setInterval(() => {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+        }
+
+        refreshInterval = setInterval(() => {
             fetch(`/chat/${chatId}/messages`)
                 .then(response => response.json())
                 .then(messages => {
@@ -150,6 +154,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => console.error('Error refreshing messages:', error));
         }, 3000);
     }
+
+    function checkNewMessages() {
+        fetch('/admin/check-new-messages')
+            .then(response => response.json())
+            .then(data => {
+                data.newMessages.forEach(chat => {
+                    const chatRow = document.querySelector(`[data-chat-id="${chat.id}"]`);
+                    if (chatRow) {
+                        const dot = chatRow.querySelector('.new-message-dot');
+                        if (dot) {
+                            dot.style.display = 'inline';
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error checking new messages:', error));
+    }
+
+    setInterval(checkNewMessages, 5000);
 
     if (manageButton) {
         manageButton.addEventListener('click', function() {
@@ -260,7 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
             sendMessageForm.dispatchEvent(new Event('submit'));
         }
     });
-
 });
 </script>
 @endsection
