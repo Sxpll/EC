@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function scrollToBottom(element) {
-        element.scrollTop = element.scrollHeight;
+        element.scrollTop = element.scrollHeight; //terqaweqeqe
     }
 });
 
