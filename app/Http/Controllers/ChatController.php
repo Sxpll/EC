@@ -6,6 +6,7 @@ use App\Models\Chat;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
 
 class ChatController extends Controller
 {
@@ -32,34 +33,76 @@ class ChatController extends Controller
     }
 
     public function sendMessage(Request $request, $id)
-    {
+{
+    \Log::info('Start sendMessage function for chat ID: ' . $id);
+
+    try {
         $chat = Chat::findOrFail($id);
+        \Log::info('Chat found: ' . $chat->id);
 
         if ($chat->status === 'completed') {
+            \Log::warning('Cannot send messages to a completed chat.');
             return response()->json(['success' => false, 'message' => 'Cannot send messages to a completed chat.']);
         }
-    
 
         $message = new Message();
         $message->chat_id = $chat->id;
         $message->message = $request->message;
         $message->admin_id = Auth::user()->role === 'admin' ? Auth::id() : null;
         $message->save();
+        \Log::info('Message saved for chat: ' . $chat->id);
+
+        // Wysyłanie powiadomień
+        if (!$chat->admin_id) {
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                Notification::create([
+                    'chat_id' => $chat->id,
+                    'user_id' => $admin->id,
+                    'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
+                    'read' => false,
+                ]);
+                \Log::info('Notification sent to admin ID: ' . $admin->id);
+            }
+        } else {
+            Notification::create([
+                'chat_id' => $chat->id,
+                'user_id' => $chat->admin_id,
+                'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
+                'read' => false,
+            ]);
+            \Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
+        }
+
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        \Log::error('Error in sendMessage: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Internal Server Error'], 500);
+    }
+}
+
+    
+
+
+
+    public function takeChat($id)
+{
+    $chat = Chat::findOrFail($id);
+    if (Auth::user()->role === 'admin') {
+        $chat->admin_id = Auth::id();
+        $chat->is_taken = true;
+        $chat->save();
+
+        // Usunięcie poprzednich powiadomień, które zostały wysłane do wszystkich adminów
+        Notification::where('chat_id', $chat->id)
+                    ->where('user_id', '!=', Auth::id())
+                    ->delete();
 
         return response()->json(['success' => true]);
     }
+    return response()->json(['error' => 'Unauthorized'], 403);
+}
 
-    public function takeChat($id)
-    {
-        $chat = Chat::findOrFail($id);
-        if (Auth::user()->role === 'admin') {
-            $chat->admin_id = Auth::id();
-            $chat->is_taken = true;
-            $chat->save();
-            return response()->json(['success' => true]);
-        }
-        return response()->json(['error' => 'Unauthorized'], 403);
-    }
 
     public function createChat(Request $request)
     {

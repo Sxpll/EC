@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+
+<!-- Dropdown z listą powiadomień -->
+<div id="notificationsDropdown" class="notifications-dropdown">
+    <h6 class="dropdown-header">Notifications</h6>
+    <div id="notificationList" class="notification-list"></div>
+</div>
+
 <div class="container">
     <h1 class="elo">All Chats</h1>
     <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
@@ -81,6 +88,9 @@
     </div>
 </div>
 
+<!-- Załadowanie biblioteki axios -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const chatWindowModal = document.getElementById('chatWindowModal');
@@ -93,6 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const userId = @json(Auth::id()); // Bezpieczne przekazanie identyfikatora użytkownika
     let currentChatId = null;
     let refreshInterval = null;
+
+    const notificationBell = document.getElementById('notificationBell');
+    const notificationsDropdown = document.getElementById('notificationsDropdown');
+    const notificationCount = document.getElementById('notificationCount');
+    const notificationList = document.getElementById('notificationList');
+    let notifications = [];
 
     document.querySelectorAll('.btn-view').forEach(button => {
         button.addEventListener('click', function(e) {
@@ -128,6 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatWindowModal.style.display = 'block';
                 chatWindow.scrollTop = chatWindow.scrollHeight;
                 startAutoRefresh(chatId);
+                markAllNotificationsAsRead(chatId); // Mark all notifications as read when the chat is opened
             })
             .catch(error => {
                 console.error('Error fetching chat messages:', error);
@@ -243,6 +260,74 @@ document.addEventListener('DOMContentLoaded', function() {
             sendMessageForm.dispatchEvent(new Event('submit'));
         }
     });
+
+    function markAllNotificationsAsRead(chatId) {
+        axios.post(`/notifications/mark-all-as-read`, { chat_id: chatId })
+            .then(response => {
+                fetchNotifications(); // Odświeżenie listy powiadomień
+            })
+            .catch(error => {
+                console.error('Error marking notifications as read:', error);
+            });
+    }
+
+    // Funkcje do obsługi powiadomień
+
+    function fetchNotifications() {
+        axios.get('/notifications')
+            .then(response => {
+                notifications = response.data;
+                updateNotificationUI();
+            })
+            .catch(error => {
+                console.error('Error fetching notifications:', error);
+            });
+    }
+
+    function updateNotificationUI() {
+        notificationList.innerHTML = '';
+        if (notifications.length > 0) {
+            notificationCount.style.display = 'inline-block';
+            notificationCount.innerText = notifications.length;
+            notifications.forEach(notification => {
+                const item = document.createElement('div');
+                item.classList.add('notification-item');
+                item.innerText = notification.message;
+                item.addEventListener('click', function() {
+                    openChatWindow(notification.chat_id);
+                    markAllNotificationsAsRead(notification.chat_id);
+                });
+                notificationList.appendChild(item);
+            });
+        } else {
+            notificationCount.style.display = 'none';
+            notificationList.innerHTML = '<div class="text-center">No new notifications</div>';
+        }
+    }
+
+    notificationBell.addEventListener('click', function() {
+        notificationsDropdown.style.display = notificationsDropdown.style.display === 'none' || notificationsDropdown.style.display === '' ? 'block' : 'none';
+    });
+
+    // Pobieranie powiadomień co 5 sekund
+    setInterval(fetchNotifications, 5000);
+    fetchNotifications(); 
+    
+    
+    function showNotificationBanner(message) {
+        const banner = document.createElement('div');
+        banner.className = 'notification-banner';
+        banner.innerText = message;
+        document.body.appendChild(banner);
+        setTimeout(() => banner.classList.add('show'), 100);
+        setTimeout(() => {
+            banner.classList.add('hide');
+            banner.addEventListener('transitionend', () => banner.remove());
+        }, 3000);
+    }
+
+    
+   
 });
 
 </script>

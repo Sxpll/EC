@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,9 +32,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filter');
     Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
-    Route::post('/chat/{chatId}/mark-as-viewed', [ChatController::class, 'markAsViewed']);
+    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
 
 
+
+
+Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
+
+
+    
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats');
