@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserHistory;
 
+
 class AdminController extends Controller
 {
     public function dashboard()
@@ -186,4 +187,7 @@ public function storeUser(Request $request)
         $histories = UserHistory::where('user_id', $id)->orderBy('created_at', 'desc')->get();
         return response()->json($histories);
     }
+    
+
+
 }
