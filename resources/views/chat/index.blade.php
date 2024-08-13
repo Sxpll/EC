@@ -103,12 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const userId = @json(Auth::id()); // Bezpieczne przekazanie identyfikatora użytkownika
     let currentChatId = null;
     let refreshInterval = null;
-
-    const notificationBell = document.getElementById('notificationBell');
-    const notificationsDropdown = document.getElementById('notificationsDropdown');
-    const notificationCount = document.getElementById('notificationCount');
-    const notificationList = document.getElementById('notificationList');
-    let notifications = [];
+    let notificationBannerShown = false; // Flaga, która kontroluje jednorazowe wyświetlenie powiadomienia
 
     document.querySelectorAll('.btn-view').forEach(button => {
         button.addEventListener('click', function(e) {
@@ -143,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 sendMessageForm.action = `/chat/${chatId}/send-message`;
                 chatWindowModal.style.display = 'block';
                 chatWindow.scrollTop = chatWindow.scrollHeight;
+                currentChatId = chatId;  // Ustawienie currentChatId tutaj
                 startAutoRefresh(chatId);
                 markAllNotificationsAsRead(chatId); // Mark all notifications as read when the chat is opened
             })
@@ -227,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         let message = messageInput.value;
-        fetch(this.action, {
+        fetch(sendMessageForm.action, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -278,6 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => {
                 notifications = response.data;
                 updateNotificationUI();
+                checkForNewMessages(notifications); // Sprawdź, czy są nowe wiadomości, aby wywołać powiadomienie banerowe
             })
             .catch(error => {
                 console.error('Error fetching notifications:', error);
@@ -285,6 +282,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateNotificationUI() {
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationCount = document.getElementById('notificationCount');
+        const notificationList = document.getElementById('notificationList');
+
+        if (!notificationBell || !notificationCount || !notificationList) {
+            console.error('One of the elements is missing in the DOM');
+            return;
+        }
+
         notificationList.innerHTML = '';
         if (notifications.length > 0) {
             notificationCount.style.display = 'inline-block';
@@ -305,15 +311,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    notificationBell.addEventListener('click', function() {
-        notificationsDropdown.style.display = notificationsDropdown.style.display === 'none' || notificationsDropdown.style.display === '' ? 'block' : 'none';
-    });
+    function checkForNewMessages(notifications) {
+        if (!notificationBannerShown) {
+            notifications.forEach(notification => {
+                if (!notification.read) {
+                    showNotificationBanner(notification.message);
+                    notificationBannerShown = true;
+                }
+            });
+        }
+    }
 
-    // Pobieranie powiadomień co 5 sekund
-    setInterval(fetchNotifications, 5000);
-    fetchNotifications(); 
-    
-    
     function showNotificationBanner(message) {
         const banner = document.createElement('div');
         banner.className = 'notification-banner';
@@ -326,9 +334,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
 
-    
-   
+    // Pobieranie powiadomień co 5 sekund
+    setInterval(fetchNotifications, 5000);
+    fetchNotifications(); 
 });
+
 
 </script>
 @endsection

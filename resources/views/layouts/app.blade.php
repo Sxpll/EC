@@ -72,7 +72,7 @@
             cursor: pointer;
             font-size: 24px;
             color: #007bff;
-            margin-top:-13px;
+            margin-top: -13px;
         }
 
         .notification-count {
@@ -84,6 +84,33 @@
             border-radius: 50%;
             padding: 2px 6px;
             font-size: 12px;
+        }
+
+        /* Styl dla dynamicznego banera powiadomień */
+        .notification-banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            z-index: 2000;
+            backdrop-filter: blur(10px); /* Dodanie rozmytego tła */
+        }
+
+        .notification-banner.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .notification-banner.hide {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
         }
     </style>
 </head>
@@ -97,12 +124,14 @@
                 <img src="{{ asset('img/logo.png') }}" alt="Logo" style="height: 40px;">
             </a>
 
+            @if(auth()->check() && auth()->user()->role === 'admin')
             <div class="notification-bell-container">
                 <div id="notificationBell" class="notification-bell">
                     <i class="fas fa-bell"></i>
                     <span id="notificationCount" class="notification-count"></span>
                 </div>
             </div>
+            @endif
         </div>
     </nav>
 
@@ -160,6 +189,37 @@
             closeNav();
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationsDropdown = document.getElementById('notificationsDropdown');
+
+        if (notificationBell) {
+            notificationBell.addEventListener('click', function () {
+                console.log("Notification bell clicked");
+                if (notificationsDropdown.style.display === 'block') {
+                    notificationsDropdown.style.display = 'none';
+                } else {
+                    notificationsDropdown.style.display = 'block';
+                }
+            });
+        }
+
+        function showNotificationBanner(message) {
+            const banner = document.createElement('div');
+            banner.className = 'notification-banner';
+            banner.innerText = message;
+            document.body.appendChild(banner);
+            setTimeout(() => banner.classList.add('show'), 100);
+            setTimeout(() => {
+                banner.classList.add('hide');
+                banner.addEventListener('transitionend', () => banner.remove());
+            }, 3000);
+        }
+
+        
+    });
+
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>

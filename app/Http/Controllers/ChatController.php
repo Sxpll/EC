@@ -52,17 +52,20 @@ class ChatController extends Controller
         $message->save();
         \Log::info('Message saved for chat: ' . $chat->id);
 
-        // Wysyłanie powiadomień
-        if (!$chat->admin_id) {
+        // Wysyłanie powiadomień tylko dla użytkowników, gdy wiadomość pochodzi od admina
+        if (!$chat->admin_id || $message->admin_id !== Auth::id()) {
             $admins = \App\Models\User::where('role', 'admin')->get();
             foreach ($admins as $admin) {
-                Notification::create([
-                    'chat_id' => $chat->id,
-                    'user_id' => $admin->id,
-                    'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
-                    'read' => false,
-                ]);
-                \Log::info('Notification sent to admin ID: ' . $admin->id);
+                // Sprawdzenie, aby nie wysłać powiadomienia do samego siebie
+                if ($admin->id !== Auth::id()) {
+                    Notification::create([
+                        'chat_id' => $chat->id,
+                        'user_id' => $admin->id,
+                        'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
+                        'read' => false,
+                    ]);
+                    \Log::info('Notification sent to admin ID: ' . $admin->id);
+                }
             }
         } else {
             Notification::create([
@@ -80,6 +83,7 @@ class ChatController extends Controller
         return response()->json(['success' => false, 'message' => 'Internal Server Error'], 500);
     }
 }
+
 
     
 
