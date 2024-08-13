@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageInput = sendMessageForm.querySelector('textarea[name="message"]');
     const manageButton = document.getElementById('manageButton');
     const takeChatButton = document.getElementById('takeChatButton');
-    const userId = @json(Auth::id()); // Bezpieczne przekazanie identyfikatora użytkownika
+    const userId = @json(Auth::id());
     let currentChatId = null;
     let refreshInterval = null;
     let notificationBannerShown = false; // Flaga, która kontroluje jednorazowe wyświetlenie powiadomienia
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Pobieranie powiadomień co 5 sekund
     setInterval(fetchNotifications, 5000);
-    fetchNotifications(); 
+    fetchNotifications();
 });
 
 
