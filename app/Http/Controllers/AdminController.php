@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserHistory;
 
@@ -12,17 +13,20 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-    if (auth()->user()->role !== 'admin') {
-        return redirect('/home')->with('error', 'Unauthorized access');
-    }
+        if (auth()->user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
 
-    // Użytkownicy, którzy nie są usunięci
-    $totalUsers = User::where('is_deleted', false)->count();
-    $activeUsers = User::where('is_deleted', false)->where('isActive', true)->count();
-    $inactiveUsers = User::where('is_deleted', false)->where('isActive', false)->count();
-    $deletedUsers = User::where('is_deleted', true)->count();
+        // Użytkownicy, którzy nie są usunięci
+        $totalUsers = User::where('is_deleted', false)->count();
+        $activeUsers = User::where('is_deleted', false)->where('isActive', true)->count();
+        $inactiveUsers = User::where('is_deleted', false)->where('isActive', false)->count();
+        $deletedUsers = User::where('is_deleted', true)->count();
 
-    return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers', 'deletedUsers'));
+        // Produkty
+        $totalProducts = Product::count();
+
+        return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers', 'deletedUsers', 'totalProducts'));
     }
 
 
@@ -95,6 +99,7 @@ class AdminController extends Controller
 
 
 
+
 public function storeUser(Request $request)
 {
     if (auth()->user()->role !== 'admin') {
@@ -131,7 +136,7 @@ public function storeUser(Request $request)
         'user_lastname' => $user->lastname,
         'new_value' => "Name: {$user->name}\nEmail: {$user->email}\nRole: {$user->role}",
     ]);
-    
+
 
     return response()->json(['success' => true, 'message' => 'User added successfully']);
 }
@@ -187,7 +192,7 @@ public function storeUser(Request $request)
         $histories = UserHistory::where('user_id', $id)->orderBy('created_at', 'desc')->get();
         return response()->json($histories);
     }
-    
+
 
 
 }

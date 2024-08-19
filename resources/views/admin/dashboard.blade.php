@@ -9,6 +9,7 @@
         </div>
         <div class="card-body">
             <div class="row">
+                <!-- Informacje o użytkownikach -->
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-body">
@@ -41,10 +42,33 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Informacje o produktach -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Total Products</h3>
+                            <p>{{ $totalProducts }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informacje o kategoriach -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Total Categories</h3>
+                            <p>{{ \App\Models\Category::count() }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="row mt-4 justify-content-center">
                 <div class="col-md-6 text-center">
                     <a href="{{ route('admin.manageUsers') }}" class="btn btn-primary btn-block">Manage Users</a>
+                    <a href="{{ route('products.index') }}" class="btn btn-primary btn-block">Manage Products</a>
+                    <a href="{{ route('categories.index') }}" class="btn btn-primary btn-block">Manage Categories</a>
                 </div>
             </div>
         </div>

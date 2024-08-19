@@ -7,6 +7,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,19 +31,27 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
 
+    // Dodajemy trasę GET /products/{id} dla metody show
+    Route::get('/products/{id}', [ProductController::class, 'show']);
+    Route::get('/products/{id}/images', [ProductController::class, 'showImages']);
+    Route::get('/products/{id}/attachments', [ProductController::class, 'showAttachments']);
+
+    // Trasy resource dla produktów i kategorii
+    Route::resource('products', ProductController::class)->except(['show']);
+    Route::resource('categories', CategoryController::class)->except(['show']);
+
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filter');
     Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
 
 
+    Route::delete('/products/{productId}/images/{imageId}', [ProductController::class, 'deleteImage']);
+    Route::delete('/products/{productId}/attachments/{attachmentId}', [ProductController::class, 'deleteAttachment']);
 
 
-Route::get('/notifications', [NotificationController::class, 'index']);
-Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
-
-
-    
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats');
