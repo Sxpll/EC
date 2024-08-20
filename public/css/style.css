@@ -123,6 +123,15 @@ body {
 
 .btn-danger {
     background-color: #e74c3c;
+    border: none;
+    padding: 5px 10px; /* Zmniejsz rozmiar paddingu */
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 14px; /* Zmniejsz rozmiar czcionki */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+
 }
 
 .btn-danger:hover {
@@ -726,4 +735,105 @@ textarea.form-control {
     display: flex;
     left: 0; /* lub dowolna wartość */
     transform: translateX(40px);
+}
+
+/* Stylizacja obrazków w galerii */
+#productImages img {
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#productImages img:hover {
+    opacity: 0.7;
+}
+
+/* Stylizacja kontenera galerii */
+.gallery-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.gallery-item {
+    width: 150px;
+    height: 200px; /* Zwiększona wysokość, aby pomieścić przycisk */
+    margin: 10px;
+    overflow: hidden;
+    border: 3px solid #aaa;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 150px; /* Ustawiona stała wysokość obrazu */
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.gallery-item button {
+    width: 100%;
+    padding: 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.gallery-item button:hover {
+    background-color: #c0392b;
+}
+
+/* Stylizacja obrazków w galerii */
+.gallery-image {
+    max-width: 100%;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.gallery-image:hover {
+    transform: scale(1.05);
+}
+
+/* Modal do podglądu obrazów */
+#imagePreviewModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#imagePreviewModal img {
+    margin: auto;
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Przyciski zamykania modala */
+.close-custom {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.close-custom:hover, .close-custom:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
 }

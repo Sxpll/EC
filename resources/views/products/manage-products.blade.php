@@ -121,13 +121,13 @@
 
         <!-- Images tab -->
         <div id="Images" class="tab-content">
-            <div id="productImages" class="d-flex flex-wrap"></div>
+            <div id="productImages" class="d-flex flex-wrap gallery-container"></div>
             <form id="addImageForm" enctype="multipart/form-data">
                 <div class="form-group mt-4">
                     <label for="newImages">Add New Images:</label>
                     <input type="file" name="images[]" id="newImages" class="form-control-file" multiple>
                 </div>
-                <button type="button" class="btn btn-success mt-2" id="saveNewImagesBtn">Add Images</button>
+                <button type="button" class="btn btn-success mt-2" id="saveNewImagesBtn">Upload Images</button>
             </form>
         </div>
 
@@ -139,7 +139,7 @@
                     <label for="newAttachments">Add New Attachments:</label>
                     <input type="file" name="attachments[]" id="newAttachments" class="form-control-file" multiple>
                 </div>
-                <button type="button" class="btn btn-success mt-2" id="saveNewAttachmentsBtn">Add Attachments</button>
+                <button type="button" class="btn btn-success mt-2" id="saveNewAttachmentsBtn">Upload Attachments</button>
             </form>
         </div>
 
@@ -163,197 +163,278 @@
     </div>
 </div>
 
+<!-- Modal for image preview -->
+<div id="imagePreviewModal">
+    <span class="close-custom" id="closePreviewModal">&times;</span>
+    <img id="previewImage" src="">
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var addProductModal = document.getElementById("addProductModal");
-        var viewProductModal = document.getElementById("viewProductModal");
-        var addProductBtn = document.getElementById("openModalBtn");
-        var closeBtns = document.getElementsByClassName("close");
-        var viewBtns = document.getElementsByClassName("btn-view");
-        var deleteProductBtn = document.getElementById("deleteProductBtn");
+    var addProductModal = document.getElementById("addProductModal");
+    var viewProductModal = document.getElementById("viewProductModal");
+    var addProductBtn = document.getElementById("openModalBtn");
+    var closeBtns = document.getElementsByClassName("close");
+    var viewBtns = document.getElementsByClassName("btn-view");
+    var deleteProductBtn = document.getElementById("deleteProductBtn");
 
-        addProductBtn.onclick = function() {
-            addProductModal.style.display = "block";
+    // Otwieranie modala dodawania produktu
+    addProductBtn.onclick = function() {
+        addProductModal.style.display = "block";
+    };
+
+    // Zamknięcie modala
+    Array.from(closeBtns).forEach(function(btn) {
+        btn.onclick = function() {
+            addProductModal.style.display = "none";
+            viewProductModal.style.display = "none";
         }
+    });
 
-        Array.from(closeBtns).forEach(function(btn) {
-            btn.onclick = function() {
-                addProductModal.style.display = "none";
-                viewProductModal.style.display = "none";
-            }
-        });
-
-        window.onclick = function(event) {
-            if (event.target == addProductModal) {
-                addProductModal.style.display = "none";
-            }
-            if (event.target == viewProductModal) {
-                viewProductModal.style.display = "none";
-            }
+    // Zamknięcie modala po kliknięciu na zewnątrz
+    window.onclick = function(event) {
+        if (event.target == addProductModal) {
+            addProductModal.style.display = "none";
         }
+        if (event.target == viewProductModal) {
+            viewProductModal.style.display = "none";
+        }
+    };
 
-        Array.from(viewBtns).forEach(function(btn) {
-            btn.onclick = function() {
-                var productId = this.getAttribute("data-id");
+    // Wyświetlenie produktu
+    Array.from(viewBtns).forEach(function(btn) {
+        btn.onclick = function() {
+            var productId = this.getAttribute("data-id");
 
-                fetch(`/products/${productId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById("viewProductId").value = data.id;
-                        document.getElementById("viewName").value = data.name;
-                        document.getElementById("viewCategoryId").value = data.category_id;
-                        document.getElementById("viewDescription").value = data.description;
+            fetch(`/products/${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("viewProductId").value = data.id;
+                    document.getElementById("viewName").value = data.name;
+                    document.getElementById("viewCategoryId").value = data.category_id;
+                    document.getElementById("viewDescription").value = data.description;
 
-                        fetchProductImages(productId);
-                        fetchProductAttachments(productId);
+                    fetchProductImages(productId);
+                    fetchProductAttachments(productId);
 
-                        var viewProductForm = document.getElementById("viewProductForm");
-                        viewProductForm.onsubmit = function(event) {
-                            event.preventDefault();
+                    var viewProductForm = document.getElementById("viewProductForm");
+                    viewProductForm.onsubmit = function(event) {
+                        event.preventDefault();
 
-                            var updatedProduct = {
-                                name: document.getElementById("viewName").value,
-                                category_id: document.getElementById("viewCategoryId").value || null,
-                                description: document.getElementById("viewDescription").value,
-                                _method: 'PUT',
-                                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            };
+                        var updatedProduct = {
+                            name: document.getElementById("viewName").value,
+                            category_id: document.getElementById("viewCategoryId").value || null,
+                            description: document.getElementById("viewDescription").value,
+                            _method: 'PUT',
+                            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        };
 
-                            axios.post(`/products/${productId}`, updatedProduct)
-                                .then(response => {
-                                    if (response.data.success) {
-                                        sessionStorage.setItem('message', 'Product updated successfully');
-                                        sessionStorage.setItem('messageType', 'success');
-                                        location.reload();
-                                    } else {
-                                        alert('Error updating product');
-                                    }
-                                })
-                                .catch(error => {
+                        axios.post(`/products/${productId}`, updatedProduct)
+                            .then(response => {
+                                if (response.data.success) {
+                                    sessionStorage.setItem('message', 'Product updated successfully');
+                                    sessionStorage.setItem('messageType', 'success');
+                                    location.reload();
+                                } else {
                                     alert('Error updating product');
-                                });
-                        };
+                                }
+                            })
+                            .catch(error => {
+                                alert('Error updating product');
+                            });
+                    };
 
-                        deleteProductBtn.onclick = function() {
-                            if (confirm('Are you sure you want to delete this product?')) {
-                                axios.delete(`/products/${productId}`, {
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                    }
-                                }).then(response => {
-                                    if (response.data.success) {
-                                        sessionStorage.setItem('message', 'Product deleted successfully');
-                                        sessionStorage.setItem('messageType', 'success');
-                                        location.reload();
-                                    } else {
-                                        alert('Error deleting product');
-                                    }
-                                }).catch(error => {
+                    deleteProductBtn.onclick = function() {
+                        if (confirm('Are you sure you want to delete this product?')) {
+                            axios.delete(`/products/${productId}`, {
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                }
+                            }).then(response => {
+                                if (response.data.success) {
+                                    sessionStorage.setItem('message', 'Product deleted successfully');
+                                    sessionStorage.setItem('messageType', 'success');
+                                    location.reload();
+                                } else {
                                     alert('Error deleting product');
-                                });
-                            }
-                        };
+                                }
+                            }).catch(error => {
+                                alert('Error deleting product');
+                            });
+                        }
+                    };
 
-                        viewProductModal.style.display = "block";
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                    });
-            }
-        });
-
-        function fetchProductImages(productId) {
-            axios.get(`/products/${productId}/images`)
-                .then(response => {
-                    const imageContainer = document.getElementById('productImages');
-                    imageContainer.innerHTML = '';
-                    response.data.forEach(image => {
-                        const imgElement = document.createElement('img');
-                        imgElement.src = `data:${image.mime_type};base64,${image.file_data}`;
-                        imgElement.style.maxWidth = '150px';
-                        imgElement.classList.add('mr-2', 'mt-2', 'img-thumbnail');
-
-                        const removeBtn = document.createElement('button');
-                        removeBtn.textContent = 'Remove';
-                        removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
-                        removeBtn.onclick = function() {
-                            axios.delete(`/products/${productId}/images/${image.id}`)
-                                .then(() => {
-                                    fetchProductImages(productId);
-                                })
-                                .catch(error => {
-                                    console.error('Error removing image:', error);
-                                });
-                        };
-
-                        const imageWrapper = document.createElement('div');
-                        imageWrapper.classList.add('d-flex', 'flex-column', 'align-items-center', 'mr-2', 'mt-2');
-                        imageWrapper.appendChild(imgElement);
-                        imageWrapper.appendChild(removeBtn);
-
-                        imageContainer.appendChild(imageWrapper);
-                    });
+                    viewProductModal.style.display = "block";
                 })
                 .catch(error => {
-                    console.error('Error fetching images:', error);
+                    console.error('Fetch error:', error);
                 });
         }
+    });
 
-        function fetchProductAttachments(productId) {
-            axios.get(`/products/${productId}/attachments`)
-                .then(response => {
-                    const attachmentContainer = document.getElementById('productAttachments');
-                    attachmentContainer.innerHTML = '';
-                    response.data.forEach(attachment => {
-                        const linkElement = document.createElement('a');
-                        linkElement.href = `data:${attachment.mime_type};base64,${attachment.file_data}`;
-                        linkElement.textContent = attachment.file_name;
-                        linkElement.download = attachment.file_name;
-                        linkElement.classList.add('btn', 'btn-outline-info', 'mr-2', 'mt-2');
+    // Pobieranie i wyświetlanie obrazów
+    function fetchProductImages(productId) {
+        axios.get(`/products/${productId}/images`)
+            .then(response => {
+                const imageContainer = document.getElementById('productImages');
+                imageContainer.innerHTML = '';
+                response.data.forEach(image => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = `data:${image.mime_type};base64,${image.file_data}`;
+                    imgElement.classList.add('gallery-image');
 
-                        const removeBtn = document.createElement('button');
-                        removeBtn.textContent = 'Remove';
-                        removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
-                        removeBtn.onclick = function() {
-                            axios.delete(`/products/${productId}/attachments/${attachment.id}`)
-                                .then(() => {
-                                    fetchProductAttachments(productId);
-                                })
-                                .catch(error => {
-                                    console.error('Error removing attachment:', error);
-                                });
-                        };
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Remove';
+                    removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
+                    removeBtn.onclick = function() {
+                        axios.delete(`/products/${productId}/images/${image.id}`)
+                            .then(() => {
+                                fetchProductImages(productId);
+                            })
+                            .catch(error => {
+                                console.error('Error removing image:', error);
+                            });
+                    };
 
-                        const attachmentWrapper = document.createElement('div');
-                        attachmentWrapper.classList.add('d-flex', 'flex-column', 'align-items-center', 'mr-2', 'mt-2');
-                        attachmentWrapper.appendChild(linkElement);
-                        attachmentWrapper.appendChild(removeBtn);
+                    const imageWrapper = document.createElement('div');
+                    imageWrapper.classList.add('gallery-item');
+                    imageWrapper.appendChild(imgElement);
+                    imageWrapper.appendChild(removeBtn);
 
-                        attachmentContainer.appendChild(attachmentWrapper);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching attachments:', error);
+                    imageContainer.appendChild(imageWrapper);
+
+                    // Podgląd zdjęcia
+                    imgElement.onclick = function() {
+                        document.getElementById('previewImage').src = imgElement.src;
+                        document.getElementById('imagePreviewModal').style.display = 'block';
+                    };
                 });
-        }
-
-        // Obsługa zakładek
-        document.querySelectorAll('.tab-link').forEach(button => {
-            button.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                document.querySelector(`#${tabName}`).classList.add('active');
-
-                document.querySelectorAll('.tab-link').forEach(link => {
-                    link.classList.remove('active');
-                });
-                this.classList.add('active');
+            })
+            .catch(error => {
+                console.error('Error fetching images:', error);
             });
+    }
+
+    // Zamknięcie podglądu zdjęcia
+    document.getElementById('closePreviewModal').onclick = function() {
+        document.getElementById('imagePreviewModal').style.display = 'none';
+    };
+
+    // Obsługa zakładek
+    document.querySelectorAll('.tab-link').forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelector(`#${tabName}`).classList.add('active');
+
+            document.querySelectorAll('.tab-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            this.classList.add('active');
         });
     });
+
+    // Dodawanie nowych zdjęć
+    document.getElementById('saveNewImagesBtn').onclick = function () {
+        const productId = document.getElementById('viewProductId').value;
+        const formData = new FormData();
+        const images = document.getElementById('newImages').files;
+
+        for (let i = 0; i < images.length; i++) {
+            formData.append('images[]', images[i]);
+        }
+
+        axios.post(`/products/${productId}/images`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(response => {
+            if (response.data.success) {
+                fetchProductImages(productId); // Odświeżenie zdjęć po dodaniu
+            } else {
+                alert('Error uploading images');
+            }
+        }).catch(error => {
+            console.error('Error uploading images:', error);
+        });
+    };
+
+    function fetchProductAttachments(productId) {
+        axios.get(`/products/${productId}/attachments`)
+            .then(response => {
+                const attachmentContainer = document.getElementById('productAttachments');
+                attachmentContainer.innerHTML = ''; // Opróżnij kontener załączników
+
+                response.data.forEach(attachment => {
+                    const linkElement = document.createElement('a');
+                    linkElement.href = `data:${attachment.mime_type};base64,${attachment.file}`;
+                    linkElement.textContent = attachment.file_name;
+                    linkElement.download = attachment.file_name;
+                    linkElement.classList.add('btn', 'btn-outline-info', 'mr-2', 'mt-2');
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Remove';
+                    removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
+
+                    removeBtn.onclick = function () {
+                        if (confirm('Are you sure you want to delete this attachment?')) {
+                            axios.delete(`/products/${productId}/attachments/${attachment.id}`)
+                                .then(response => {
+                                    if (response.data.success) {
+                                        fetchProductAttachments(productId);  // Odświeżenie załączników po usunięciu
+                                    } else {
+                                        alert('Error deleting attachment');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error deleting attachment:', error);
+                                    alert('Error deleting attachment');
+                                });
+                        }
+                    };
+
+                    const attachmentWrapper = document.createElement('div');
+                    attachmentWrapper.classList.add('d-flex', 'flex-column', 'align-items-center', 'mr-2', 'mt-2');
+                    attachmentWrapper.appendChild(linkElement);
+                    attachmentWrapper.appendChild(removeBtn);
+
+                    attachmentContainer.appendChild(attachmentWrapper);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching attachments:', error);
+            });
+    }
+
+    // Dodawanie nowych załączników
+    document.getElementById('saveNewAttachmentsBtn').onclick = function () {
+        const productId = document.getElementById('viewProductId').value;
+        const formData = new FormData();
+        const attachments = document.getElementById('newAttachments').files;
+
+        for (let i = 0; i < attachments.length; i++) {
+            formData.append('attachments[]', attachments[i]);
+        }
+
+        axios.post(`/products/${productId}/attachments`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(response => {
+            if (response.data.success) {
+                fetchProductAttachments(productId); // Odświeżenie załączników po dodaniu
+            } else {
+                alert('Error uploading attachments');
+            }
+        }).catch(error => {
+            console.error('Error uploading attachments:', error);
+        });
+    };
+});
+
 </script>
 @endsection

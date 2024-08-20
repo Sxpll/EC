@@ -40,6 +40,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('products', ProductController::class)->except(['show']);
     Route::resource('categories', CategoryController::class)->except(['show']);
 
+    Route::post('/products/{product}/images', [ProductController::class, 'storeImages']);
+    Route::post('/products/{product}/attachments', [ProductController::class, 'storeAttachments']);
+
+
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filter');
     Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
@@ -48,6 +52,7 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/products/{productId}/images/{imageId}', [ProductController::class, 'deleteImage']);
     Route::delete('/products/{productId}/attachments/{attachmentId}', [ProductController::class, 'deleteAttachment']);
+
 
 
     Route::get('/notifications', [NotificationController::class, 'index']);
