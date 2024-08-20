@@ -9,14 +9,14 @@ class AddIsActiveToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_active')->default(true);
+            $table->boolean('isActive')->default(true);
         });
     }
 
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_active');
+            $table->dropColumn('isActive');
         });
     }
 }
