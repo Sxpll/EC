@@ -4,6 +4,9 @@
 <div class="container-admin manage-products-container">
     <div class="card-admin">
         <div class="card-header">
+        <a href="{{ url()->previous() }}" class="btn btn-link text-decoration-none" style="margin-right: 725px";>
+            <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
+            </a>
             <h1>Manage Products</h1>
             <button id="openModalBtn" class="btn btn-success">Add Product</button>
             <input type="text" id="search" placeholder="Search Products" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
@@ -72,6 +75,7 @@
             </div>
             <button type="submit" class="btn btn-success">Add Product</button>
         </form>
+
     </div>
 </div>
 
@@ -159,9 +163,13 @@
                 <tbody>
                 </tbody>
             </table>
+
         </div>
     </div>
+
+
 </div>
+
 
 <!-- Modal for image preview -->
 <div id="imagePreviewModal">

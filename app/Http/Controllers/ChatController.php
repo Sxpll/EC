@@ -36,9 +36,8 @@ class ChatController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        // Znajdź czat po ID
-        $chat = Chat::findOrFail($id);
-        return view('chat.show', compact('chat'));
+        $chat = Chat::with('messages', 'admin')->findOrFail($id);
+        return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
     }
 
     public function sendMessage(Request $request, $id)
