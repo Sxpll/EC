@@ -11,8 +11,15 @@
                     <label for="name">Category Name</label>
                     <input type="text" name="name" id="name" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-success">Add Category</button>
+                <button type="submit" class="btn btn-success1">Add Category</button>
             </form>
+
+            <!-- Przycisk Back umieszczony w nowym wierszu -->
+            <div class="row mt-3">
+                <div class="col text-center">
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-back">Back</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

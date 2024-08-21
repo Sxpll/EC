@@ -14,6 +14,10 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Update Category</button>
             </form>
+            <!-- Przycisk Back -->
+            <div class="text-center mt-4">
+                <a href="{{ url()->previous() }}" class="btn btn-secondary btn-back">Back</a>
+            </div>
         </div>
     </div>
 </div>

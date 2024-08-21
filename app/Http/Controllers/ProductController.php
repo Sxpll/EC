@@ -6,43 +6,42 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
 use App\Models\ProductAttachment;
+use App\Models\ProductHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
     public function index()
-    {
-        $products = Product::with('category')->get();
-        $categories = Category::all();
-        return view('products.manage-products', compact('products', 'categories'));
+{
+    if (!Auth::check() || Auth::user()->role !== 'admin') {
+        return redirect('/home')->with('error', 'Unauthorized access');
     }
 
+    $products = Product::where('isActive', true)->with('category')->get();
+    $categories = Category::all(); // Pobierz wszystkie kategorie
 
-
+    return view('products.manage-products', compact('products', 'categories'));
+}
 
     public function show($id)
     {
+
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
         $product = Product::with('category')->findOrFail($id);
-        return response()->json($product);
+        $histories = ProductHistory::where('product_id', $id)->get();
+        return response()->json(['product' => $product, 'histories' => $histories]);
     }
 
-
-
-
-
-
-    // Formularz do dodania nowego produktu
     public function create()
     {
         $categories = Category::all();
         return view('products.create', compact('categories'));
     }
-
-
-
-
-
 
     public function store(Request $request)
     {
@@ -54,25 +53,39 @@ class ProductController extends Controller
             'attachments.*' => 'file|max:10240',
         ]);
 
+        Log::info('Storing new product', $request->all());
+
         $product = Product::create($request->all());
 
-        // Przechowywanie zdjęć w bazie danych
+        Log::info('Product stored successfully: ' . $product->id);
+
+        // Zapis historii tworzenia produktu
+        ProductHistory::create([
+            'admin_id' => Auth::user()->id,
+            'admin_name' => Auth::user()->name,
+            'action' => 'created',
+            'product_id' => $product->id,
+            'field' => 'Product',
+            'new_value' => json_encode($product->toArray())
+        ]);
+
+        // Przechowywanie zdjęć
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'file_data' => base64_encode(file_get_contents($image)), // Kodowanie base64
+                    'file_data' => base64_encode(file_get_contents($image)),
                     'mime_type' => $image->getClientMimeType()
                 ]);
             }
         }
 
-        // Przechowywanie załączników w bazie danych
+        // Przechowywanie załączników
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $attachment) {
                 ProductAttachment::create([
                     'product_id' => $product->id,
-                    'file_data' => base64_encode(file_get_contents($attachment)), // Kodowanie base64
+                    'file_data' => base64_encode(file_get_contents($attachment)),
                     'mime_type' => $attachment->getClientMimeType(),
                     'file_name' => $attachment->getClientOriginalName()
                 ]);
@@ -82,167 +95,196 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product added successfully');
     }
 
-
-
-
-
-
-    // Aktualizacja produktu
     public function update(Request $request, $id)
-{
-    $product = Product::findOrFail($id);
+    {
+        $product = Product::findOrFail($id);
+        $oldData = $product->toArray(); // Zapisujemy stare wartości
 
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'required|string',
-        'category_id' => 'nullable|exists:categories,id', // Kategorie mogą być null
-    ]);
+        Log::info('Update request received for product ID: ' . $id, ['request_data' => $request->all()]);
 
-    $product->update($request->all());
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category_id' => 'nullable|exists:categories,id',
+        ]);
 
-    // Logowanie zmiany produktu
-    // Tutaj możesz dodać logikę zapisu historii zmian
+        // Aktualizacja produktu
+        $product->update($request->except(['_method', '_token']));
 
-    return response()->json(['success' => true]); // Zwracamy odpowiedź JSON
-}
+        // Zapis historii edycji produktu
+        foreach ($request->except(['_method', '_token']) as $key => $value) {
+            if (isset($oldData[$key]) && $oldData[$key] != $value) {
+                ProductHistory::create([
+                    'admin_id' => Auth::user()->id,
+                    'admin_name' => Auth::user()->name,
+                    'action' => 'updated',
+                    'product_id' => $product->id,
+                    'field' => $key,
+                    'old_value' => $oldData[$key],
+                    'new_value' => $value,
+                ]);
+                Log::info('Field updated', [
+                    'field' => $key,
+                    'old_value' => $oldData[$key],
+                    'new_value' => $value
+                ]);
+            }
+        }
 
+        return response()->json(['success' => true]);
+    }
 
-
-
-
-
-
-    // Usuwanie produktu
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
-        $product->delete();
+        $oldData = $product->toArray(); // Zapisujemy dane przed usunięciem
 
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully');
+        // Zamiast usuwania, ustawiamy isActive na 0
+        $product->update(['isActive' => false]);
+
+        // Zapis historii usuwania produktu
+        ProductHistory::create([
+            'admin_id' => Auth::user()->id,
+            'admin_name' => Auth::user()->name,
+            'action' => 'deleted',
+            'product_id' => $id,
+            'field' => 'Product',
+            'old_value' => json_encode($oldData),
+        ]);
+
+        Log::info('Product deactivated (soft delete) successfully: ' . $id);
+        return redirect()->route('products.index')->with('success', 'Product deactivated successfully');
     }
 
     public function showImages($id)
-{
-    try {
-        $product = Product::findOrFail($id);
-        $images = $product->images->map(function($image) {
-            return [
-                'id' => $image->id, // Dodaj ID
-                'file_data' => base64_encode($image->file_data),
-                'mime_type' => $image->mime_type
-            ];
-        });
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $images = $product->images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'file_data' => base64_encode($image->file_data),
+                    'mime_type' => $image->mime_type
+                ];
+            });
 
-        Log::info("Fetched images for product ID: $id", $images->toArray()); // Dodaj logowanie
+            Log::info("Fetched images for product ID: $id", $images->toArray());
 
-        return response()->json($images);
-    } catch (\Exception $e) {
-        Log::error("Error fetching images for product ID: $id - " . $e->getMessage());
-        return response()->json(['error' => 'Error fetching images'], 500);
+            return response()->json($images);
+        } catch (\Exception $e) {
+            Log::error("Error fetching images for product ID: $id - " . $e->getMessage());
+            return response()->json(['error' => 'Error fetching images'], 500);
+        }
     }
-}
 
+    public function showAttachments($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $attachments = $product->attachments->map(function ($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'file' => base64_encode($attachment->file_data),
+                    'mime_type' => $attachment->mime_type,
+                    'file_name' => $attachment->file_name,
+                ];
+            });
 
-public function showAttachments($id)
-{
-    try {
-        $product = Product::findOrFail($id);
-        $attachments = $product->attachments->map(function($attachment) {
-            return [
-                'id' => $attachment->id,  // Upewnij się, że ID jest zwracane
-                'file' => base64_encode($attachment->file_data), // Zakoduj do base64
-                'mime_type' => $attachment->mime_type,
-                'file_name' => $attachment->file_name,
-            ];
-        });
+            Log::info("Fetched attachments for product ID: $id");
 
-        Log::info("Fetched attachments for product ID: $id");
-
-        return response()->json($attachments);
-    } catch (\Exception $e) {
-        Log::error("Error fetching attachments for product ID: $id - " . $e->getMessage());
-        return response()->json(['error' => 'Error fetching attachments'], 500);
+            return response()->json($attachments);
+        } catch (\Exception $e) {
+            Log::error("Error fetching attachments for product ID: $id - " . $e->getMessage());
+            return response()->json(['error' => 'Error fetching attachments'], 500);
+        }
     }
-}
-
 
     public function deleteImage($productId, $imageId)
-{
-    try {
-        $image = ProductImage::where('product_id', $productId)->where('id', $imageId)->firstOrFail();
-        $image->delete();
+    {
+        try {
+            $image = ProductImage::where('product_id', $productId)->where('id', $imageId)->firstOrFail();
+            $image->delete();
 
-        return response()->json(['success' => true]);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Error deleting image'], 500);
-    }
-}
+            Log::info("Deleted image with ID: $imageId for product ID: $productId");
 
-
-
-public function deleteAttachment($productId, $attachmentId)
-{
-    try {
-        $attachment = ProductAttachment::where('product_id', $productId)
-            ->where('id', $attachmentId)
-            ->firstOrFail();
-        $attachment->delete();
-
-        return response()->json(['success' => true]);
-    } catch (\Exception $e) {
-        Log::error("Error deleting attachment for product ID: $productId, attachment ID: $attachmentId - " . $e->getMessage());
-        return response()->json(['error' => 'Error deleting attachment'], 500);
-    }
-}
-
-
-
-
-// Metoda storeImages
-public function storeImages(Request $request, $id)
-{
-    $request->validate([
-        'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    $product = Product::findOrFail($id);
-
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $image) {
-            ProductImage::create([
-                'product_id' => $product->id,
-                'file_data' => file_get_contents($image), // Poprawka, nie kodujemy na tym etapie
-                'mime_type' => $image->getClientMimeType()
-            ]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error("Error deleting image for product ID: $productId - " . $e->getMessage());
+            return response()->json(['error' => 'Error deleting image'], 500);
         }
     }
 
-    return response()->json(['success' => true]);
-}
+    public function deleteAttachment($productId, $attachmentId)
+    {
+        try {
+            $attachment = ProductAttachment::where('product_id', $productId)
+                ->where('id', $attachmentId)
+                ->firstOrFail();
+            $attachment->delete();
 
-// Metoda storeAttachments
-public function storeAttachments(Request $request, $id)
-{
-    $request->validate([
-        'attachments.*' => 'file|max:10240',
-    ]);
+            Log::info("Deleted attachment with ID: $attachmentId for product ID: $productId");
 
-    $product = Product::findOrFail($id);
-
-    if ($request->hasFile('attachments')) {
-        foreach ($request->file('attachments') as $attachment) {
-            ProductAttachment::create([
-                'product_id' => $product->id,
-                'file_data' => file_get_contents($attachment), // Poprawka, nie kodujemy na tym etapie
-                'mime_type' => $attachment->getClientMimeType(),
-                'file_name' => $attachment->getClientOriginalName()
-            ]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error("Error deleting attachment for product ID: $productId - " . $e->getMessage());
+            return response()->json(['error' => 'Error deleting attachment'], 500);
         }
     }
 
-    return response()->json(['success' => true]);
+    public function storeImages(Request $request, $id)
+    {
+        $request->validate([
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $product = Product::findOrFail($id);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'file_data' => file_get_contents($image),
+                    'mime_type' => $image->getClientMimeType()
+                ]);
+            }
+        }
+
+        Log::info("Images stored successfully for product ID: $id");
+        return response()->json(['success' => true]);
+    }
+
+    public function storeAttachments(Request $request, $id)
+    {
+        $request->validate([
+            'attachments.*' => 'file|max:10240',
+        ]);
+
+        $product = Product::findOrFail($id);
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $attachment) {
+                ProductAttachment::create([
+                    'product_id' => $product->id,
+                    'file_data' => file_get_contents($attachment),
+                    'mime_type' => $attachment->getClientMimeType(),
+                    'file_name' => $attachment->getClientOriginalName()
+                ]);
+            }
+        }
+
+        Log::info("Attachments stored successfully for product ID: $id");
+        return response()->json(['success' => true]);
+    }
+
+    public function fetchHistory($id)
+{
+    $histories = ProductHistory::where('product_id', $id)->get();
+
+    if ($histories->isEmpty()) {
+        return response()->json(['error' => 'No history found for this product'], 404);
+    }
+
+    return response()->json($histories);
 }
-
-
 
 }

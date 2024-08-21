@@ -115,6 +115,7 @@ body {
     text-align: center;
     display: inline-block;
     text-wrap: wrap;
+    text-decoration: none;
 }
 
 .btn-primary:hover, .btn-success:hover, .btn-danger:hover {
@@ -235,6 +236,12 @@ body {
     word-wrap: break-word;
 }
 
+.table tr td:nth-child(4) {
+    text-wrap: wrap;
+}
+.table tr td:nth-child(5) {
+    text-wrap: wrap;
+}
 .table tr td:nth-child(6) {
     text-wrap: wrap;
 }
@@ -246,6 +253,9 @@ body {
 .table tbody tr:nth-child(even) {
     background-color: #323246;
 }
+
+
+
 
 .modal {
     display: none;
@@ -836,4 +846,141 @@ textarea.form-control {
     color: #bbb;
     text-decoration: none;
     cursor: pointer;
+}
+
+.btn-success1 {
+    padding: 8px 20px; /* Dopasowanie wielkości przycisku */
+    font-size: 14px; /* Rozmiar czcionki */
+    border-radius: 4px; /* Zaokrąglone rogi */
+    background-color: #1abc9c; /* Kolor tła */
+    color: white; /* Kolor tekstu */
+    border: none; /* Brak obramowania */
+    cursor: pointer; /* Zmiana kursora na kliknięcie */
+    text-decoration: none;
+}
+
+.btn-success1:hover {
+    background-color: #16a085; /* Zmiana koloru po najechaniu */
+}
+
+.btn-success1:focus {
+    outline: none; /* Usunięcie obramowania po kliknięciu */
+}
+
+
+.btn-danger {
+    background-color: #e74c3c;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    max-width: 100px;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+    text-align: center;
+    display: inline-block;
+    text-wrap: wrap;
+}
+
+.btn-outline-info{
+    text-decoration: none;
+    color: white;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.eloelo{
+    margin-right: 10px;
+    display: inline-block;
+    margin-left: -10px;
+}
+
+.dashboard-btn {
+    background-color: #1abc9c; /* Domyślny kolor przycisku */
+    color: #ffffff; /* Kolor tekstu */
+    font-size: 16px; /* Rozmiar czcionki */
+    text-align: center; /* Wyrównanie tekstu w środku */
+    padding: 10px 20px; /* Wewnętrzne odstępy dla przycisku */
+    display: inline-block; /* Zapewnia, że przyciski są traktowane jako elementy blokowe */
+    text-decoration: none; /* Usuwa podkreślenie */
+    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
+    border-radius: 5px; /* Zaokrąglenie krawędzi */
+    border: none; /* Usuwa obramowanie */
+    overflow: hidden; /* Zapobiega wychodzeniu treści poza obszar */
+    max-width: 200px; /* Ustawia maksymalną szerokość, aby tekst się zmieścił */
+}
+
+.dashboard-btn:hover {
+    background-color: #16a085; /* Kolor przycisku po najechaniu */
+    color: #ffffff;
+}
+
+.dashboard-btn:active,
+.dashboard-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.dashboard-btn a {
+    text-decoration: none; /* Usuwa podkreślenie w linkach */
+}
+
+.btn-danger1{
+    background-color: red;
+    border: none;
+    padding: 10px;
+    width: 105px;
+    max-width: 105px;
+    height: 42px;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+    text-align: center;
+    display: inline-block;
+    text-wrap: wrap;
+}
+
+.btn-back {
+    padding: 10px 20px; /* Dopasowanie wielkości przycisku */
+    font-size: 16px; /* Rozmiar czcionki */
+    border-radius: 4px; /* Zaokrąglone rogi */
+    background-color: #34495e; /* Kolor tła */
+    color: white; /* Kolor tekstu */
+    border: none; /* Brak obramowania */
+    cursor: pointer; /* Zmiana kursora na kliknięcie */
+    text-decoration: none; /* Usunięcie podkreślenia */
+}
+
+.btn-back:hover {
+    background-color: #2c3e50; /* Zmiana koloru po najechaniu */
+}
+
+.btn-back:focus {
+    outline: none; /* Usunięcie obramowania po kliknięciu */
+}
+
+.btn-back {
+    background-color: #6c757d; /* Szary kolor dla przycisku Back */
+    color: #fff; /* Biały tekst */
+    border: none; /* Brak obramowania */
+    padding: 10px 20px; /* Odsunięcie wewnętrzne */
+    border-radius: 5px; /* Zaokrąglone rogi */
+    font-size: 16px; /* Rozmiar czcionki */
+    text-align: center; /* Wyrównanie tekstu */
+    display: inline-block; /* Wyświetlanie jako blok w linii */
+    transition: background-color 0.3s ease; /* Płynne przejście przy zmianie koloru tła */
+    cursor: pointer; /* Zmiana kursora na wskaźnik */
+    text-decoration: none; /* Brak podkreślenia */
+    margin-top: 20px; /* Odsunięcie od góry */
+}
+
+/* Efekt hover */
+.btn-back:hover {
+    background-color: #5a6268; /* Ciemniejszy odcień szarości przy najechaniu */
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -39,6 +40,8 @@ Route::middleware('auth')->group(function () {
     // Trasy resource dla produktów i kategorii
     Route::resource('products', ProductController::class)->except(['show']);
     Route::resource('categories', CategoryController::class)->except(['show']);
+    Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
+
 
     Route::post('/products/{product}/images', [ProductController::class, 'storeImages']);
     Route::post('/products/{product}/attachments', [ProductController::class, 'storeAttachments']);
@@ -48,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+
 
 
     Route::delete('/products/{productId}/images/{imageId}', [ProductController::class, 'deleteImage']);

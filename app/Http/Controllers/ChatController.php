@@ -12,11 +12,15 @@ class ChatController extends Controller
 {
     public function index()
     {
-        $chats = Chat::with('user')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
+        // Pokaż wszystkie czaty
+        $chats = Chat::all();
         return view('chat.index', compact('chats'));
     }
+
 
     public function userChats()
     {
@@ -28,8 +32,13 @@ class ChatController extends Controller
 
     public function show($id)
     {
-        $chat = Chat::with('messages', 'admin')->findOrFail($id);
-        return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
+        // Znajdź czat po ID
+        $chat = Chat::findOrFail($id);
+        return view('chat.show', compact('chat'));
     }
 
     public function sendMessage(Request $request, $id)
@@ -85,7 +94,7 @@ class ChatController extends Controller
 }
 
 
-    
+
 
 
 
@@ -182,8 +191,8 @@ class ChatController extends Controller
         return response()->json($messages);
     }
 
-   
-    
-    
-    
+
+
+
+
 }

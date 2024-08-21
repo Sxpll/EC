@@ -66,9 +66,9 @@
 
             <div class="row mt-4 justify-content-center">
                 <div class="col-md-6 text-center">
-                    <a href="{{ route('admin.manageUsers') }}" class="btn btn-primary btn-block">Manage Users</a>
-                    <a href="{{ route('products.index') }}" class="btn btn-primary btn-block">Manage Products</a>
-                    <a href="{{ route('categories.index') }}" class="btn btn-primary btn-block">Manage Categories</a>
+                    <a href="{{ route('admin.manageUsers') }}" class="btn btn-primary btn-block dashboard-btn">Manage Users</a>
+                    <a href="{{ route('products.index') }}" class="btn btn-primary btn-block dashboard-btn">Manage Products</a>
+                    <a href="{{ route('categories.index') }}" class="btn btn-primary btn-block dashboard-btn">Manage Categories</a>
                 </div>
             </div>
         </div>
