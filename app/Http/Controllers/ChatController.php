@@ -31,28 +31,42 @@ class ChatController extends Controller
     }
 
     public function show($id)
-    {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Unauthorized access');
-        }
+{
+    $chat = Chat::with('messages', 'admin')->findOrFail($id);
 
-        $chat = Chat::with('messages', 'admin')->findOrFail($id);
-        return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
+    // Upewnij się, że tylko użytkownik powiązany z czatem lub admin ma dostęp
+    if (Auth::user()->role !== 'admin' && $chat->user_id !== Auth::id()) {
+        return response()->json(['error' => 'Unauthorized access'], 403);
     }
 
-    public function sendMessage(Request $request, $id)
+    return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
+}
+
+
+public function sendMessage(Request $request, $id)
 {
     \Log::info('Start sendMessage function for chat ID: ' . $id);
 
+    // Walidacja żądania
+    $request->validate([
+        'message' => 'required|string|max:1000',
+    ]);
+
     try {
+        // Znajdź czat, sprawdź, czy istnieje
         $chat = Chat::findOrFail($id);
         \Log::info('Chat found: ' . $chat->id);
 
+        // Sprawdź, czy czat nie jest zakończony
         if ($chat->status === 'completed') {
             \Log::warning('Cannot send messages to a completed chat.');
-            return response()->json(['success' => false, 'message' => 'Cannot send messages to a completed chat.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot send messages to a completed chat.'
+            ], 400);
         }
 
+        // Utwórz nową wiadomość
         $message = new Message();
         $message->chat_id = $chat->id;
         $message->message = $request->message;
@@ -76,6 +90,7 @@ class ChatController extends Controller
                 }
             }
         } else {
+            // Powiadomienie dla przypisanego admina
             Notification::create([
                 'chat_id' => $chat->id,
                 'user_id' => $chat->admin_id,
@@ -85,10 +100,17 @@ class ChatController extends Controller
             \Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
         }
 
-        return response()->json(['success' => true]);
+        // Zwróć pomyślną odpowiedź
+        return response()->json(['success' => true], 200);
+
     } catch (\Exception $e) {
         \Log::error('Error in sendMessage: ' . $e->getMessage());
-        return response()->json(['success' => false, 'message' => 'Internal Server Error'], 500);
+
+        // Zwróć odpowiedź z kodem błędu 500
+        return response()->json([
+            'success' => false,
+            'message' => 'Internal Server Error'
+        ], 500);
     }
 }
 
@@ -163,32 +185,40 @@ class ChatController extends Controller
     return redirect()->back()->with('success', 'Chat status has been successfully updated.');
 }
 
-    public function filterChats(Request $request)
-    {
-        $status = $request->get('status');
-        $user_id = Auth::id();
+public function filterChats(Request $request)
+{
+    $status = $request->get('status');
+    $user_id = Auth::id();
 
-        $chats = Chat::where('user_id', $user_id)
-            ->where(function($query) use ($status) {
-                if ($status === 'open') {
-                    $query->whereIn('status', ['open', 'in progress']);
-                } elseif ($status === 'completed') {
-                    $query->where('status', 'completed');
-                }
-            })
-            ->get();
+    $chats = Chat::where('user_id', $user_id)
+        ->where(function($query) use ($status) {
+            if ($status === 'open') {
+                $query->whereIn('status', ['open', 'ongoing']);
+            } elseif ($status === 'completed') {
+                $query->where('status', 'completed');
+            }
+        })
+        ->orderBy('created_at', 'desc')  // Sortowanie od najnowszych do najstarszych
+        ->get();
 
-        return response()->json($chats);
-    }
+    return response()->json($chats);
+}
+
 
     public function getMessages($id)
-    {
-        $messages = Message::where('chat_id', $id)
-                           ->orderBy('created_at', 'asc')
-                           ->get();
+{
+    $chat = Chat::findOrFail($id);
 
-        return response()->json($messages);
+    if (Auth::user()->role !== 'admin' && $chat->user_id !== Auth::id()) {
+        return response()->json(['error' => 'Unauthorized access'], 403);
     }
+
+    $messages = Message::where('chat_id', $id)
+                       ->orderBy('created_at', 'asc')
+                       ->get();
+
+    return response()->json($messages);
+}
 
 
 

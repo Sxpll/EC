@@ -984,3 +984,8 @@ textarea.form-control {
 .btn-back:hover {
     background-color: #5a6268; /* Ciemniejszy odcień szarości przy najechaniu */
 }
+
+.chat-title{
+    color: white;
+    font-size: 15px;
+}
