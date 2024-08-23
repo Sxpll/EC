@@ -23,6 +23,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
     Route::put('/account', [AccountController::class, 'update'])->name('account.update');
 
+
+
+    Route::get('/admin/chats', [ChatController::class, 'index'])->name('admin.chats');
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/manage-users', [AdminController::class, 'manageUsers'])->name('admin.manageUsers');
     Route::put('/admin/user/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
@@ -31,6 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/history', [AdminController::class, 'showHistory'])->name('admin.history');
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
+
+
 
     // Dodajemy trasę GET /products/{id} dla metody show
     Route::get('/products/{id}', [ProductController::class, 'show']);
