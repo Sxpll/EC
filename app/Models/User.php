@@ -12,11 +12,19 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'lastname', 'email', 'password', 'role', 'is_hr', 'isActive', 'is_deleted'
+        'name',
+        'lastname',
+        'email',
+        'password',
+        'role',
+        'is_hr',
+        'isActive',
+        'is_deleted'
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
     protected $casts = [
@@ -34,8 +42,7 @@ class User extends Authenticatable
     }
 
     public function admin()
-{
-    return $this->belongsTo(User::class, 'admin_id');
-}
-
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
 }

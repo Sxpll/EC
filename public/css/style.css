@@ -8,7 +8,7 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .container-admin, .container-center, .container-admin-dashboard {
@@ -41,12 +41,12 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
     width: 100%;
-    max-width: 1000px; 
+    max-width: 1000px;
     height: 95%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .manage-users-container .card-admin {
@@ -115,6 +115,7 @@ body {
     text-align: center;
     display: inline-block;
     text-wrap: wrap;
+    text-decoration: none;
 }
 
 .btn-primary:hover, .btn-success:hover, .btn-danger:hover {
@@ -123,6 +124,15 @@ body {
 
 .btn-danger {
     background-color: #e74c3c;
+    border: none;
+    padding: 5px 10px; /* Zmniejsz rozmiar paddingu */
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 14px; /* Zmniejsz rozmiar czcionki */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+
 }
 
 .btn-danger:hover {
@@ -226,6 +236,12 @@ body {
     word-wrap: break-word;
 }
 
+.table tr td:nth-child(4) {
+    text-wrap: wrap;
+}
+.table tr td:nth-child(5) {
+    text-wrap: wrap;
+}
 .table tr td:nth-child(6) {
     text-wrap: wrap;
 }
@@ -237,6 +253,9 @@ body {
 .table tbody tr:nth-child(even) {
     background-color: #323246;
 }
+
+
+
 
 .modal {
     display: none;
@@ -305,6 +324,7 @@ body {
         width: 100%;
         max-width: none;
         margin-top: 10px;
+
     }
 
     .navbar-brand img {
@@ -518,7 +538,7 @@ textarea.form-control {
 }
 
 .btn-success {
-    background-color: #28a745;
+    background-color:#1abc9c;
     border: none;
     padding: 10px;
     border-radius: 5px;
@@ -586,17 +606,17 @@ textarea.form-control {
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
-    color: #aaa; 
-    background: none; 
-    border: none; 
-    padding: 0; 
+    color: #aaa;
+    background: none;
+    border: none;
+    padding: 0;
     z-index: 1000;
 }
 
 .close-custom:hover, .close-custom:focus {
-    color: #fff; 
+    color: #fff;
     text-decoration: none;
-    outline: none; 
+    outline: none;
 }
 
 .btn-primary, .btn-view {
@@ -644,7 +664,7 @@ textarea.form-control {
     color: #007bff;
     z-index: 1000;
     display: flex;
-    
+
 }
 
 .notification-count {
@@ -656,7 +676,7 @@ textarea.form-control {
     border-radius: 50%;
     padding: 2px 6px;
     font-size: 12px;
-  
+
 }
 
 .notifications-dropdown {
@@ -725,4 +745,236 @@ textarea.form-control {
     display: flex;
     left: 0; /* lub dowolna wartość */
     transform: translateX(40px);
+}
+
+/* Stylizacja obrazków w galerii */
+#productImages img {
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#productImages img:hover {
+    opacity: 0.7;
+}
+
+/* Stylizacja kontenera galerii */
+.gallery-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.gallery-item {
+    width: 150px;
+    height: 200px; /* Zwiększona wysokość, aby pomieścić przycisk */
+    margin: 10px;
+    overflow: hidden;
+    border: 3px solid #aaa;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 150px; /* Ustawiona stała wysokość obrazu */
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.gallery-item button {
+    width: 100%;
+    padding: 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.gallery-item button:hover {
+    background-color: #c0392b;
+}
+
+/* Stylizacja obrazków w galerii */
+.gallery-image {
+    max-width: 100%;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.gallery-image:hover {
+    transform: scale(1.05);
+}
+
+/* Modal do podglądu obrazów */
+#imagePreviewModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#imagePreviewModal img {
+    margin: auto;
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Przyciski zamykania modala */
+.close-custom {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.close-custom:hover, .close-custom:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-success1 {
+    padding: 8px 20px; /* Dopasowanie wielkości przycisku */
+    font-size: 14px; /* Rozmiar czcionki */
+    border-radius: 4px; /* Zaokrąglone rogi */
+    background-color: #1abc9c; /* Kolor tła */
+    color: white; /* Kolor tekstu */
+    border: none; /* Brak obramowania */
+    cursor: pointer; /* Zmiana kursora na kliknięcie */
+    text-decoration: none;
+}
+
+.btn-success1:hover {
+    background-color: #16a085; /* Zmiana koloru po najechaniu */
+}
+
+.btn-success1:focus {
+    outline: none; /* Usunięcie obramowania po kliknięciu */
+}
+
+
+.btn-danger {
+    background-color: #e74c3c;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    max-width: 100px;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+    text-align: center;
+    display: inline-block;
+    text-wrap: wrap;
+}
+
+.btn-outline-info{
+    text-decoration: none;
+    color: white;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.eloelo{
+    margin-right: 10px;
+    display: inline-block;
+    margin-left: -10px;
+}
+
+.dashboard-btn {
+    background-color: #1abc9c; /* Domyślny kolor przycisku */
+    color: #ffffff; /* Kolor tekstu */
+    font-size: 16px; /* Rozmiar czcionki */
+    text-align: center; /* Wyrównanie tekstu w środku */
+    padding: 10px 20px; /* Wewnętrzne odstępy dla przycisku */
+    display: inline-block; /* Zapewnia, że przyciski są traktowane jako elementy blokowe */
+    text-decoration: none; /* Usuwa podkreślenie */
+    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
+    border-radius: 5px; /* Zaokrąglenie krawędzi */
+    border: none; /* Usuwa obramowanie */
+    overflow: hidden; /* Zapobiega wychodzeniu treści poza obszar */
+    max-width: 200px; /* Ustawia maksymalną szerokość, aby tekst się zmieścił */
+}
+
+.dashboard-btn:hover {
+    background-color: #16a085; /* Kolor przycisku po najechaniu */
+    color: #ffffff;
+}
+
+.dashboard-btn:active,
+.dashboard-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.dashboard-btn a {
+    text-decoration: none; /* Usuwa podkreślenie w linkach */
+}
+
+.btn-danger1{
+    background-color: red;
+    border: none;
+    padding: 10px;
+    width: 105px;
+    max-width: 105px;
+    height: 42px;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+    text-align: center;
+    display: inline-block;
+    text-wrap: wrap;
+}
+
+.btn-back {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+}
+
+.btn-back:focus {
+    outline: none;
+}
+
+
+.chat-title{
+    color: white;
+    font-size: 15px;
+}
+
+.table-danger {
+    background-color: #f8d7da; /* Czerwone tło */
+    color: red; /* Ciemny czerwony tekst */
 }

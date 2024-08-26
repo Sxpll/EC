@@ -4,6 +4,9 @@
 <div class="container-admin manage-users-container">
     <div class="card-admin">
         <div class="card-header">
+        <a href="{{ url()->previous() }}" class="btn btn-link text-decoration-none" style="margin-right: 725px";>
+            <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
+            </a>
             <h1>Manage Users</h1>
             <button id="openModalBtn" class="btn btn-success">Add User</button>
             <input type="text" id="search" placeholder="Search Users" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
@@ -82,13 +85,13 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Edit User</h2>
-        
+
         <!-- Zakładki -->
         <div class="tabs">
             <button class="tab-link active" onclick="openTab(event, 'Info')">Info</button>
             <button class="tab-link" onclick="openTab(event, 'History')">History</button>
         </div>
-        
+
         <div id="Info" class="tab-content active">
             <form id="viewUserForm" method="POST">
                 @csrf
@@ -151,7 +154,7 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
-    
+
     function openTab(evt, tabName) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");
@@ -377,7 +380,7 @@ function openTab(evt, tabName) {
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 }
-    
+
 </script>
 
 

@@ -13,64 +13,60 @@
         </div>
     </div>
     <ul class="list-group mt-3" id="chatList">
-        @foreach($chats as $chat)
-            <li class="list-group-item chat-item" data-status="{{ $chat->status }}">
-                <a href="#" class="chat-link" data-chat-id="{{ $chat->id }}">
-                    <div class="chat-title">{{ $chat->title }}</div>
-                    <div class="chat-time">{{ $chat->created_at->format('Y-m-d H:i') }}</div>
-                </a>
-            </li>
-        @endforeach
+        <!-- Lista czatów będzie ładowana dynamicznie za pomocą JavaScript -->
     </ul>
 </div>
 
+<!-- New Chat Modal -->
 <div id="newChatModal" class="modal" tabindex="-1" role="dialog" style="display:none;">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">New Chat</h5>
-        <button type="button" class="close-custom" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <form id="createChatForm" action="{{ route('chat.createChat') }}" method="POST">
-        @csrf
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" class="form-control" name="title" id="title" required>
-          </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Chat</h5>
+                <button type="button" class="close-custom" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="createChatForm" action="{{ route('chat.createChat') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" class="form-control" name="title" id="title" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Start Chat</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Start Chat</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 
+<!-- Chat Window Modal -->
 <div id="chatWindowModal" class="modal" tabindex="-1" role="dialog" style="display:none;">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="chatTitle">Chat</h5>
-        <button type="button" class="close-custom" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="chat-window" style="height: 50vh; overflow-y: scroll;">
-        <!-- Messages will be loaded here -->
-      </div>
-      <div class="modal-footer">
-        <form id="sendMessageForm" action="" method="POST">
-            @csrf
-            <textarea name="message" rows="3" class="form-control" style="resize: none;" required></textarea>
-            <button type="submit" class="btn btn-primary mt-2">Send</button>
-        </form>
-      </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatTitle">Chat</h5>
+                <button type="button" class="close-custom" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="chat-window" style="height: 50vh; overflow-y: scroll;">
+                <!-- Messages will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <form id="sendMessageForm" action="" method="POST">
+                    @csrf
+                    <textarea name="message" rows="3" class="form-control" style="resize: none;" required></textarea>
+                    <button type="submit" class="btn btn-primary mt-2">Send</button>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>    
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
@@ -81,17 +77,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatWindowModal = document.getElementById('chatWindowModal');
     const chatWindow = document.getElementById('chat-window');
     const chatTitle = document.getElementById('chatTitle');
-    const messageTextarea = document.querySelector('#sendMessageForm textarea');
     const chatStatusFilter = document.getElementById('chatStatusFilter');
     const chatList = document.getElementById('chatList');
 
-    newThreadButton.addEventListener('click', function() {
-        newChatModal.style.display = 'block';
-    });
-
-    chatStatusFilter.addEventListener('change', function() {
-        const selectedStatus = this.value;
-        axios.get(`/chat/filter`, { params: { status: selectedStatus } })
+    // Funkcja do ładowania czatów na podstawie statusu
+    function loadChats(status) {
+        axios.get(`/chat/filter`, { params: { status: status } })
             .then(response => {
                 chatList.innerHTML = '';
                 response.data.forEach(chat => {
@@ -115,16 +106,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
                 alert('An error occurred while filtering chats. Please try again.');
             });
+    }
+
+    // Ładowanie czatów domyślnie z filtrem na "open" przy załadowaniu strony
+    loadChats('open');
+
+    // Obsługa zmiany statusu
+    chatStatusFilter.addEventListener('change', function() {
+        const selectedStatus = this.value;
+        loadChats(selectedStatus);
     });
 
-    document.querySelectorAll('.chat-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            let chatId = this.getAttribute('data-chat-id');
-            openChatWindow(chatId);
+    // Nowy czat
+    newThreadButton.addEventListener('click', function() {
+        newChatModal.style.display = 'block';
+    });
+
+    // Zamknij modale
+    document.querySelectorAll('.close-custom').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.modal').style.display = 'none';
         });
     });
 
+    // Tworzenie nowego czatu
     createChatForm.addEventListener('submit', function(e) {
         e.preventDefault();
         let formData = new FormData(this);
@@ -154,94 +159,78 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function openChatWindow(chatId) {
-    let url = `/chat/${chatId}`;
-    axios.get(url)
-        .then(response => {
-            chatWindow.innerHTML = '';
+        let url = `/chat/${chatId}`;
+        axios.get(url)
+            .then(response => {
+                chatWindow.innerHTML = '';
 
-            // Sprawdzenie, czy response.data zawiera wiadomości
-            if (response.data && response.data.messages) {
-                let messages = response.data.messages;
-                
-                // Dodajemy warunek sprawdzający, czy istnieje pierwszy element z tablicy messages
-                if (messages.length > 0 && messages[0].chat) {
-                    chatTitle.textContent = messages[0].chat.title;
+                if (response.data && response.data.messages) {
+                    let messages = response.data.messages;
+                    if (messages.length > 0 && messages[0].chat) {
+                        chatTitle.textContent = messages[0].chat.title;
+                    } else {
+                        chatTitle.textContent = 'Chat';
+                    }
+                    messages.forEach(msg => {
+                        let messageDiv = document.createElement('div');
+                        let messageClass = msg.admin_id ? 'admin' : 'user';
+                        messageDiv.classList.add('message', messageClass);
+                        messageDiv.innerHTML = `${msg.message}`;
+                        let messageTime = document.createElement('div');
+                        messageTime.classList.add('message-time');
+                        messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        messageTime.style.display = 'none';
+                        messageDiv.appendChild(messageTime);
+                        messageDiv.addEventListener('click', () => {
+                            messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
+                        });
+                        chatWindow.appendChild(messageDiv);
+                    });
                 } else {
+                    console.error('No messages found or no chat data in response:', response.data);
                     chatTitle.textContent = 'Chat';
                 }
-                
-                messages.forEach(msg => {
-                    let messageDiv = document.createElement('div');
-                    let messageClass = msg.admin_id ? 'admin' : 'user';
-                    messageDiv.classList.add('message', messageClass);
-                    messageDiv.innerHTML = `${msg.message}`;
-                    let messageTime = document.createElement('div');
-                    messageTime.classList.add('message-time');
-                    messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    messageTime.style.display = 'none';
-                    messageDiv.appendChild(messageTime);
-                    messageDiv.addEventListener('click', () => {
-                        messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
-                    });
-                    chatWindow.appendChild(messageDiv);
-                });
-            } else {
-                console.error('No messages found or no chat data in response:', response.data);
-                chatTitle.textContent = 'Chat';
-            }
 
-            document.getElementById('sendMessageForm').action = url + '/send-message';
-            chatWindowModal.style.display = 'block';
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-            startAutoRefresh(chatId);
-        })
-        .catch(error => console.error('Error:', error));
-}
-
-
-let refreshInterval = null;
-
-function startAutoRefresh(chatId) {
-    // Jeśli jest już aktywne odświeżanie, zatrzymaj je
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
+                document.getElementById('sendMessageForm').action = url + '/send-message';
+                chatWindowModal.style.display = 'block';
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                startAutoRefresh(chatId);
+            })
+            .catch(error => console.error('Error:', error));
     }
 
-    refreshInterval = setInterval(() => {
-        fetch(`/chat/${chatId}/messages`)
-            .then(response => response.json())
-            .then(messages => {
-                chatWindow.innerHTML = '';
-                messages.forEach(msg => {
-                    let messageDiv = document.createElement('div');
-                    let messageClass = msg.admin_id ? 'admin' : 'user';
-                    messageDiv.classList.add('message', messageClass);
-                    messageDiv.innerHTML = `${msg.message}`;
-                    let messageTime = document.createElement('div');
-                    messageTime.classList.add('message-time');
-                    messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    messageTime.style.display = 'none';
-                    messageDiv.appendChild(messageTime);
-                    messageDiv.addEventListener('click', () => {
-                        messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
+    let refreshInterval = null;
+
+    function startAutoRefresh(chatId) {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+        }
+
+        refreshInterval = setInterval(() => {
+            fetch(`/chat/${chatId}/messages`)
+                .then(response => response.json())
+                .then(messages => {
+                    chatWindow.innerHTML = '';
+                    messages.forEach(msg => {
+                        let messageDiv = document.createElement('div');
+                        let messageClass = msg.admin_id ? 'admin' : 'user';
+                        messageDiv.classList.add('message', messageClass);
+                        messageDiv.innerHTML = `${msg.message}`;
+                        let messageTime = document.createElement('div');
+                        messageTime.classList.add('message-time');
+                        messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        messageTime.style.display = 'none';
+                        messageDiv.appendChild(messageTime);
+                        messageDiv.addEventListener('click', () => {
+                            messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
+                        });
+                        chatWindow.appendChild(messageDiv);
                     });
-                    chatWindow.appendChild(messageDiv);
-                });
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            })
-            .catch(error => console.error('Error refreshing messages:', error));
-    }, 3000);
-}
-
-
-
-
-
-    document.querySelectorAll('.close-custom').forEach(button => {
-        button.addEventListener('click', function() {
-            this.closest('.modal').style.display = 'none';
-        });
-    });
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                })
+                .catch(error => console.error('Error refreshing messages:', error));
+        }, 3000);
+    }
 
     document.getElementById('sendMessageForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -262,23 +251,11 @@ function startAutoRefresh(chatId) {
                     });
                     chatWindow.appendChild(newMessage);
                     this.message.value = '';
-                    scrollToBottom(chatWindow);
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
                 }
             })
             .catch(error => console.error('Error:', error));
     });
-
-    messageTextarea.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            document.getElementById('sendMessageForm').dispatchEvent(new Event('submit'));
-        }
-    });
-
-    function scrollToBottom(element) {
-        element.scrollTop = element.scrollHeight; 
-    }
 });
-
 </script>
 @endsection

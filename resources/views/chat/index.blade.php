@@ -10,6 +10,10 @@
 
 <div class="container">
     <h1 class="elo">All Chats</h1>
+    <div class="form-group mb-3">
+        <input type="text" id="searchChat" class="form-control" placeholder="Search by title or author...">
+    </div>
+
     <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
         <table class="table table-hover">
             <thead>
@@ -100,22 +104,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageInput = sendMessageForm.querySelector('textarea[name="message"]');
     const manageButton = document.getElementById('manageButton');
     const takeChatButton = document.getElementById('takeChatButton');
+    const chatTableBody = document.querySelector('tbody');
+    const searchChat = document.getElementById('searchChat');
     const userId = @json(Auth::id());
     let currentChatId = null;
     let refreshInterval = null;
-    let notificationBannerShown = false; // Flaga, która kontroluje jednorazowe wyświetlenie powiadomienia
+    let notificationBannerShown = false;
 
-    document.querySelectorAll('.btn-view').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            currentChatId = this.getAttribute('data-chat-id');
-            if (!currentChatId) {
-                console.error('Chat ID is not defined');
-                return;
-            }
-            openChatWindow(currentChatId);
+    // Funkcja przypisująca eventy do przycisków "View"
+    function bindViewButtons() {
+        document.querySelectorAll('.btn-view').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentChatId = this.getAttribute('data-chat-id');
+                if (!currentChatId) {
+                    console.error('Chat ID is not defined');
+                    return;
+                }
+                openChatWindow(currentChatId);
+            });
         });
-    });
+    }
+
+    // Obsługa kliknięcia przycisków "View"
+    bindViewButtons(); // Początkowe przypisanie eventów
 
     function openChatWindow(chatId) {
         fetch(`/chat/${chatId}`)
@@ -129,18 +141,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     messageDiv.classList.add('message', messageClass);
                     messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
                     chatWindow.appendChild(messageDiv);
-                    messageDiv.addEventListener('click', () => {
-                        const timeSpan = messageDiv.querySelector('.message-time');
-                        timeSpan.style.display = timeSpan.style.display === 'block' ? 'none' : 'block';
-                    });
                 });
 
                 sendMessageForm.action = `/chat/${chatId}/send-message`;
                 chatWindowModal.style.display = 'block';
                 chatWindow.scrollTop = chatWindow.scrollHeight;
-                currentChatId = chatId;  // Ustawienie currentChatId tutaj
+                currentChatId = chatId;
                 startAutoRefresh(chatId);
-                markAllNotificationsAsRead(chatId); // Mark all notifications as read when the chat is opened
+                markAllNotificationsAsRead(chatId);
             })
             .catch(error => {
                 console.error('Error fetching chat messages:', error);
@@ -190,7 +198,8 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(response => response.json())
@@ -227,7 +236,8 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({ message: message })
         })
@@ -260,21 +270,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function markAllNotificationsAsRead(chatId) {
         axios.post(`/notifications/mark-all-as-read`, { chat_id: chatId })
             .then(response => {
-                fetchNotifications(); // Odświeżenie listy powiadomień
+                fetchNotifications();
             })
             .catch(error => {
                 console.error('Error marking notifications as read:', error);
             });
     }
 
-    // Funkcje do obsługi powiadomień
-
     function fetchNotifications() {
         axios.get('/notifications')
             .then(response => {
                 notifications = response.data;
                 updateNotificationUI();
-                checkForNewMessages(notifications); // Sprawdź, czy są nowe wiadomości, aby wywołać powiadomienie banerowe
+                checkForNewMessages(notifications);
             })
             .catch(error => {
                 console.error('Error fetching notifications:', error);
@@ -334,11 +342,49 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
 
-    // Pobieranie powiadomień co 5 sekund
+    // Wyszukiwanie czatów
+    searchChat.addEventListener('input', function() {
+        const searchValue = this.value.toLowerCase();
+
+        fetch(`/chat?search=${encodeURIComponent(searchValue)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            return response.text(); // Zamieniamy na 'text', aby zobaczyć surową odpowiedź
+        })
+        .then(data => {
+
+            try {
+                const chats = JSON.parse(data);
+                chatTableBody.innerHTML = ''; // Wyczyszczenie zawartości tabeli
+
+                chats.forEach(chat => {
+                    const chatRow = document.createElement('tr');
+                    chatRow.setAttribute('data-chat-id', chat.id);
+                    chatRow.innerHTML = `
+                        <td>${chat.title}</td>
+                        <td>${chat.user.name} ${chat.user.lastname}</td> <!-- Poprawione nazwisko -->
+                        <td>${chat.status}</td>
+                        <td class="text-center">
+                            <button class="btn btn-primary btn-view" data-chat-id="${chat.id}">View</button>
+                        </td>
+                    `;
+                    chatTableBody.appendChild(chatRow);
+                });
+
+                bindViewButtons(); // Ponowne przypisanie eventów po zaktualizowaniu listy
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+            }
+        })
+        .catch(error => console.error('Error fetching chats:', error));
+    });
+
     setInterval(fetchNotifications, 5000);
     fetchNotifications();
 });
-
 
 </script>
 @endsection

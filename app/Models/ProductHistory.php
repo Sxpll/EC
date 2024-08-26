@@ -5,20 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserHistory extends Model
+class ProductHistory extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'admin_id',
         'admin_name',
-        'admin_lastname',
         'action',
-        'user_id',
-        'user_name',
-        'user_lastname',
+        'product_id',
         'field',
         'old_value',
         'new_value',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
 }
