@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
@@ -10,9 +11,9 @@ class NotificationController extends Controller
     public function index()
     {
         $notifications = Notification::where('user_id', Auth::id())
-                                     ->where('read', false)
-                                     ->orderBy('created_at', 'desc')
-                                     ->get();
+            ->where('read', false)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json($notifications);
     }
@@ -20,13 +21,11 @@ class NotificationController extends Controller
     public function markAllAsRead(Request $request)
     {
         $chatId = $request->input('chat_id');
-        
+
         Notification::where('chat_id', $chatId)
-                    ->where('user_id', Auth::id())
-                    ->update(['read' => true]);
-    
+            ->where('user_id', Auth::id())
+            ->update(['read' => true]);
+
         return response()->json(['success' => true]);
     }
-    
-
 }

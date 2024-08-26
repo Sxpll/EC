@@ -16,17 +16,17 @@ use Illuminate\Support\Facades\Log;
 class ProductController extends Controller
 {
     public function index()
-{
-    if (!Auth::check() || Auth::user()->role !== 'admin') {
-        return redirect('/home')->with('error', 'Unauthorized access');
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
+        // Retrieve all products
+        $products = Product::with('category')->get();
+        $categories = Category::all();
+
+        return view('products.manage-products', compact('products', 'categories'));
     }
-
-    // Retrieve all products
-    $products = Product::with('category')->get();
-    $categories = Category::all();
-
-    return view('products.manage-products', compact('products', 'categories'));
-}
 
 
     public function show($id)
@@ -108,82 +108,81 @@ class ProductController extends Controller
 
 
 
-public function update(Request $request, $id)
-{
-    $product = Product::findOrFail($id);
-    $oldData = $product->toArray();
-
-    // Usuń 'created_at' i 'updated_at' z oldData
-    unset($oldData['created_at'], $oldData['updated_at']);
-
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'required|string',
-        'category_id' => 'nullable|exists:categories,id',
-    ]);
-
-    // Aktualizacja produktu
-    $product->update($request->except(['_method', '_token']));
-
-    $newData = $product->toArray();
-
-    // Usuń 'created_at' i 'updated_at' z newData
-    unset($newData['created_at'], $newData['updated_at']);
-
-    // Zapis historii edycji produktu
-    foreach ($request->except(['_method', '_token']) as $key => $value) {
-        if (isset($oldData[$key]) && $oldData[$key] != $value) {
-            ProductHistory::create([
-                'admin_id' => Auth::user()->id,
-                'admin_name' => Auth::user()->name,
-                'action' => 'updated',
-                'product_id' => $product->id,
-                'field' => $key,
-                'old_value' => $oldData[$key],
-                'new_value' => $newData[$key],
-            ]);
-        }
-    }
-
-    return response()->json(['success' => true]);
-}
-
-
-public function destroy($id)
-{
-    Log::info("Attempting to deactivate product with ID: $id");
-
-    try {
+    public function update(Request $request, $id)
+    {
         $product = Product::findOrFail($id);
         $oldData = $product->toArray();
 
         // Usuń 'created_at' i 'updated_at' z oldData
         unset($oldData['created_at'], $oldData['updated_at']);
 
-        // Zamiast usuwania, ustawiamy isActive na 0
-        $product->update(['isActive' => false]);
-        $product->save();
-
-        Log::info('isActive value after update:', ['isActive' => $product->isActive]);
-
-
-        ProductHistory::create([
-            'admin_id' => Auth::user()->id,
-            'admin_name' => Auth::user()->name,
-            'action' => 'deleted',
-            'product_id' => $id,
-            'field' => 'Product',
-            'old_value' => json_encode($oldData),
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
-        Log::info("Product deactivated (soft delete) successfully: $id");
-        return response()->json(['success' => true]);
+        // Aktualizacja produktu
+        $product->update($request->except(['_method', '_token']));
 
-    } catch (\Exception $e) {
-        Log::error("Error deactivating product with ID: $id - " . $e->getMessage());
-        return response()->json(['error' => 'Error deactivating product'], 500);
+        $newData = $product->toArray();
+
+        // Usuń 'created_at' i 'updated_at' z newData
+        unset($newData['created_at'], $newData['updated_at']);
+
+        // Zapis historii edycji produktu
+        foreach ($request->except(['_method', '_token']) as $key => $value) {
+            if (isset($oldData[$key]) && $oldData[$key] != $value) {
+                ProductHistory::create([
+                    'admin_id' => Auth::user()->id,
+                    'admin_name' => Auth::user()->name,
+                    'action' => 'updated',
+                    'product_id' => $product->id,
+                    'field' => $key,
+                    'old_value' => $oldData[$key],
+                    'new_value' => $newData[$key],
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true]);
     }
-}
+
+
+    public function destroy($id)
+    {
+        Log::info("Attempting to deactivate product with ID: $id");
+
+        try {
+            $product = Product::findOrFail($id);
+            $oldData = $product->toArray();
+
+            // Usuń 'created_at' i 'updated_at' z oldData
+            unset($oldData['created_at'], $oldData['updated_at']);
+
+            // Zamiast usuwania, ustawiamy isActive na 0
+            $product->update(['isActive' => false]);
+            $product->save();
+
+            Log::info('isActive value after update:', ['isActive' => $product->isActive]);
+
+
+            ProductHistory::create([
+                'admin_id' => Auth::user()->id,
+                'admin_name' => Auth::user()->name,
+                'action' => 'deleted',
+                'product_id' => $id,
+                'field' => 'Product',
+                'old_value' => json_encode($oldData),
+            ]);
+
+            Log::info("Product deactivated (soft delete) successfully: $id");
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error("Error deactivating product with ID: $id - " . $e->getMessage());
+            return response()->json(['error' => 'Error deactivating product'], 500);
+        }
+    }
 
 
 
@@ -308,28 +307,26 @@ public function destroy($id)
     }
 
     public function fetchHistory($id)
-{
-    $histories = ProductHistory::where('product_id', $id)->get();
+    {
+        $histories = ProductHistory::where('product_id', $id)->get();
 
-    if ($histories->isEmpty()) {
-        return response()->json(['error' => 'No history found for this product'], 404);
+        if ($histories->isEmpty()) {
+            return response()->json(['error' => 'No history found for this product'], 404);
+        }
+
+        return response()->json($histories);
     }
 
-    return response()->json($histories);
-}
+    public function activate($id)
+    {
+        $product = Product::findOrFail($id);
 
-public function activate($id)
-{
-    $product = Product::findOrFail($id);
+        // Zmiana isActive na 1
+        $product->update(['isActive' => 1]);
 
-    // Zmiana isActive na 1
-    $product->update(['isActive' => 1]);
+        // Dodaj logowanie lub inne działania, jeśli potrzebne
+        Log::info('Product activated successfully: ' . $id);
 
-    // Dodaj logowanie lub inne działania, jeśli potrzebne
-    Log::info('Product activated successfully: ' . $id);
-
-    return response()->json(['success' => true]);
-}
-
-
+        return response()->json(['success' => true]);
+    }
 }

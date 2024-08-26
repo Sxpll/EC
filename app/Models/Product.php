@@ -12,17 +12,17 @@ class Product extends Model
     protected $fillable = ['name', 'description', 'category_id', 'isActive'];
 
     public function category()
-{
-    return $this->belongsTo(Category::class)->withDefault();
-}
+    {
+        return $this->belongsTo(Category::class)->withDefault();
+    }
 
-public function images()
-{
-    return $this->hasMany(ProductImage::class);
-}
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 
-public function attachments()
-{
-    return $this->hasMany(ProductAttachment::class);
-}
+    public function attachments()
+    {
+        return $this->hasMany(ProductAttachment::class);
+    }
 }
