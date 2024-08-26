@@ -14,12 +14,16 @@
                 <button type="submit" class="btn btn-success1">Add Category</button>
             </form>
 
-            <!-- Przycisk Back umieszczony w nowym wierszu -->
-            <div class="row mt-3">
-                <div class="col text-center">
-                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-back">Back</a>
-                </div>
-            </div>
+
+
+<!-- Przycisk Back umieszczony w nowym wierszu -->
+<div class="row mt-3">
+    <div class="col text-center">
+    <a href="{{ route ('admin.dashboard') }}" class="btn btn-secondary btn-back">Back</a>
+    </div>
+</div>
+
+
         </div>
     </div>
 </div>

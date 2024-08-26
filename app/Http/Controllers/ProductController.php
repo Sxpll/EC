@@ -6,7 +6,9 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
 use App\Models\ProductAttachment;
+
 use App\Models\ProductHistory;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -19,15 +21,16 @@ class ProductController extends Controller
         return redirect('/home')->with('error', 'Unauthorized access');
     }
 
-    $products = Product::where('isActive', true)->with('category')->get();
-    $categories = Category::all(); // Pobierz wszystkie kategorie
+    // Retrieve all products
+    $products = Product::with('category')->get();
+    $categories = Category::all();
 
     return view('products.manage-products', compact('products', 'categories'));
 }
 
+
     public function show($id)
     {
-
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/home')->with('error', 'Unauthorized access');
         }
@@ -43,7 +46,7 @@ class ProductController extends Controller
         return view('products.create', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request) // Tutaj używamy Request
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -55,9 +58,12 @@ class ProductController extends Controller
 
         Log::info('Storing new product', $request->all());
 
-        $product = Product::create($request->all());
+        // Tworzenie produktu
+        $product = Product::create($request->only('name', 'description', 'category_id'));
 
-        Log::info('Product stored successfully: ' . $product->id);
+        // Pobierz dane produktu bez created_at i updated_at
+        $newData = $product->toArray();
+        unset($newData['created_at'], $newData['updated_at']);
 
         // Zapis historii tworzenia produktu
         ProductHistory::create([
@@ -66,83 +72,101 @@ class ProductController extends Controller
             'action' => 'created',
             'product_id' => $product->id,
             'field' => 'Product',
-            'new_value' => json_encode($product->toArray())
+            'new_value' => json_encode($newData),
         ]);
 
-        // Przechowywanie zdjęć
+        // Obsługa zdjęć
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'file_data' => base64_encode(file_get_contents($image)),
+                    'file_data' => file_get_contents($image),
                     'mime_type' => $image->getClientMimeType()
                 ]);
             }
         }
 
-        // Przechowywanie załączników
+        // Obsługa załączników
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $attachment) {
                 ProductAttachment::create([
                     'product_id' => $product->id,
-                    'file_data' => base64_encode(file_get_contents($attachment)),
+                    'file_data' => file_get_contents($attachment),
                     'mime_type' => $attachment->getClientMimeType(),
                     'file_name' => $attachment->getClientOriginalName()
                 ]);
             }
         }
 
+        Log::info('Product stored successfully with images and attachments: ' . $product->id);
+
         return redirect()->route('products.index')->with('success', 'Product added successfully');
     }
 
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
-        $oldData = $product->toArray(); // Zapisujemy stare wartości
 
-        Log::info('Update request received for product ID: ' . $id, ['request_data' => $request->all()]);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'nullable|exists:categories,id',
-        ]);
 
-        // Aktualizacja produktu
-        $product->update($request->except(['_method', '_token']));
 
-        // Zapis historii edycji produktu
-        foreach ($request->except(['_method', '_token']) as $key => $value) {
-            if (isset($oldData[$key]) && $oldData[$key] != $value) {
-                ProductHistory::create([
-                    'admin_id' => Auth::user()->id,
-                    'admin_name' => Auth::user()->name,
-                    'action' => 'updated',
-                    'product_id' => $product->id,
-                    'field' => $key,
-                    'old_value' => $oldData[$key],
-                    'new_value' => $value,
-                ]);
-                Log::info('Field updated', [
-                    'field' => $key,
-                    'old_value' => $oldData[$key],
-                    'new_value' => $value
-                ]);
-            }
+
+public function update(Request $request, $id)
+{
+    $product = Product::findOrFail($id);
+    $oldData = $product->toArray();
+
+    // Usuń 'created_at' i 'updated_at' z oldData
+    unset($oldData['created_at'], $oldData['updated_at']);
+
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'required|string',
+        'category_id' => 'nullable|exists:categories,id',
+    ]);
+
+    // Aktualizacja produktu
+    $product->update($request->except(['_method', '_token']));
+
+    $newData = $product->toArray();
+
+    // Usuń 'created_at' i 'updated_at' z newData
+    unset($newData['created_at'], $newData['updated_at']);
+
+    // Zapis historii edycji produktu
+    foreach ($request->except(['_method', '_token']) as $key => $value) {
+        if (isset($oldData[$key]) && $oldData[$key] != $value) {
+            ProductHistory::create([
+                'admin_id' => Auth::user()->id,
+                'admin_name' => Auth::user()->name,
+                'action' => 'updated',
+                'product_id' => $product->id,
+                'field' => $key,
+                'old_value' => $oldData[$key],
+                'new_value' => $newData[$key],
+            ]);
         }
-
-        return response()->json(['success' => true]);
     }
 
-    public function destroy($id)
-    {
+    return response()->json(['success' => true]);
+}
+
+
+public function destroy($id)
+{
+    Log::info("Attempting to deactivate product with ID: $id");
+
+    try {
         $product = Product::findOrFail($id);
-        $oldData = $product->toArray(); // Zapisujemy dane przed usunięciem
+        $oldData = $product->toArray();
+
+        // Usuń 'created_at' i 'updated_at' z oldData
+        unset($oldData['created_at'], $oldData['updated_at']);
 
         // Zamiast usuwania, ustawiamy isActive na 0
         $product->update(['isActive' => false]);
+        $product->save();
 
-        // Zapis historii usuwania produktu
+        Log::info('isActive value after update:', ['isActive' => $product->isActive]);
+
+
         ProductHistory::create([
             'admin_id' => Auth::user()->id,
             'admin_name' => Auth::user()->name,
@@ -152,9 +176,16 @@ class ProductController extends Controller
             'old_value' => json_encode($oldData),
         ]);
 
-        Log::info('Product deactivated (soft delete) successfully: ' . $id);
-        return redirect()->route('products.index')->with('success', 'Product deactivated successfully');
+        Log::info("Product deactivated (soft delete) successfully: $id");
+        return response()->json(['success' => true]);
+
+    } catch (\Exception $e) {
+        Log::error("Error deactivating product with ID: $id - " . $e->getMessage());
+        return response()->json(['error' => 'Error deactivating product'], 500);
     }
+}
+
+
 
     public function showImages($id)
     {
@@ -286,5 +317,19 @@ class ProductController extends Controller
 
     return response()->json($histories);
 }
+
+public function activate($id)
+{
+    $product = Product::findOrFail($id);
+
+    // Zmiana isActive na 1
+    $product->update(['isActive' => 1]);
+
+    // Dodaj logowanie lub inne działania, jeśli potrzebne
+    Log::info('Product activated successfully: ' . $id);
+
+    return response()->json(['success' => true]);
+}
+
 
 }

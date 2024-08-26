@@ -3,14 +3,15 @@
 @section('content')
 <div class="container-admin manage-products-container">
     <div class="card-admin">
-        <div class="card-header">
-        <a href="{{ url()->previous() }}" class="btn btn-link text-decoration-none" style="margin-right: 725px";>
-            <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
-            </a>
-            <h1>Manage Products</h1>
-            <button id="openModalBtn" class="btn btn-success">Add Product</button>
-            <input type="text" id="search" placeholder="Search Products" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
-        </div>
+    <div class="card-header">
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none" style="margin-right: 725px;">
+        <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
+    </a>
+    <h1>Manage Products</h1>
+    <button id="openModalBtn" class="btn btn-success">Add Product</button>
+    <input type="text" id="search" placeholder="Search Products" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
+</div>
+
         <div class="card-body">
             <div id="alert-container"></div>
             <div class="table-responsive">
@@ -24,17 +25,18 @@
                         </tr>
                     </thead>
                     <tbody id="products-table">
-                        @foreach ($products as $product)
-                            <tr>
-                                <td>{{ $product->name }}</td>
-                                <td>{{ $product->category ? $product->category->name : 'No Category' }}</td>
-                                <td>{{ $product->description }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
+    @foreach ($products as $product)
+        <tr class="{{ !$product->isActive ? 'table-danger' : '' }}">
+            <td>{{ $product->name }}</td>
+            <td>{{ $product->category ? $product->category->name : 'No Category' }}</td>
+            <td>{{ $product->description }}</td>
+            <td>
+                <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
+            </td>
+        </tr>
+    @endforeach
+</tbody>
+
                 </table>
             </div>
         </div>
@@ -119,6 +121,7 @@
                 <div class="form-group d-flex justify-content-center">
                     <button type="submit" class="btn btn-primary mx-2">Update Product</button>
                     <button type="button" id="deleteProductBtn" class="btn btn-danger mx-2">Delete Product</button>
+                    <button type="button" id="activateProductBtn" class="btn btn-success mx-2">Activate Product</button>
                 </div>
             </form>
         </div>
@@ -311,8 +314,6 @@
                                 }).then(response => {
                                     console.log("Product delete response:", response.data);
                                     if (response.data.success) {
-                                        sessionStorage.setItem('message', 'Product deleted successfully');
-                                        sessionStorage.setItem('messageType', 'success');
                                         location.reload();
                                     } else {
                                         alert('Error deleting product');
@@ -370,6 +371,34 @@
                     console.error('Error fetching images:', error);
                 });
         }
+
+
+        document.getElementById('activateProductBtn').onclick = function () {
+    const productId = document.getElementById('viewProductId').value;
+
+    if (confirm('Are you sure you want to activate this product?')) {
+        axios.post(`/products/${productId}/activate`, {
+            _method: 'PUT',
+            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            isActive: 1 // Wartość isActive na 1
+        })
+        .then(response => {
+            console.log("Product activated successfully:", response.data);
+            if (response.data.success) {
+                sessionStorage.setItem('message', 'Product activated successfully');
+                sessionStorage.setItem('messageType', 'success');
+                location.reload(); // Odśwież stronę po aktywacji
+            } else {
+                alert('Error activating product');
+            }
+        })
+        .catch(error => {
+            console.error("Error activating product:", error.response ? error.response.data : error);
+            alert('Error activating product');
+        });
+    }
+};
+
 
         function fetchProductAttachments(productId) {
             console.log("Fetching attachments for product ID:", productId);

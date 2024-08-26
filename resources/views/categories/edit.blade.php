@@ -12,12 +12,17 @@
                     <label for="name">Category Name</label>
                     <input type="text" name="name" id="name" class="form-control" value="{{ $category->name }}" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Update Category</button>
+
+                <!-- Przycisk Update Category -->
+                <div class="form-group text-center">
+                    <button type="submit" class="btn btn-primary">Update Category</button>
+                </div>
+
+                <!-- Przycisk Back -->
+                <div class="form-group text-center">
+                    <a href="{{ route('categories.index') }}" class="btn btn-secondary btn-back" style="display: inline-block; width: auto;">Back</a>
+                </div>
             </form>
-            <!-- Przycisk Back -->
-            <div class="text-center mt-4">
-                <a href="{{ url()->previous() }}" class="btn btn-secondary btn-back">Back</a>
-            </div>
         </div>
     </div>
 </div>

@@ -9,6 +9,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use Illuminate\Support\Facades\Auth;
+
 
 
 Route::get('/', function () {
@@ -29,11 +31,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/manage-users', [AdminController::class, 'manageUsers'])->name('admin.manageUsers');
     Route::put('/admin/user/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::delete('/admin/user/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
     Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.storeUser');
     Route::get('/admin/history', [AdminController::class, 'showHistory'])->name('admin.history');
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
+    Route::put('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
+
 
 
 
@@ -41,6 +46,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::get('/products/{id}/images', [ProductController::class, 'showImages']);
     Route::get('/products/{id}/attachments', [ProductController::class, 'showAttachments']);
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
 
     // Trasy resource dla produktów i kategorii
     Route::resource('products', ProductController::class)->except(['show']);
