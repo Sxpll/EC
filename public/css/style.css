@@ -978,3 +978,7 @@ textarea.form-control {
     background-color: #f8d7da; /* Czerwone tło */
     color: red; /* Ciemny czerwony tekst */
 }
+
+.fa-arrow-left{
+    color: white;
+}
