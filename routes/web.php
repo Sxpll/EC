@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -39,6 +40,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
     Route::put('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
+    Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class);
+    Route::get('products/{id}/images', [ProductController::class, 'showImages'])->name('products.images');
+    Route::get('products/{id}/attachments', [ProductController::class, 'showAttachments'])->name('products.attachments');
+    Route::delete('products/{productId}/images/{imageId}', [ProductController::class, 'deleteImage'])->name('products.images.delete');
+    Route::delete('products/{productId}/attachments/{attachmentId}', [ProductController::class, 'deleteAttachment'])->name('products.attachments.delete');
+
 
 
 
@@ -72,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/products/{productId}/attachments/{attachmentId}', [ProductController::class, 'deleteAttachment']);
 
 
+    Route::post('/categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');
 
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);

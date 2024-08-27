@@ -1,4 +1,3 @@
-<!-- categories/category-tree.blade.php -->
 <ul>
     @foreach ($categories as $category)
     <li>
@@ -9,15 +8,7 @@
         @if ($category->childrenRecursive->count())
         <ul>
             @foreach ($category->childrenRecursive as $childCategory)
-            <li>
-                <input type="checkbox" name="categories[]" value="{{ $childCategory->id }}"
-                    @if(in_array($childCategory->id, $selectedCategories ?? [])) checked @endif>
-                {{ $childCategory->name }}
-
-                @if ($childCategory->childrenRecursive->count())
-                @include('categories.category-tree', ['categories' => $childCategory->childrenRecursive, 'selectedCategories' => $selectedCategories])
-                @endif
-            </li>
+            @include('categories.category-tree', ['categories' => $childCategory->childrenRecursive, 'selectedCategories' => $selectedCategories ?? []])
             @endforeach
         </ul>
         @endif

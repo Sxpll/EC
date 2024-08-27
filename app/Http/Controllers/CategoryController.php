@@ -99,4 +99,41 @@ class CategoryController extends Controller
 
         return redirect()->route('categories.index')->with('success', 'Category activated successfully.');
     }
+
+    public function updateHierarchy(Request $request)
+    {
+        $categories = $request->input('hierarchy');
+
+        try {
+            foreach ($categories as $index => $categoryData) {
+                $category = Category::findOrFail($categoryData['id']);
+                $category->update([
+                    'parent_id' => null,
+                    'order' => $index,
+                ]);
+
+                if (!empty($categoryData['children'])) {
+                    $this->updateChildCategories($categoryData['children'], $category->id);
+                }
+            }
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    private function updateChildCategories($children, $parentId)
+    {
+        foreach ($children as $index => $childData) {
+            $childCategory = Category::findOrFail($childData['id']);
+            $childCategory->update([
+                'parent_id' => $parentId,
+                'order' => $index,
+            ]);
+
+            if (!empty($childData['children'])) {
+                $this->updateChildCategories($childData['children'], $childCategory->id);
+            }
+        }
+    }
 }

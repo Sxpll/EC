@@ -48,8 +48,16 @@ class ProductController extends Controller
 
     public function create()
     {
-        $categories = Category::all();
+        // Pobierz kategorie z hierarchią
+        $categories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
         return view('products.create', compact('categories'));
+    }
+
+
+    public function edit($id)
+    {
+        $product = Product::with('categories')->findOrFail($id);
+        return response()->json($product);
     }
 
     public function store(Request $request)
