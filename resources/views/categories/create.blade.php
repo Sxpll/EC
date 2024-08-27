@@ -2,29 +2,39 @@
 
 @section('content')
 <div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <h1>Add New Category</h1>
-            <form action="{{ route('categories.store') }}" method="POST">
-                @csrf
-                <div class="form-group">
-                    <label for="name">Category Name</label>
-                    <input type="text" name="name" id="name" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-success1">Add Category</button>
-            </form>
-
-
-
-<!-- Przycisk Back umieszczony w nowym wierszu -->
-<div class="row mt-3">
-    <div class="col text-center">
-    <a href="{{ route ('admin.dashboard') }}" class="btn btn-secondary btn-back">Back</a>
-    </div>
-</div>
-
-
+    <h1>Add New Category</h1>
+    <form action="{{ route('categories.store') }}" method="POST">
+        @csrf
+        <div class="form-group">
+            <label for="name">Category Name</label>
+            <input type="text" name="name" id="name" class="form-control" required>
         </div>
-    </div>
+
+        <div class="form-group">
+            <label for="parent_id">Parent Category</label>
+            <select name="parent_id" id="parent_id" class="form-control">
+                <option value="">No Parent</option>
+                @foreach($categories as $category)
+                @if ($category->isActive)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @if ($category->childrenRecursive)
+                @foreach ($category->childrenRecursive as $child)
+                @if ($child->isActive)
+                <option value="{{ $child->id }}">-- {{ $child->name }}</option>
+                @endif
+                @endforeach
+                @endif
+                @endif
+                @endforeach
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Add Category</button>
+        <div class="row mt-3">
+            <div class="col text-center">
+                <a href="{{ route('categories.index') }}" class="btn btn-secondary btn-back">Back</a>
+            </div>
+        </div>
+    </form>
 </div>
 @endsection

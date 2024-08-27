@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
     Route::put('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
+    Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
+
 
 
 

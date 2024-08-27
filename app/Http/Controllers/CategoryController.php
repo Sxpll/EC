@@ -24,24 +24,23 @@ class CategoryController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        return view('categories.create');
+        $categories = Category::where('isActive', 1)->whereNull('parent_id')->with('childrenRecursive')->get();
+        return view('categories.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Unauthorized access');
-        }
-
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories',
+            'name' => 'required|string|max:255',
+            'parent_id' => 'nullable|exists:categories,id',
         ]);
 
         Category::create([
             'name' => $request->name,
+            'parent_id' => $request->parent_id,
         ]);
 
-        return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+        return redirect()->route('categories.index')->with('success', 'Category added successfully');
     }
 
     public function edit(Category $category)
@@ -50,7 +49,8 @@ class CategoryController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        return view('categories.edit', compact('category'));
+        $categories = Category::where('isActive', 1)->whereNull('parent_id')->with('childrenRecursive')->get();
+        return view('categories.edit', compact('category', 'categories'));
     }
 
     public function update(Request $request, Category $category)
@@ -61,10 +61,12 @@ class CategoryController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'parent_id' => 'nullable|exists:categories,id',
         ]);
 
         $category->update([
             'name' => $request->name,
+            'parent_id' => $request->parent_id,
         ]);
 
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
@@ -78,12 +80,23 @@ class CategoryController extends Controller
 
         $category = Category::findOrFail($id);
 
-        // Ustawienie category_id na null w produktach powiązanych z usuwaną kategorią
-        $category->products()->update(['category_id' => null]);
+        // Zamiast usuwać, zmieniamy `isActive` na 0
+        $category->update(['isActive' => 0]);
 
-        // Usuń kategorię
-        $category->delete();
+        return redirect()->route('categories.index')->with('success', 'Category deactivated successfully.');
+    }
 
-        return redirect()->route('categories.index')->with('success', 'Category deleted and products detached.');
+    public function activate($id)
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
+        $category = Category::findOrFail($id);
+
+        // Zmiana `isActive` na 1
+        $category->update(['isActive' => 1]);
+
+        return redirect()->route('categories.index')->with('success', 'Category activated successfully.');
     }
 }

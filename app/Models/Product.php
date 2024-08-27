@@ -11,10 +11,11 @@ class Product extends Model
 
     protected $fillable = ['name', 'description', 'category_id', 'isActive'];
 
-    public function category()
+    public function categories()
     {
-        return $this->belongsTo(Category::class)->withDefault();
+        return $this->belongsToMany(Category::class, 'category_product', 'product_id', 'category_id');
     }
+
 
     public function images()
     {

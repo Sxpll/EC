@@ -3,14 +3,14 @@
 @section('content')
 <div class="container-admin manage-products-container">
     <div class="card-admin">
-    <div class="card-header">
-    <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none" style="margin-right: 725px;">
-        <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
-    </a>
-    <h1>Manage Products</h1>
-    <button id="openModalBtn" class="btn btn-success">Add Product</button>
-    <input type="text" id="search" placeholder="Search Products" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
-</div>
+        <div class="card-header">
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none" style="margin-right: 725px;">
+                <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
+            </a>
+            <h1>Manage Products</h1>
+            <button id="openModalBtn" class="btn btn-success">Add Product</button>
+            <input type="text" id="search" placeholder="Search Products" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
+        </div>
 
         <div class="card-body">
             <div id="alert-container"></div>
@@ -25,17 +25,21 @@
                         </tr>
                     </thead>
                     <tbody id="products-table">
-    @foreach ($products as $product)
-        <tr class="{{ !$product->isActive ? 'table-danger' : '' }}">
-            <td>{{ $product->name }}</td>
-            <td>{{ $product->category ? $product->category->name : 'No Category' }}</td>
-            <td>{{ $product->description }}</td>
-            <td>
-                <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
-            </td>
-        </tr>
-    @endforeach
-</tbody>
+                        @foreach ($products as $product)
+                        <tr class="{{ !$product->isActive ? 'table-danger' : '' }}">
+                            <td>{{ $product->name }}</td>
+                            <td>
+                                @foreach ($product->categories as $category)
+                                {{ $category->name }}@if (!$loop->last), @endif
+                                @endforeach
+                            </td>
+                            <td>{{ $product->description }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
 
                 </table>
             </div>
@@ -55,13 +59,10 @@
                 <input type="text" name="name" id="name" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="category_id">Category:</label>
-                <select name="category_id" id="category_id" class="form-control">
-                    <option value="">No Category</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
-                </select>
+                <label for="categories">Categories:</label>
+                <div id="category-tree">
+                    @include('categories.category-tree', ['categories' => $categories, 'selectedCategories' => []])
+                </div>
             </div>
             <div class="form-group">
                 <label for="description">Description:</label>
@@ -106,13 +107,10 @@
                     <input type="text" id="viewName" name="name" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="viewCategoryId">Category:</label>
-                    <select id="viewCategoryId" name="category_id" class="form-control">
-                        <option value="">No Category</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
+                    <label for="categories">Categories:</label>
+                    <div id="category-tree">
+                        @include('categories.category-tree', ['categories' => $categories, 'selectedCategories' => $product->categories->pluck('id')->toArray()])
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="viewDescription">Description:</label>
@@ -169,10 +167,7 @@
 
         </div>
     </div>
-
-
 </div>
-
 
 <!-- Modal for image preview -->
 <div id="imagePreviewModal">
@@ -212,7 +207,6 @@
         // Open modal to add product
         addProductBtn.onclick = function() {
             addProductModal.style.display = "block";
-            console.log("Add Product Modal Opened");
         };
 
         // Close modals
@@ -237,15 +231,13 @@
         Array.from(viewBtns).forEach(function(btn) {
             btn.onclick = function() {
                 var productId = this.getAttribute("data-id");
-                console.log("Fetching product with ID:", productId);
 
                 fetch(`/products/${productId}`)
                     .then(response => response.json())
                     .then(data => {
-                        console.log("Product data received:", data);
+                        // Set product details
                         document.getElementById("viewProductId").value = data.product.id;
                         document.getElementById("viewName").value = data.product.name;
-                        document.getElementById("viewCategoryId").value = data.product.category_id;
                         document.getElementById("viewDescription").value = data.product.description;
 
                         fetchProductImages(productId);
@@ -255,101 +247,45 @@
                         fetch(`/products/${productId}/history`)
                             .then(response => response.json())
                             .then(histories => {
-                                console.log("Product history received:", histories);
                                 const historyTableBody = document.querySelector('#historyTable tbody');
                                 historyTableBody.innerHTML = '';
                                 histories.forEach(history => {
                                     const row = document.createElement('tr');
                                     row.innerHTML = `
-                                        <td>${history.admin_name}</td>
-                                        <td>${history.action}</td>
-                                        <td>${history.field}</td>
-                                        <td>${history.old_value ? history.old_value : 'N/A'}</td>
-                                        <td>${history.new_value ? history.new_value : 'N/A'}</td>
-                                        <td>${new Date(history.created_at).toLocaleString()}</td>
-                                    `;
+                                    <td>${history.admin_name}</td>
+                                    <td>${history.action}</td>
+                                    <td>${history.field}</td>
+                                    <td>${history.old_value ? history.old_value : 'N/A'}</td>
+                                    <td>${history.new_value ? history.new_value : 'N/A'}</td>
+                                    <td>${new Date(history.created_at).toLocaleString()}</td>
+                                `;
                                     historyTableBody.appendChild(row);
                                 });
                             });
-
-                        var viewProductForm = document.getElementById("viewProductForm");
-                        viewProductForm.onsubmit = function(event) {
-                            event.preventDefault();
-
-                            var updatedProduct = {
-                                name: document.getElementById("viewName").value,
-                                category_id: document.getElementById("viewCategoryId").value || null,
-                                description: document.getElementById("viewDescription").value,
-                                _method: 'PUT',
-                                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            };
-
-                            console.log("Updating product with ID:", productId, updatedProduct);
-
-                            axios.post(`/products/${productId}`, updatedProduct)
-                                .then(response => {
-                                    console.log("Product update response:", response.data);
-                                    if (response.data.success) {
-                                        sessionStorage.setItem('message', 'Product updated successfully');
-                                        sessionStorage.setItem('messageType', 'success');
-                                        location.reload();
-                                    } else {
-                                        alert('Error updating product');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Error updating product:", error.response ? error.response.data : error);
-                                    alert('Error updating product');
-                                });
-                        };
-
-                        deleteProductBtn.onclick = function() {
-                            if (confirm('Are you sure you want to delete this product?')) {
-                                console.log("Deleting product with ID:", productId);
-
-                                axios.delete(`/products/${productId}`, {
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                    }
-                                }).then(response => {
-                                    console.log("Product delete response:", response.data);
-                                    if (response.data.success) {
-                                        location.reload();
-                                    } else {
-                                        alert('Error deleting product');
-                                    }
-                                }).catch(error => {
-                                    console.error("Error deleting product:", error.response ? error.response.data : error);
-                                    alert('Error deleting product');
-                                });
-                            }
-                        };
 
                         viewProductModal.style.display = "block";
                     })
                     .catch(error => {
                         console.error("Error fetching product:", error);
                     });
-            }
+            };
         });
 
         function fetchProductImages(productId) {
-            console.log("Fetching images for product ID:", productId);
             axios.get(`/products/${productId}/images`)
                 .then(response => {
-                    console.log("Images data received:", response.data);
                     const imageContainer = document.getElementById('productImages');
                     imageContainer.innerHTML = '';
                     response.data.forEach(image => {
                         const imgElement = document.createElement('img');
                         imgElement.src = `data:${image.mime_type};base64,${image.file_data}`;
                         imgElement.classList.add('gallery-image');
+                        imageContainer.appendChild(imgElement);
 
                         const removeBtn = document.createElement('button');
                         removeBtn.textContent = 'Remove';
                         removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
                         removeBtn.onclick = function() {
-                            console.log("Removing image with ID:", image.id);
                             axios.delete(`/products/${productId}/images/${image.id}`)
                                 .then(() => {
                                     fetchProductImages(productId);
@@ -372,73 +308,36 @@
                 });
         }
 
-
-        document.getElementById('activateProductBtn').onclick = function () {
-    const productId = document.getElementById('viewProductId').value;
-
-    if (confirm('Are you sure you want to activate this product?')) {
-        axios.post(`/products/${productId}/activate`, {
-            _method: 'PUT',
-            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            isActive: 1 // Wartość isActive na 1
-        })
-        .then(response => {
-            console.log("Product activated successfully:", response.data);
-            if (response.data.success) {
-                sessionStorage.setItem('message', 'Product activated successfully');
-                sessionStorage.setItem('messageType', 'success');
-                location.reload(); // Odśwież stronę po aktywacji
-            } else {
-                alert('Error activating product');
-            }
-        })
-        .catch(error => {
-            console.error("Error activating product:", error.response ? error.response.data : error);
-            alert('Error activating product');
-        });
-    }
-};
-
-
         function fetchProductAttachments(productId) {
-            console.log("Fetching attachments for product ID:", productId);
             axios.get(`/products/${productId}/attachments`)
                 .then(response => {
-                    console.log("Attachments data received:", response.data);
                     const attachmentContainer = document.getElementById('productAttachments');
                     attachmentContainer.innerHTML = '';
-
                     response.data.forEach(attachment => {
                         const linkElement = document.createElement('a');
-                        linkElement.href = `data:${attachment.mime_type};base64,${attachment.file}`;
+                        linkElement.href = `/download/${attachment.id}`; // Zakładam, że masz endpoint do pobierania
                         linkElement.textContent = attachment.file_name;
-                        linkElement.download = attachment.file_name;
                         linkElement.classList.add('btn', 'btn-outline-info', 'mr-2', 'mt-2');
+                        linkElement.setAttribute('download', attachment.file_name);
 
                         const removeBtn = document.createElement('button');
                         removeBtn.textContent = 'Remove';
                         removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
 
-                        removeBtn.onclick = function () {
-                            console.log("Removing attachment with ID:", attachment.id);
+                        removeBtn.onclick = function() {
                             if (confirm('Are you sure you want to delete this attachment?')) {
                                 axios.delete(`/products/${productId}/attachments/${attachment.id}`)
-                                    .then(response => {
-                                        if (response.data.success) {
-                                            fetchProductAttachments(productId);
-                                        } else {
-                                            alert('Error deleting attachment');
-                                        }
+                                    .then(() => {
+                                        fetchProductAttachments(productId);
                                     })
                                     .catch(error => {
-                                        console.error('Error deleting attachment:', error);
-                                        alert('Error deleting attachment');
+                                        console.error('Error removing attachment:', error);
                                     });
                             }
                         };
 
                         const attachmentWrapper = document.createElement('div');
-                        attachmentWrapper.classList.add('d-flex', 'flex-column', 'align-items-center', 'mr-2', 'mt-2');
+                        attachmentWrapper.classList.add('attachment-item');
                         attachmentWrapper.appendChild(linkElement);
                         attachmentWrapper.appendChild(removeBtn);
 
@@ -450,7 +349,7 @@
                 });
         }
 
-        document.getElementById('saveNewImagesBtn').onclick = function () {
+        document.getElementById('saveNewImagesBtn').onclick = function() {
             const productId = document.getElementById('viewProductId').value;
             const formData = new FormData();
             const images = document.getElementById('newImages').files;
@@ -458,8 +357,6 @@
             for (let i = 0; i < images.length; i++) {
                 formData.append('images[]', images[i]);
             }
-
-            console.log("Uploading images for product ID:", productId);
 
             axios.post(`/products/${productId}/images`, formData, {
                 headers: {
@@ -476,7 +373,7 @@
             });
         };
 
-        document.getElementById('saveNewAttachmentsBtn').onclick = function () {
+        document.getElementById('saveNewAttachmentsBtn').onclick = function() {
             const productId = document.getElementById('viewProductId').value;
             const formData = new FormData();
             const attachments = document.getElementById('newAttachments').files;
@@ -484,8 +381,6 @@
             for (let i = 0; i < attachments.length; i++) {
                 formData.append('attachments[]', attachments[i]);
             }
-
-            console.log("Uploading attachments for product ID:", productId);
 
             axios.post(`/products/${productId}/attachments`, formData, {
                 headers: {

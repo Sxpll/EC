@@ -22,7 +22,8 @@ class ProductController extends Controller
         }
 
         // Retrieve all products
-        $products = Product::with('category')->get();
+        $products = Product::with('categories')->get();;
+
         $categories = Category::all();
 
         return view('products.manage-products', compact('products', 'categories'));
@@ -35,10 +36,15 @@ class ProductController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        $product = Product::with('category')->findOrFail($id);
+
+
+        $product = Product::with('categories')->findOrFail($id);
         $histories = ProductHistory::where('product_id', $id)->get();
+
         return response()->json(['product' => $product, 'histories' => $histories]);
     }
+
+
 
     public function create()
     {
@@ -46,12 +52,13 @@ class ProductController extends Controller
         return view('products.create', compact('categories'));
     }
 
-    public function store(Request $request) // Tutaj używamy Request
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
+            'categories' => 'required|array',
+            'categories.*' => 'exists:categories,id',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'attachments.*' => 'file|max:10240',
         ]);
@@ -59,11 +66,10 @@ class ProductController extends Controller
         Log::info('Storing new product', $request->all());
 
         // Tworzenie produktu
-        $product = Product::create($request->only('name', 'description', 'category_id'));
+        $product = Product::create($request->only('name', 'category', 'description'));
 
-        // Pobierz dane produktu bez created_at i updated_at
-        $newData = $product->toArray();
-        unset($newData['created_at'], $newData['updated_at']);
+        // Przypisanie kategorii
+        $product->categories()->sync($request->categories);
 
         // Zapis historii tworzenia produktu
         ProductHistory::create([
@@ -72,7 +78,7 @@ class ProductController extends Controller
             'action' => 'created',
             'product_id' => $product->id,
             'field' => 'Product',
-            'new_value' => json_encode($newData),
+            'new_value' => json_encode($product->toArray()),
         ]);
 
         // Obsługa zdjęć
@@ -104,31 +110,27 @@ class ProductController extends Controller
     }
 
 
-
-
-
-
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
         $oldData = $product->toArray();
 
-        // Usuń 'created_at' i 'updated_at' z oldData
-        unset($oldData['created_at'], $oldData['updated_at']);
-
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'category_id' => 'nullable|exists:categories,id',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
         ]);
 
         // Aktualizacja produktu
-        $product->update($request->except(['_method', '_token']));
+        $product->update($request->only('name', 'description'));
+
+        // Aktualizacja przypisania kategorii
+        if ($request->has('categories')) {
+            $product->categories()->sync($request->categories);
+        }
 
         $newData = $product->toArray();
-
-        // Usuń 'created_at' i 'updated_at' z newData
-        unset($newData['created_at'], $newData['updated_at']);
 
         // Zapis historii edycji produktu
         foreach ($request->except(['_method', '_token']) as $key => $value) {
