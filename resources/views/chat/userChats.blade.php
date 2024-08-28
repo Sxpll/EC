@@ -12,10 +12,13 @@
             </select>
         </div>
     </div>
-    <ul class="list-group mt-3" id="chatList">
-        <!-- Lista czatów będzie ładowana dynamicznie za pomocą JavaScript -->
-    </ul>
+    <div class="chat-container">
+        <ul class="list-group mt-3" id="chatList">
+            <!-- Lista czatów będzie ładowana dynamicznie za pomocą JavaScript -->
+        </ul>
+    </div>
 </div>
+
 
 <!-- New Chat Modal -->
 <div id="newChatModal" class="modal" tabindex="-1" role="dialog" style="display:none;">
