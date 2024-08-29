@@ -205,7 +205,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+
+    @if(auth()->check() && auth()->user()->role === 'admin')
     <script>
+        // Sprawdzenie, czy zmienna została już zdefiniowana
+        if (typeof notificationBannerShown === 'undefined') {
+            var notificationBannerShown = false;
+        }
+
         window.openChatWindow = function(chatId) {
             window.location.href = `/chat?openChat=${chatId}`;
         };
@@ -216,7 +223,8 @@
 
             if (notificationBell) {
                 notificationBell.addEventListener('click', function() {
-                    notificationsDropdown.style.display = notificationsDropdown.style.display === 'block' ? 'none' : 'block';
+                    const isDisplayed = notificationsDropdown.style.display === 'block';
+                    notificationsDropdown.style.display = isDisplayed ? 'none' : 'block';
                 });
             }
 
@@ -266,6 +274,11 @@
             }
         });
     </script>
+    @endif
+
+
+
+
 </body>
 
 </html>

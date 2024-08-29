@@ -704,7 +704,7 @@ textarea.form-control {
     border: 1px solid #353333; /* Granica */
     border-radius: 5px; /* Zaokrąglenie rogów */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Cień dla efektu unoszenia */
-    z-index: 1000; /* Warstwa na wierzchu */
+    z-index: 2000; /* Warstwa na wierzchu */
     opacity: 1; /* Pełna widoczność */
     visibility: visible; /* Widoczność elementu */
     overflow-y: auto; /* Dodanie paska przewijania w pionie w przypadku dużej ilości powiadomień */
@@ -746,6 +746,10 @@ textarea.form-control {
     transition: opacity 0.5s ease, transform 0.5s ease;
     z-index: 2000;
     backdrop-filter: blur(10px); /* Dodanie rozmytego tła */
+}
+
+.show-dropdown {
+    display: block !important;
 }
 
 .notification-banner.show {

@@ -95,6 +95,8 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
+    let notificationBannerShown = false; // Deklaracja na sztywno
+
     document.addEventListener('DOMContentLoaded', function() {
         const chatWindowModal = document.getElementById('chatWindowModal');
         const chatWindow = document.getElementById('chat-window');
