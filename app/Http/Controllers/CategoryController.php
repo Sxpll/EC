@@ -14,7 +14,7 @@ class CategoryController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        $categories = Category::all();
+        $categories = Category::where('isActive', 1)->whereNull('parent_id')->with('childrenRecursive')->get();
         return view('categories.index', compact('categories'));
     }
 
@@ -49,7 +49,7 @@ class CategoryController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        $categories = Category::where('isActive', 1)->whereNull('parent_id')->with('childrenRecursive')->get();
+        $categories = Category::active()->whereNull('parent_id')->with('childrenRecursive')->get();
         return view('categories.edit', compact('category', 'categories'));
     }
 
@@ -69,8 +69,14 @@ class CategoryController extends Controller
             'parent_id' => $request->parent_id,
         ]);
 
+        // Sprawdzamy, czy żądanie jest typu AJAX
+        if ($request->ajax()) {
+            return response()->json(['success' => 'Category renamed successfully.']);
+        }
+
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
+
 
     public function destroy($id)
     {
@@ -79,11 +85,9 @@ class CategoryController extends Controller
         }
 
         $category = Category::findOrFail($id);
-
-        // Zamiast usuwać, zmieniamy `isActive` na 0
         $category->update(['isActive' => 0]);
 
-        return redirect()->route('categories.index')->with('success', 'Category deactivated successfully.');
+        return response()->json(['success' => 'Category deactivated successfully.']);
     }
 
     public function activate($id)
@@ -93,8 +97,6 @@ class CategoryController extends Controller
         }
 
         $category = Category::findOrFail($id);
-
-        // Zmiana `isActive` na 1
         $category->update(['isActive' => 1]);
 
         return redirect()->route('categories.index')->with('success', 'Category activated successfully.');
@@ -108,7 +110,7 @@ class CategoryController extends Controller
             foreach ($categories as $index => $categoryData) {
                 $category = Category::findOrFail($categoryData['id']);
                 $category->update([
-                    'parent_id' => null,
+                    'parent_id' => $categoryData['parent_id'] ?? null,
                     'order' => $index,
                 ]);
 
@@ -135,5 +137,27 @@ class CategoryController extends Controller
                 $this->updateChildCategories($childData['children'], $childCategory->id);
             }
         }
+    }
+
+    public function getTree()
+    {
+        $categories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
+        $treeData = $this->buildTree($categories);
+
+        return response()->json($treeData);
+    }
+
+    private function buildTree($categories)
+    {
+        $tree = [];
+        foreach ($categories as $category) {
+            $node = [
+                'id' => $category->id,
+                'text' => $category->name,
+                'children' => $this->buildTree($category->childrenRecursive)
+            ];
+            $tree[] = $node;
+        }
+        return $tree;
     }
 }

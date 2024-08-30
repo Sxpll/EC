@@ -40,7 +40,6 @@
                         </tr>
                         @endforeach
                     </tbody>
-
                 </table>
             </div>
         </div>
@@ -60,9 +59,7 @@
             </div>
             <div class="form-group">
                 <label for="categories">Categories:</label>
-                <div id="category-tree">
-                    @include('categories.category-tree', ['categories' => $categories, 'selectedCategories' => []])
-                </div>
+                <div id="category-tree"></div> <!-- Kontener dla jsTree -->
             </div>
             <div class="form-group">
                 <label for="description">Description:</label>
@@ -78,7 +75,6 @@
             </div>
             <button type="submit" class="btn btn-success">Add Product</button>
         </form>
-
     </div>
 </div>
 
@@ -108,9 +104,7 @@
                 </div>
                 <div class="form-group">
                     <label for="categories">Categories:</label>
-                    <div id="category-tree">
-                        @include('categories.category-tree', ['categories' => $categories, 'selectedCategories' => $product->categories->pluck('id')->toArray()])
-                    </div>
+                    <div id="category-tree-view"></div> <!-- Kontener dla jsTree w trybie edycji -->
                 </div>
                 <div class="form-group">
                     <label for="viewDescription">Description:</label>
@@ -164,7 +158,6 @@
                 <tbody>
                 </tbody>
             </table>
-
         </div>
     </div>
 </div>
@@ -176,6 +169,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -186,216 +182,118 @@
         var viewBtns = document.getElementsByClassName("btn-view");
         var deleteProductBtn = document.getElementById("deleteProductBtn");
 
-        // Tab Switching
-        const tabs = document.querySelectorAll('.tab-link');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                const target = document.querySelector(`#${this.dataset.tab}`);
-
-                // Remove active class from all tabs and contents
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-
-                // Add active class to clicked tab and corresponding content
-                this.classList.add('active');
-                target.classList.add('active');
-            });
+        // Initialize jsTree for adding product
+        $('#category-tree').jstree({
+            'core': {
+                'data': {
+                    "url": "{{ route('categories.getTree') }}",
+                    "dataType": "json"
+                },
+                "check_callback": true,
+                "themes": {
+                    "variant": "large"
+                }
+            },
+            "plugins": ["checkbox", "wholerow"]
         });
 
-        // Open modal to add product
+        // Initialize jsTree for viewing product
+        $('#category-tree-view').jstree({
+            'core': {
+                'data': {
+                    "url": "{{ route('categories.getTree') }}",
+                    "dataType": "json"
+                },
+                "check_callback": true,
+                "themes": {
+                    "variant": "large"
+                }
+            },
+            "plugins": ["checkbox", "wholerow"]
+        });
+
+        // Open Add Product Modal
         addProductBtn.onclick = function() {
             addProductModal.style.display = "block";
         };
 
         // Close modals
-        Array.from(closeBtns).forEach(function(btn) {
-            btn.onclick = function() {
+        for (var i = 0; i < closeBtns.length; i++) {
+            closeBtns[i].onclick = function() {
                 addProductModal.style.display = "none";
                 viewProductModal.style.display = "none";
-            }
-        });
+            };
+        }
 
-        // Close modal if clicked outside
-        window.onclick = function(event) {
-            if (event.target == addProductModal) {
-                addProductModal.style.display = "none";
-            }
-            if (event.target == viewProductModal) {
-                viewProductModal.style.display = "none";
-            }
-        };
-
-        // View product and history
-        Array.from(viewBtns).forEach(function(btn) {
-            btn.onclick = function() {
-                var productId = this.getAttribute("data-id");
-
-                fetch(`/products/${productId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Set product details
-                        document.getElementById("viewProductId").value = data.product.id;
-                        document.getElementById("viewName").value = data.product.name;
-                        document.getElementById("viewDescription").value = data.product.description;
-
-                        fetchProductImages(productId);
-                        fetchProductAttachments(productId);
-
-                        // Fetch product history
-                        fetch(`/products/${productId}/history`)
-                            .then(response => response.json())
-                            .then(histories => {
-                                const historyTableBody = document.querySelector('#historyTable tbody');
-                                historyTableBody.innerHTML = '';
-                                histories.forEach(history => {
-                                    const row = document.createElement('tr');
-                                    row.innerHTML = `
-                                    <td>${history.admin_name}</td>
-                                    <td>${history.action}</td>
-                                    <td>${history.field}</td>
-                                    <td>${history.old_value ? history.old_value : 'N/A'}</td>
-                                    <td>${history.new_value ? history.new_value : 'N/A'}</td>
-                                    <td>${new Date(history.created_at).toLocaleString()}</td>
-                                `;
-                                    historyTableBody.appendChild(row);
-                                });
-                            });
-
+        // View Product Button Click
+        for (var i = 0; i < viewBtns.length; i++) {
+            viewBtns[i].onclick = function() {
+                var productId = $(this).data('id');
+                // Fetch product details and populate modal fields
+                axios.get(`/products/${productId}`)
+                    .then(function(response) {
+                        console.log(response.data); // Debugging line
+                        var product = response.data;
+                        $('#viewProductId').val(product.id);
+                        $('#viewName').val(product.name);
+                        $('#viewDescription').val(product.description);
+                        // Populate categories
+                        $('#category-tree-view').jstree(true).deselect_all(true);
+                        product.categories.forEach(function(categoryId) {
+                            $('#category-tree-view').jstree(true).select_node(categoryId);
+                        });
                         viewProductModal.style.display = "block";
                     })
-                    .catch(error => {
-                        console.error("Error fetching product:", error);
+                    .catch(function(error) {
+                        console.error('Error fetching product details:', error);
                     });
             };
+        }
+
+        // Delete Product
+        deleteProductBtn.onclick = function() {
+            var productId = $('#viewProductId').val();
+            axios.delete(`/products/${productId}`, {
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    }
+                })
+                .then(function(response) {
+                    alert('Product deleted successfully');
+                    viewProductModal.style.display = "none";
+                    location.reload();
+                })
+                .catch(function(error) {
+                    console.error('Error deleting product:', error);
+                });
+        };
+
+        // Activate Product
+        document.getElementById("activateProductBtn").onclick = function() {
+            var productId = $('#viewProductId').val();
+            axios.post(`/products/${productId}/activate`, {
+                    _token: '{{ csrf_token() }}'
+                })
+                .then(function(response) {
+                    alert('Product activated successfully');
+                    viewProductModal.style.display = "none";
+                    location.reload();
+                })
+                .catch(function(error) {
+                    console.error('Error activating product:', error);
+                });
+        };
+
+        // Modal image preview
+        $('#productImages').on('click', '.gallery-item img', function() {
+            var src = $(this).attr('src');
+            $('#previewImage').attr('src', src);
+            $('#imagePreviewModal').show();
         });
 
-        function fetchProductImages(productId) {
-            axios.get(`/products/${productId}/images`)
-                .then(response => {
-                    const imageContainer = document.getElementById('productImages');
-                    imageContainer.innerHTML = '';
-                    response.data.forEach(image => {
-                        const imgElement = document.createElement('img');
-                        imgElement.src = `data:${image.mime_type};base64,${image.file_data}`;
-                        imgElement.classList.add('gallery-image');
-                        imageContainer.appendChild(imgElement);
-
-                        const removeBtn = document.createElement('button');
-                        removeBtn.textContent = 'Remove';
-                        removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
-                        removeBtn.onclick = function() {
-                            axios.delete(`/products/${productId}/images/${image.id}`)
-                                .then(() => {
-                                    fetchProductImages(productId);
-                                })
-                                .catch(error => {
-                                    console.error('Error removing image:', error);
-                                });
-                        };
-
-                        const imageWrapper = document.createElement('div');
-                        imageWrapper.classList.add('gallery-item');
-                        imageWrapper.appendChild(imgElement);
-                        imageWrapper.appendChild(removeBtn);
-
-                        imageContainer.appendChild(imageWrapper);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching images:', error);
-                });
-        }
-
-        function fetchProductAttachments(productId) {
-            axios.get(`/products/${productId}/attachments`)
-                .then(response => {
-                    const attachmentContainer = document.getElementById('productAttachments');
-                    attachmentContainer.innerHTML = '';
-                    response.data.forEach(attachment => {
-                        const linkElement = document.createElement('a');
-                        linkElement.href = `/download/${attachment.id}`; // Zakładam, że masz endpoint do pobierania
-                        linkElement.textContent = attachment.file_name;
-                        linkElement.classList.add('btn', 'btn-outline-info', 'mr-2', 'mt-2');
-                        linkElement.setAttribute('download', attachment.file_name);
-
-                        const removeBtn = document.createElement('button');
-                        removeBtn.textContent = 'Remove';
-                        removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
-
-                        removeBtn.onclick = function() {
-                            if (confirm('Are you sure you want to delete this attachment?')) {
-                                axios.delete(`/products/${productId}/attachments/${attachment.id}`)
-                                    .then(() => {
-                                        fetchProductAttachments(productId);
-                                    })
-                                    .catch(error => {
-                                        console.error('Error removing attachment:', error);
-                                    });
-                            }
-                        };
-
-                        const attachmentWrapper = document.createElement('div');
-                        attachmentWrapper.classList.add('attachment-item');
-                        attachmentWrapper.appendChild(linkElement);
-                        attachmentWrapper.appendChild(removeBtn);
-
-                        attachmentContainer.appendChild(attachmentWrapper);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching attachments:', error);
-                });
-        }
-
-        document.getElementById('saveNewImagesBtn').onclick = function() {
-            const productId = document.getElementById('viewProductId').value;
-            const formData = new FormData();
-            const images = document.getElementById('newImages').files;
-
-            for (let i = 0; i < images.length; i++) {
-                formData.append('images[]', images[i]);
-            }
-
-            axios.post(`/products/${productId}/images`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }).then(response => {
-                if (response.data.success) {
-                    fetchProductImages(productId);
-                } else {
-                    alert('Error uploading images');
-                }
-            }).catch(error => {
-                console.error('Error uploading images:', error);
-            });
-        };
-
-        document.getElementById('saveNewAttachmentsBtn').onclick = function() {
-            const productId = document.getElementById('viewProductId').value;
-            const formData = new FormData();
-            const attachments = document.getElementById('newAttachments').files;
-
-            for (let i = 0; i < attachments.length; i++) {
-                formData.append('attachments[]', attachments[i]);
-            }
-
-            axios.post(`/products/${productId}/attachments`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }).then(response => {
-                if (response.data.success) {
-                    fetchProductAttachments(productId);
-                } else {
-                    alert('Error uploading attachments');
-                }
-            }).catch(error => {
-                console.error('Error uploading attachments:', error);
-            });
-        };
+        $('#closePreviewModal').click(function() {
+            $('#imagePreviewModal').hide();
+        });
     });
 </script>
 @endsection

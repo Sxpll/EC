@@ -96,30 +96,30 @@ class ChatController extends Controller
             $message->save();
             Log::info('Message saved for chat: ' . $chat->id);
 
-            // Wysyłanie powiadomień tylko dla użytkowników, gdy wiadomość pochodzi od admina
-            if (!$chat->admin_id || $message->admin_id !== Auth::id()) {
-                $admins = \App\Models\User::where('role', 'admin')->get();
-                foreach ($admins as $admin) {
-                    // Sprawdzenie, aby nie wysłać powiadomienia do samego siebie
-                    if ($admin->id !== Auth::id()) {
-                        Notification::create([
-                            'chat_id' => $chat->id,
-                            'user_id' => $admin->id,
-                            'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
-                            'read' => false,
-                        ]);
-                        Log::info('Notification sent to admin ID: ' . $admin->id);
-                    }
+            // Sprawdzenie, czy wiadomość pochodzi od admina
+            if ($message->admin_id) {
+                // Jeśli admin wysłał wiadomość, sprawdź, czy to admin przypisany do czatu
+                if ($chat->admin_id && $chat->admin_id !== $message->admin_id) {
+                    // Powiadom przypisanego admina, że nowa wiadomość została wysłana
+                    Notification::create([
+                        'chat_id' => $chat->id,
+                        'user_id' => $chat->admin_id,
+                        'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
+                        'read' => false,
+                    ]);
+                    Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
                 }
             } else {
-                // Powiadomienie dla przypisanego admina
-                Notification::create([
-                    'chat_id' => $chat->id,
-                    'user_id' => $chat->admin_id,
-                    'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
-                    'read' => false,
-                ]);
-                Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
+                // Wiadomość pochodzi od użytkownika, wyślij powiadomienie do przypisanego admina
+                if ($chat->admin_id) {
+                    Notification::create([
+                        'chat_id' => $chat->id,
+                        'user_id' => $chat->admin_id,
+                        'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
+                        'read' => false,
+                    ]);
+                    Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
+                }
             }
 
             // Zwróć pomyślną odpowiedź
@@ -134,10 +134,6 @@ class ChatController extends Controller
             ], 500);
         }
     }
-
-
-
-
 
 
     public function takeChat($id)

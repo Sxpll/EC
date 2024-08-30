@@ -1176,3 +1176,27 @@ h1.elo {
 #chat-window::-webkit-scrollbar-thumb:hover {
     background-color: #16a085;  /* Kolor suwaka po najechaniu */
 }
+
+.dd {
+    max-height: 400px; /* Maksymalna wysokość dla kontenera z drzewem kategorii */
+    overflow-y: auto; /* Dodanie przewijania w pionie */
+    background-color: #2c2c2c; /* Kolor tła */
+    padding: 20px; /* Wewnętrzne odstępy */
+    border-radius: 10px; /* Zaokrąglone rogi */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Cień dla efektu unoszenia */
+    margin-bottom: 20px; /* Odstęp poniżej drzewa */
+}
+
+.dd-list {
+    list-style-type: none; /* Usunięcie kropek z listy */
+    padding: 0; /* Usunięcie domyślnych odstępów */
+}
+
+.dd-item > .dd-handle {
+    cursor: move; /* Wskaźnik kursora przy przeciąganiu */
+    background-color: #444; /* Kolor tła uchwytu */
+    color: #fff; /* Kolor tekstu */
+    padding: 10px; /* Wewnętrzne odstępy dla uchwytu */
+    border-radius: 5px; /* Zaokrąglenie krawędzi */
+    margin-bottom: 5px; /* Odstęp poniżej uchwytu */
+}

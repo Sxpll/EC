@@ -36,13 +36,15 @@ class ProductController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-
-
         $product = Product::with('categories')->findOrFail($id);
         $histories = ProductHistory::where('product_id', $id)->get();
 
-        return response()->json(['product' => $product, 'histories' => $histories]);
+        return response()->json([
+            'product' => $product,
+            'histories' => $histories
+        ]);
     }
+
 
 
 
@@ -62,6 +64,8 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('Request Data:', $request->all());
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -74,7 +78,7 @@ class ProductController extends Controller
         Log::info('Storing new product', $request->all());
 
         // Tworzenie produktu
-        $product = Product::create($request->only('name', 'category', 'description'));
+        $product = Product::create($request->only('name', 'description'));
 
         // Przypisanie kategorii
         $product->categories()->sync($request->categories);
@@ -116,6 +120,7 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')->with('success', 'Product added successfully');
     }
+
 
 
     public function update(Request $request, $id)

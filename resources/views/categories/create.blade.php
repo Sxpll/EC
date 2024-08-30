@@ -15,16 +15,7 @@
             <select name="parent_id" id="parent_id" class="form-control">
                 <option value="">No Parent</option>
                 @foreach($categories as $category)
-                @if ($category->isActive)
-                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                @if ($category->childrenRecursive)
-                @foreach ($category->childrenRecursive as $child)
-                @if ($child->isActive)
-                <option value="{{ $child->id }}">-- {{ $child->name }}</option>
-                @endif
-                @endforeach
-                @endif
-                @endif
+                @include('categories.category-option', ['category' => $category, 'level' => 0])
                 @endforeach
             </select>
         </div>
