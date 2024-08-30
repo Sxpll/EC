@@ -59,7 +59,8 @@
             </div>
             <div class="form-group">
                 <label for="categories">Categories:</label>
-                <div id="category-tree"></div> <!-- Kontener dla jsTree -->
+                <div id="category-tree"></div>
+                <input type="hidden" name="categories[]" id="selectedCategories">
             </div>
             <div class="form-group">
                 <label for="description">Description:</label>
@@ -94,9 +95,9 @@
 
         <!-- Info tab -->
         <div id="Info" class="tab-content active">
-            <form id="viewProductForm" method="POST">
+            <form id="viewProductForm" method="POST" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
+                <input type="hidden" name="_method" value="PUT">
                 <input type="hidden" id="viewProductId" name="id">
                 <div class="form-group">
                     <label for="viewName">Name:</label>
@@ -104,7 +105,8 @@
                 </div>
                 <div class="form-group">
                     <label for="categories">Categories:</label>
-                    <div id="category-tree-view"></div> <!-- Kontener dla jsTree w trybie edycji -->
+                    <div id="category-tree-view"></div>
+                    <input type="hidden" name="categories[]" id="selectedCategoriesView">
                 </div>
                 <div class="form-group">
                     <label for="viewDescription">Description:</label>
@@ -182,7 +184,6 @@
         var viewBtns = document.getElementsByClassName("btn-view");
         var deleteProductBtn = document.getElementById("deleteProductBtn");
 
-        // Initialize jsTree for adding product
         $('#category-tree').jstree({
             'core': {
                 'data': {
@@ -197,7 +198,6 @@
             "plugins": ["checkbox", "wholerow"]
         });
 
-        // Initialize jsTree for viewing product
         $('#category-tree-view').jstree({
             'core': {
                 'data': {
@@ -212,12 +212,20 @@
             "plugins": ["checkbox", "wholerow"]
         });
 
-        // Open Add Product Modal
+        $('#category-tree').on("changed.jstree", function(e, data) {
+            var selectedCategories = data.selected;
+            $('#selectedCategories').val(selectedCategories.join(','));
+        });
+
+        $('#category-tree-view').on("changed.jstree", function(e, data) {
+            var selectedCategoriesView = data.selected;
+            $('#selectedCategoriesView').val(selectedCategoriesView.join(','));
+        });
+
         addProductBtn.onclick = function() {
             addProductModal.style.display = "block";
         };
 
-        // Close modals
         for (var i = 0; i < closeBtns.length; i++) {
             closeBtns[i].onclick = function() {
                 addProductModal.style.display = "none";
@@ -225,22 +233,18 @@
             };
         }
 
-        // View Product Button Click
         for (var i = 0; i < viewBtns.length; i++) {
             viewBtns[i].onclick = function() {
                 var productId = $(this).data('id');
-                // Fetch product details and populate modal fields
                 axios.get(`/products/${productId}`)
                     .then(function(response) {
-                        console.log(response.data); // Debugging line
-                        var product = response.data;
+                        var product = response.data.product;
                         $('#viewProductId').val(product.id);
                         $('#viewName').val(product.name);
                         $('#viewDescription').val(product.description);
-                        // Populate categories
                         $('#category-tree-view').jstree(true).deselect_all(true);
-                        product.categories.forEach(function(categoryId) {
-                            $('#category-tree-view').jstree(true).select_node(categoryId);
+                        product.categories.forEach(function(category) {
+                            $('#category-tree-view').jstree(true).select_node(category.id);
                         });
                         viewProductModal.style.display = "block";
                     })
@@ -250,7 +254,6 @@
             };
         }
 
-        // Delete Product
         deleteProductBtn.onclick = function() {
             var productId = $('#viewProductId').val();
             axios.delete(`/products/${productId}`, {
@@ -268,7 +271,6 @@
                 });
         };
 
-        // Activate Product
         document.getElementById("activateProductBtn").onclick = function() {
             var productId = $('#viewProductId').val();
             axios.post(`/products/${productId}/activate`, {
@@ -284,7 +286,6 @@
                 });
         };
 
-        // Modal image preview
         $('#productImages').on('click', '.gallery-item img', function() {
             var src = $(this).attr('src');
             $('#previewImage').attr('src', src);
@@ -293,6 +294,14 @@
 
         $('#closePreviewModal').click(function() {
             $('#imagePreviewModal').hide();
+        });
+
+        $('.tab-link').click(function() {
+            var tab = $(this).data('tab');
+            $('.tab-link').removeClass('active');
+            $(this).addClass('active');
+            $('.tab-content').removeClass('active');
+            $('#' + tab).addClass('active');
         });
     });
 </script>

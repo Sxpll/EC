@@ -35,7 +35,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
 
-    // Products routes
     Route::resource('products', ProductController::class)->except(['show']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::get('/products/{id}/images', [ProductController::class, 'showImages']);
@@ -44,8 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/products/{productId}/attachments/{attachmentId}', [ProductController::class, 'deleteAttachment'])->name('products.attachments.delete');
     Route::post('/products/{product}/images', [ProductController::class, 'storeImages']);
     Route::post('/products/{product}/attachments', [ProductController::class, 'storeAttachments']);
-    Route::put('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
+    Route::post('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
+
 
     // Categories routes
     Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
@@ -55,7 +55,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-
 
     // Chat routes
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');

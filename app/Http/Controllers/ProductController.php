@@ -6,9 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
 use App\Models\ProductAttachment;
-
 use App\Models\ProductHistory;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,14 +19,11 @@ class ProductController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        // Retrieve all products
-        $products = Product::with('categories')->get();;
-
+        $products = Product::with('categories')->get();
         $categories = Category::all();
 
         return view('products.manage-products', compact('products', 'categories'));
     }
-
 
     public function show($id)
     {
@@ -45,16 +40,11 @@ class ProductController extends Controller
         ]);
     }
 
-
-
-
     public function create()
     {
-        // Pobierz kategorie z hierarchią
         $categories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
         return view('products.create', compact('categories'));
     }
-
 
     public function edit($id)
     {
@@ -64,8 +54,6 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        Log::info('Request Data:', $request->all());
-
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -75,25 +63,11 @@ class ProductController extends Controller
             'attachments.*' => 'file|max:10240',
         ]);
 
-        Log::info('Storing new product', $request->all());
-
-        // Tworzenie produktu
         $product = Product::create($request->only('name', 'description'));
 
-        // Przypisanie kategorii
-        $product->categories()->sync($request->categories);
+        $categories = json_decode($request->input('categories')[0]);
+        $product->categories()->sync($categories);
 
-        // Zapis historii tworzenia produktu
-        ProductHistory::create([
-            'admin_id' => Auth::user()->id,
-            'admin_name' => Auth::user()->name,
-            'action' => 'created',
-            'product_id' => $product->id,
-            'field' => 'Product',
-            'new_value' => json_encode($product->toArray()),
-        ]);
-
-        // Obsługa zdjęć
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 ProductImage::create([
@@ -104,7 +78,6 @@ class ProductController extends Controller
             }
         }
 
-        // Obsługa załączników
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $attachment) {
                 ProductAttachment::create([
@@ -116,12 +89,8 @@ class ProductController extends Controller
             }
         }
 
-        Log::info('Product stored successfully with images and attachments: ' . $product->id);
-
         return redirect()->route('products.index')->with('success', 'Product added successfully');
     }
-
-
 
     public function update(Request $request, $id)
     {
@@ -135,17 +104,17 @@ class ProductController extends Controller
             'categories.*' => 'exists:categories,id',
         ]);
 
-        // Aktualizacja produktu
         $product->update($request->only('name', 'description'));
 
-        // Aktualizacja przypisania kategorii
         if ($request->has('categories')) {
-            $product->categories()->sync($request->categories);
+            $categories = json_decode($request->input('categories')[0]);
+            $product->categories()->sync($categories);
+        } else {
+            $product->categories()->sync([]);
         }
 
         $newData = $product->toArray();
 
-        // Zapis historii edycji produktu
         foreach ($request->except(['_method', '_token']) as $key => $value) {
             if (isset($oldData[$key]) && $oldData[$key] != $value) {
                 ProductHistory::create([
@@ -160,27 +129,17 @@ class ProductController extends Controller
             }
         }
 
-        return response()->json(['success' => true]);
+        return redirect()->route('products.index')->with('success', 'Product updated successfully');
     }
-
 
     public function destroy($id)
     {
-        Log::info("Attempting to deactivate product with ID: $id");
-
         try {
             $product = Product::findOrFail($id);
             $oldData = $product->toArray();
-
-            // Usuń 'created_at' i 'updated_at' z oldData
             unset($oldData['created_at'], $oldData['updated_at']);
-
-            // Zamiast usuwania, ustawiamy isActive na 0
             $product->update(['isActive' => false]);
             $product->save();
-
-            Log::info('isActive value after update:', ['isActive' => $product->isActive]);
-
 
             ProductHistory::create([
                 'admin_id' => Auth::user()->id,
@@ -191,15 +150,12 @@ class ProductController extends Controller
                 'old_value' => json_encode($oldData),
             ]);
 
-            Log::info("Product deactivated (soft delete) successfully: $id");
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             Log::error("Error deactivating product with ID: $id - " . $e->getMessage());
             return response()->json(['error' => 'Error deactivating product'], 500);
         }
     }
-
-
 
     public function showImages($id)
     {
@@ -213,11 +169,8 @@ class ProductController extends Controller
                 ];
             });
 
-            Log::info("Fetched images for product ID: $id", $images->toArray());
-
             return response()->json($images);
         } catch (\Exception $e) {
-            Log::error("Error fetching images for product ID: $id - " . $e->getMessage());
             return response()->json(['error' => 'Error fetching images'], 500);
         }
     }
@@ -235,11 +188,8 @@ class ProductController extends Controller
                 ];
             });
 
-            Log::info("Fetched attachments for product ID: $id");
-
             return response()->json($attachments);
         } catch (\Exception $e) {
-            Log::error("Error fetching attachments for product ID: $id - " . $e->getMessage());
             return response()->json(['error' => 'Error fetching attachments'], 500);
         }
     }
@@ -249,12 +199,8 @@ class ProductController extends Controller
         try {
             $image = ProductImage::where('product_id', $productId)->where('id', $imageId)->firstOrFail();
             $image->delete();
-
-            Log::info("Deleted image with ID: $imageId for product ID: $productId");
-
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error("Error deleting image for product ID: $productId - " . $e->getMessage());
             return response()->json(['error' => 'Error deleting image'], 500);
         }
     }
@@ -266,12 +212,8 @@ class ProductController extends Controller
                 ->where('id', $attachmentId)
                 ->firstOrFail();
             $attachment->delete();
-
-            Log::info("Deleted attachment with ID: $attachmentId for product ID: $productId");
-
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error("Error deleting attachment for product ID: $productId - " . $e->getMessage());
             return response()->json(['error' => 'Error deleting attachment'], 500);
         }
     }
@@ -294,7 +236,6 @@ class ProductController extends Controller
             }
         }
 
-        Log::info("Images stored successfully for product ID: $id");
         return response()->json(['success' => true]);
     }
 
@@ -317,7 +258,6 @@ class ProductController extends Controller
             }
         }
 
-        Log::info("Attachments stored successfully for product ID: $id");
         return response()->json(['success' => true]);
     }
 
@@ -335,13 +275,7 @@ class ProductController extends Controller
     public function activate($id)
     {
         $product = Product::findOrFail($id);
-
-        // Zmiana isActive na 1
         $product->update(['isActive' => 1]);
-
-        // Dodaj logowanie lub inne działania, jeśli potrzebne
-        Log::info('Product activated successfully: ' . $id);
-
         return response()->json(['success' => true]);
     }
 }
