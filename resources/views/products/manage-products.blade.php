@@ -157,152 +157,247 @@
                         <th>Date</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="historyTableBody">
+                    <!-- Dane historii zostaną wstawione tutaj dynamicznie przez JavaScript -->
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
 
-<!-- Modal for image preview -->
-<div id="imagePreviewModal">
-    <span class="close-custom" id="closePreviewModal">&times;</span>
-    <img id="previewImage" src="">
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+        <!-- Modal for image preview -->
+        <div id="imagePreviewModal">
+            <span class="close-custom" id="closePreviewModal">&times;</span>
+            <img id="previewImage" src="">
+        </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var addProductModal = document.getElementById("addProductModal");
-        var viewProductModal = document.getElementById("viewProductModal");
-        var addProductBtn = document.getElementById("openModalBtn");
-        var closeBtns = document.getElementsByClassName("close");
-        var viewBtns = document.getElementsByClassName("btn-view");
-        var deleteProductBtn = document.getElementById("deleteProductBtn");
+        @section('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 
-        $('#category-tree').jstree({
-            'core': {
-                'data': {
-                    "url": "{{ route('categories.getTree') }}",
-                    "dataType": "json"
-                },
-                "check_callback": true,
-                "themes": {
-                    "variant": "large"
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var addProductModal = document.getElementById("addProductModal");
+                var viewProductModal = document.getElementById("viewProductModal");
+                var addProductBtn = document.getElementById("openModalBtn");
+                var closeBtns = document.getElementsByClassName("close");
+                var viewBtns = document.getElementsByClassName("btn-view");
+                var deleteProductBtn = document.getElementById("deleteProductBtn");
+
+                // Inicjalizacja drzewa kategorii do wyboru
+                $('#category-tree').jstree({
+                    'core': {
+                        'data': {
+                            "url": "{{ route('categories.getTree') }}",
+                            "dataType": "json"
+                        },
+                        "check_callback": true,
+                        "themes": {
+                            "variant": "large"
+                        }
+                    },
+                    "plugins": ["checkbox", "wholerow"]
+                });
+
+                $('#category-tree-view').jstree({
+                    'core': {
+                        'data': {
+                            "url": "{{ route('categories.getTree') }}",
+                            "dataType": "json"
+                        },
+                        "check_callback": true,
+                        "themes": {
+                            "variant": "large"
+                        }
+                    },
+                    "plugins": ["checkbox", "wholerow"]
+                });
+
+                // Zbieranie wybranych kategorii jako tablicy
+                $('#category-tree').on("changed.jstree", function(e, data) {
+                    var selectedCategories = data.selected;
+                    $('#selectedCategories').val(selectedCategories); // Przekazanie tablicy ID
+                });
+
+                $('#category-tree-view').on("changed.jstree", function(e, data) {
+                    var selectedCategoriesView = data.selected;
+                    $('#selectedCategoriesView').val(selectedCategoriesView); // Przekazanie tablicy ID
+                });
+
+                // Otwórz modal dodawania produktu
+                addProductBtn.onclick = function() {
+                    addProductModal.style.display = "block";
+                };
+
+                // Zamknij modale
+                for (var i = 0; i < closeBtns.length; i++) {
+                    closeBtns[i].onclick = function() {
+                        addProductModal.style.display = "none";
+                        viewProductModal.style.display = "none";
+                    };
                 }
-            },
-            "plugins": ["checkbox", "wholerow"]
-        });
 
-        $('#category-tree-view').jstree({
-            'core': {
-                'data': {
-                    "url": "{{ route('categories.getTree') }}",
-                    "dataType": "json"
-                },
-                "check_callback": true,
-                "themes": {
-                    "variant": "large"
+                // Pobierz szczegóły produktu i historię
+                for (var i = 0; i < viewBtns.length; i++) {
+                    viewBtns[i].onclick = function() {
+                        var productId = $(this).data('id');
+                        axios.get(`/products/${productId}`)
+                            .then(function(response) {
+                                var product = response.data.product;
+                                $('#viewProductId').val(product.id);
+                                $('#viewName').val(product.name);
+                                $('#viewDescription').val(product.description);
+                                $('#category-tree-view').jstree(true).deselect_all(true);
+
+                                if (product.categories) {
+                                    product.categories.forEach(function(category) {
+                                        $('#category-tree-view').jstree(true).select_node(category.id);
+                                    });
+                                }
+
+                                viewProductModal.style.display = "block";
+
+                                // Wyświetl historię produktu
+                                var histories = response.data.histories || [];
+                                var historyTableBody = $('#historyTableBody');
+                                historyTableBody.empty();
+
+                                // Sortowanie historii od najnowszej do najstarszej
+                                histories.sort(function(a, b) {
+                                    return new Date(b.created_at) - new Date(a.created_at);
+                                });
+
+                                histories.forEach(function(history) {
+                                    var row = `<tr>
+                                <td>${history.admin_name}</td>
+                                <td>${history.action}</td>
+                                <td>${history.field}</td>
+                                <td>${history.old_value}</td>
+                                <td>${history.new_value}</td>
+                                <td>${new Date(history.created_at).toLocaleString()}</td>
+                            </tr>`;
+                                    historyTableBody.append(row);
+                                });
+
+                                // Wyświetl obrazy
+                                var productImages = response.data.product.images || [];
+                                var imagesContainer = $('#productImages');
+                                imagesContainer.empty();
+                                productImages.forEach(function(image) {
+                                    var imgElement = `<div class="gallery-item">
+                                <img src="data:${image.mime_type};base64,${btoa(image.file_data)}" class="img-thumbnail" />
+                                <button class="btn btn-danger btn-sm delete-image" data-id="${image.id}">Delete</button>
+                            </div>`;
+                                    imagesContainer.append(imgElement);
+                                });
+
+                                // Wyświetl załączniki
+                                var productAttachments = response.data.product.attachments || [];
+                                var attachmentsContainer = $('#productAttachments');
+                                attachmentsContainer.empty();
+                                productAttachments.forEach(function(attachment) {
+                                    var attachmentElement = `<div class="attachment-item">
+                                <a href="data:${attachment.mime_type};base64,${btoa(attachment.file)}" target="_blank">${attachment.file_name}</a>
+                                <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
+                            </div>`;
+                                    attachmentsContainer.append(attachmentElement);
+                                });
+
+                            })
+                            .catch(function(error) {
+                                console.error('Error fetching product details:', error);
+                            });
+                    };
                 }
-            },
-            "plugins": ["checkbox", "wholerow"]
-        });
 
-        $('#category-tree').on("changed.jstree", function(e, data) {
-            var selectedCategories = data.selected;
-            $('#selectedCategories').val(selectedCategories.join(','));
-        });
-
-        $('#category-tree-view').on("changed.jstree", function(e, data) {
-            var selectedCategoriesView = data.selected;
-            $('#selectedCategoriesView').val(selectedCategoriesView.join(','));
-        });
-
-        addProductBtn.onclick = function() {
-            addProductModal.style.display = "block";
-        };
-
-        for (var i = 0; i < closeBtns.length; i++) {
-            closeBtns[i].onclick = function() {
-                addProductModal.style.display = "none";
-                viewProductModal.style.display = "none";
-            };
-        }
-
-        for (var i = 0; i < viewBtns.length; i++) {
-            viewBtns[i].onclick = function() {
-                var productId = $(this).data('id');
-                axios.get(`/products/${productId}`)
-                    .then(function(response) {
-                        var product = response.data.product;
-                        $('#viewProductId').val(product.id);
-                        $('#viewName').val(product.name);
-                        $('#viewDescription').val(product.description);
-                        $('#category-tree-view').jstree(true).deselect_all(true);
-                        product.categories.forEach(function(category) {
-                            $('#category-tree-view').jstree(true).select_node(category.id);
+                // Funkcja do dodawania nowych zdjęć
+                $('#saveNewImagesBtn').click(function() {
+                    var formData = new FormData($('#addImageForm')[0]);
+                    var productId = $('#viewProductId').val();
+                    axios.post(`/products/${productId}/images`, formData)
+                        .then(function(response) {
+                            alert('Images uploaded successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error uploading images:', error);
                         });
-                        viewProductModal.style.display = "block";
-                    })
-                    .catch(function(error) {
-                        console.error('Error fetching product details:', error);
-                    });
-            };
-        }
-
-        deleteProductBtn.onclick = function() {
-            var productId = $('#viewProductId').val();
-            axios.delete(`/products/${productId}`, {
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    }
-                })
-                .then(function(response) {
-                    alert('Product deleted successfully');
-                    viewProductModal.style.display = "none";
-                    location.reload();
-                })
-                .catch(function(error) {
-                    console.error('Error deleting product:', error);
                 });
-        };
 
-        document.getElementById("activateProductBtn").onclick = function() {
-            var productId = $('#viewProductId').val();
-            axios.post(`/products/${productId}/activate`, {
-                    _token: '{{ csrf_token() }}'
-                })
-                .then(function(response) {
-                    alert('Product activated successfully');
-                    viewProductModal.style.display = "none";
-                    location.reload();
-                })
-                .catch(function(error) {
-                    console.error('Error activating product:', error);
+                // Funkcja do dodawania nowych załączników
+                $('#saveNewAttachmentsBtn').click(function() {
+                    var formData = new FormData($('#addAttachmentForm')[0]);
+                    var productId = $('#viewProductId').val();
+                    axios.post(`/products/${productId}/attachments`, formData)
+                        .then(function(response) {
+                            alert('Attachments uploaded successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error uploading attachments:', error);
+                        });
                 });
-        };
 
-        $('#productImages').on('click', '.gallery-item img', function() {
-            var src = $(this).attr('src');
-            $('#previewImage').attr('src', src);
-            $('#imagePreviewModal').show();
-        });
+                // Usuń obraz
+                $('#productImages').on('click', '.delete-image', function() {
+                    var imageId = $(this).data('id');
+                    var productId = $('#viewProductId').val();
+                    axios.delete(`/products/${productId}/images/${imageId}`, {
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(function(response) {
+                            alert('Image deleted successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error deleting image:', error);
+                        });
+                });
 
-        $('#closePreviewModal').click(function() {
-            $('#imagePreviewModal').hide();
-        });
+                // Usuń załącznik
+                $('#productAttachments').on('click', '.delete-attachment', function() {
+                    var attachmentId = $(this).data('id');
+                    var productId = $('#viewProductId').val();
+                    axios.delete(`/products/${productId}/attachments/${attachmentId}`, {
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(function(response) {
+                            alert('Attachment deleted successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error deleting attachment:', error);
+                        });
+                });
 
-        $('.tab-link').click(function() {
-            var tab = $(this).data('tab');
-            $('.tab-link').removeClass('active');
-            $(this).addClass('active');
-            $('.tab-content').removeClass('active');
-            $('#' + tab).addClass('active');
-        });
-    });
-</script>
-@endsection
+                // Przełączanie między zakładkami
+                $('.tab-link').click(function() {
+                    var tab = $(this).data('tab');
+                    $('.tab-link').removeClass('active');
+                    $(this).addClass('active');
+                    $('.tab-content').removeClass('active');
+                    $('#' + tab).addClass('active');
+                });
+
+                // Edycja produktu
+                $('#viewProductForm').submit(function(event) {
+                    event.preventDefault();
+                    var productId = $('#viewProductId').val();
+                    var formData = new FormData(this);
+                    axios.post(`/products/${productId}`, formData)
+                        .then(function(response) {
+                            alert('Product updated successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error updating product:', error);
+                        });
+                });
+            });
+        </script>
+        @endsection
