@@ -1200,3 +1200,29 @@ h1.elo {
     border-radius: 5px; /* Zaokrąglenie krawędzi */
     margin-bottom: 5px; /* Odstęp poniżej uchwytu */
 }
+
+.text-danger td {
+    color: red;
+}
+
+.jstree-default .jstree-clicked {
+
+    color: black !important;
+}
+
+
+.jstree-default .jstree-hovered {
+
+    color: black !important;
+}
+
+
+.jstree-default .jstree-clicked {
+
+    color: black !important;
+}
+
+.assigned-category {
+    color: red;
+    font-weight: bold;
+}

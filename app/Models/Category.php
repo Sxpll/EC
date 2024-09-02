@@ -9,7 +9,7 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'parent_id', 'isActive'];
+    protected $fillable = ['name', 'parent_id', 'isActive', 'order'];
 
     public function parent()
     {
@@ -23,7 +23,8 @@ class Category extends Model
 
     public function childrenRecursive()
     {
-        return $this->children()->with('childrenRecursive');
+        // Filtruj dzieci na podstawie isActive
+        return $this->hasMany(Category::class, 'parent_id')->where('isActive', 1)->with('childrenRecursive');
     }
 
     public function products()

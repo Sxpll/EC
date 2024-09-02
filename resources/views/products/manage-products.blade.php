@@ -26,11 +26,16 @@
                     </thead>
                     <tbody id="products-table">
                         @foreach ($products as $product)
-                        <tr class="{{ !$product->isActive ? 'table-danger' : '' }}">
+                        <tr class="{{ $product->isActive == 0 ? 'text-danger' : '' }}">
                             <td>{{ $product->name }}</td>
                             <td>
                                 @foreach ($product->categories as $category)
-                                {{ $category->name }}@if (!$loop->last), @endif
+                                @if ($category->isActive == 0)
+                                <span style="color: gray;">{{ $category->name }}</span>
+                                @else
+                                {{ $category->name }}
+                                @endif
+                                @if (!$loop->last), @endif
                                 @endforeach
                             </td>
                             <td>{{ $product->description }}</td>
@@ -40,6 +45,7 @@
                         </tr>
                         @endforeach
                     </tbody>
+
                 </table>
             </div>
         </div>
@@ -91,6 +97,7 @@
             <button class="tab-link" data-tab="Images">Images</button>
             <button class="tab-link" data-tab="Attachments">Attachments</button>
             <button class="tab-link" data-tab="History">History</button>
+            <button class="tab-link" data-tab="ArchivedCategories">Archived Categories</button>
         </div>
 
         <!-- Info tab -->
@@ -163,6 +170,13 @@
             </table>
         </div>
 
+        <!-- Archived Categories tab -->
+        <div id="ArchivedCategories" class="tab-content">
+            <div id="archivedCategoriesContainer">
+                <h4>Archived Categories</h4>
+                <ul id="archivedCategoriesList"></ul> <!-- Lista archiwalnych kategorii -->
+            </div>
+        </div>
 
         <!-- Modal for image preview -->
         <div id="imagePreviewModal">
@@ -176,6 +190,13 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 
+        <style>
+            .assigned-category {
+                color: gray;
+                font-weight: bold;
+            }
+        </style>
+
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 var addProductModal = document.getElementById("addProductModal");
@@ -184,6 +205,7 @@
                 var closeBtns = document.getElementsByClassName("close");
                 var viewBtns = document.getElementsByClassName("btn-view");
                 var deleteProductBtn = document.getElementById("deleteProductBtn");
+                var activateProductBtn = document.getElementById("activateProductBtn");
 
                 // Inicjalizacja drzewa kategorii do wyboru
                 $('#category-tree').jstree({
@@ -204,33 +226,48 @@
                     'core': {
                         'data': {
                             "url": "{{ route('categories.getTree') }}",
-                            "dataType": "json"
+                            "dataType": "json",
+                            "data": function(node) {
+                                // Zwróć przypisane kategorie, aby oznaczyć je jako 'assigned-category'
+                                return {
+                                    "assignedCategories": $('#selectedCategoriesView').val()
+                                };
+                            }
                         },
                         "check_callback": true,
                         "themes": {
                             "variant": "large"
                         }
                     },
-                    "plugins": ["checkbox", "wholerow"]
+                    "plugins": ["checkbox", "wholerow"],
+                    "checkbox": {
+                        "three_state": false
+                    },
+                    "deselect_node": function(node, selected, event) {
+                        // Dodanie klasy dla przypisanych kategorii
+                        if (selected) {
+                            $(node).addClass('assigned-category');
+                        }
+                    }
                 });
 
-                // Zbieranie wybranych kategorii jako tablicy
                 $('#category-tree').on("changed.jstree", function(e, data) {
                     var selectedCategories = data.selected;
-                    $('#selectedCategories').val(selectedCategories); // Przekazanie tablicy ID
+                    $('#selectedCategories').val(selectedCategories.join(','));
                 });
 
                 $('#category-tree-view').on("changed.jstree", function(e, data) {
                     var selectedCategoriesView = data.selected;
-                    $('#selectedCategoriesView').val(selectedCategoriesView); // Przekazanie tablicy ID
+                    $('#selectedCategoriesView').val(selectedCategoriesView.join(','));
+
+                    // Podświetlenie przypisanych kategorii
+                    data.instance.get_node(data.node, true).children('.jstree-anchor').addClass('assigned-category');
                 });
 
-                // Otwórz modal dodawania produktu
                 addProductBtn.onclick = function() {
                     addProductModal.style.display = "block";
                 };
 
-                // Zamknij modale
                 for (var i = 0; i < closeBtns.length; i++) {
                     closeBtns[i].onclick = function() {
                         addProductModal.style.display = "none";
@@ -238,7 +275,39 @@
                     };
                 }
 
-                // Pobierz szczegóły produktu i historię
+                activateProductBtn.onclick = function() {
+                    var productId = $('#viewProductId').val();
+                    axios.post(`/products/${productId}/activate`, {
+                            _token: '{{ csrf_token() }}'
+                        })
+                        .then(function(response) {
+                            alert('Product activated successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error activating product:', error);
+                            alert('Failed to activate product');
+                        });
+                };
+
+                function loadArchivedCategories() {
+                    var productId = $('#viewProductId').val();
+                    axios.get(`/products/${productId}/archived-categories`)
+                        .then(function(response) {
+                            var archivedCategories = response.data.archivedCategories || [];
+                            var container = $('#archivedCategoriesList');
+                            container.empty();
+
+                            archivedCategories.forEach(function(category) {
+                                var item = `<li>${category.path}</li>`;
+                                container.append(item);
+                            });
+                        })
+                        .catch(function(error) {
+                            console.error('Error fetching archived categories:', error);
+                        });
+                }
+
                 for (var i = 0; i < viewBtns.length; i++) {
                     viewBtns[i].onclick = function() {
                         var productId = $(this).data('id');
@@ -258,51 +327,49 @@
 
                                 viewProductModal.style.display = "block";
 
-                                // Wyświetl historię produktu
                                 var histories = response.data.histories || [];
                                 var historyTableBody = $('#historyTableBody');
                                 historyTableBody.empty();
 
-                                // Sortowanie historii od najnowszej do najstarszej
                                 histories.sort(function(a, b) {
                                     return new Date(b.created_at) - new Date(a.created_at);
                                 });
 
                                 histories.forEach(function(history) {
                                     var row = `<tr>
-                                <td>${history.admin_name}</td>
-                                <td>${history.action}</td>
-                                <td>${history.field}</td>
-                                <td>${history.old_value}</td>
-                                <td>${history.new_value}</td>
-                                <td>${new Date(history.created_at).toLocaleString()}</td>
-                            </tr>`;
+                                        <td>${history.admin_name}</td>
+                                        <td>${history.action}</td>
+                                        <td>${history.field}</td>
+                                        <td>${history.old_value}</td>
+                                        <td>${history.new_value}</td>
+                                        <td>${new Date(history.created_at).toLocaleString()}</td>
+                                    </tr>`;
                                     historyTableBody.append(row);
                                 });
 
-                                // Wyświetl obrazy
                                 var productImages = response.data.product.images || [];
                                 var imagesContainer = $('#productImages');
                                 imagesContainer.empty();
                                 productImages.forEach(function(image) {
                                     var imgElement = `<div class="gallery-item">
-                                <img src="data:${image.mime_type};base64,${btoa(image.file_data)}" class="img-thumbnail" />
-                                <button class="btn btn-danger btn-sm delete-image" data-id="${image.id}">Delete</button>
-                            </div>`;
+                                        <img src="data:${image.mime_type};base64,${image.file_data}" class="img-thumbnail" />
+                                        <button class="btn btn-danger btn-sm delete-image" data-id="${image.id}">Delete</button>
+                                    </div>`;
                                     imagesContainer.append(imgElement);
                                 });
 
-                                // Wyświetl załączniki
                                 var productAttachments = response.data.product.attachments || [];
                                 var attachmentsContainer = $('#productAttachments');
                                 attachmentsContainer.empty();
                                 productAttachments.forEach(function(attachment) {
                                     var attachmentElement = `<div class="attachment-item">
-                                <a href="data:${attachment.mime_type};base64,${btoa(attachment.file)}" target="_blank">${attachment.file_name}</a>
-                                <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
-                            </div>`;
+                                        <a href="data:${attachment.mime_type};base64,${attachment.file_data}" target="_blank">${attachment.file_name}</a>
+                                        <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
+                                    </div>`;
                                     attachmentsContainer.append(attachmentElement);
                                 });
+
+                                loadArchivedCategories();
 
                             })
                             .catch(function(error) {
@@ -311,7 +378,18 @@
                     };
                 }
 
-                // Funkcja do dodawania nowych zdjęć
+                $('.tab-link').click(function() {
+                    var tab = $(this).data('tab');
+                    $('.tab-link').removeClass('active');
+                    $(this).addClass('active');
+                    $('.tab-content').removeClass('active');
+                    $('#' + tab).addClass('active');
+
+                    if (tab === 'ArchivedCategories') {
+                        loadArchivedCategories();
+                    }
+                });
+
                 $('#saveNewImagesBtn').click(function() {
                     var formData = new FormData($('#addImageForm')[0]);
                     var productId = $('#viewProductId').val();
@@ -325,7 +403,6 @@
                         });
                 });
 
-                // Funkcja do dodawania nowych załączników
                 $('#saveNewAttachmentsBtn').click(function() {
                     var formData = new FormData($('#addAttachmentForm')[0]);
                     var productId = $('#viewProductId').val();
@@ -339,7 +416,23 @@
                         });
                 });
 
-                // Usuń obraz
+                $('#deleteProductBtn').click(function() {
+                    var productId = $('#viewProductId').val();
+                    axios.delete(`/products/${productId}`, {
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(function(response) {
+                            alert('Product deleted successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error deleting product:', error);
+                            alert('Failed to delete product');
+                        });
+                });
+
                 $('#productImages').on('click', '.delete-image', function() {
                     var imageId = $(this).data('id');
                     var productId = $('#viewProductId').val();
@@ -357,7 +450,6 @@
                         });
                 });
 
-                // Usuń załącznik
                 $('#productAttachments').on('click', '.delete-attachment', function() {
                     var attachmentId = $(this).data('id');
                     var productId = $('#viewProductId').val();
@@ -375,16 +467,6 @@
                         });
                 });
 
-                // Przełączanie między zakładkami
-                $('.tab-link').click(function() {
-                    var tab = $(this).data('tab');
-                    $('.tab-link').removeClass('active');
-                    $(this).addClass('active');
-                    $('.tab-content').removeClass('active');
-                    $('#' + tab).addClass('active');
-                });
-
-                // Edycja produktu
                 $('#viewProductForm').submit(function(event) {
                     event.preventDefault();
                     var productId = $('#viewProductId').val();

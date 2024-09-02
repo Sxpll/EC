@@ -141,7 +141,10 @@ class CategoryController extends Controller
 
     public function getTree()
     {
-        $categories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
+        // Pobierz wszystkie aktywne kategorie bez rodzica i ich dzieci
+        $categories = Category::where('isActive', 1)->whereNull('parent_id')->with('childrenRecursive')->get();
+
+        // Przekształć kategorie na format oczekiwany przez jstree
         $treeData = $this->buildTree($categories);
 
         return response()->json($treeData);
@@ -154,7 +157,7 @@ class CategoryController extends Controller
             $node = [
                 'id' => $category->id,
                 'text' => $category->name,
-                'children' => $this->buildTree($category->childrenRecursive)
+                'children' => $this->buildTree($category->childrenRecursive) // Rekurencyjnie budujemy drzewo
             ];
             $tree[] = $node;
         }

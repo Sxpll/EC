@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/{product}/attachments', [ProductController::class, 'storeAttachments']);
     Route::post('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
+    Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
+
 
 
     // Categories routes
