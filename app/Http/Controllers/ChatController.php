@@ -56,13 +56,21 @@ class ChatController extends Controller
     {
         $chat = Chat::with('messages', 'admin')->findOrFail($id);
 
-        // Upewnij się, że tylko użytkownik powiązany z czatem lub admin ma dostęp
+        // Sprawdź, czy użytkownik ma uprawnienia do dostępu do czatu
         if (Auth::user()->role !== 'admin' && $chat->user_id !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized access'], 403);
         }
 
+        // Oznacz wiadomości jako przeczytane, jeśli admin je przegląda
+        if (Auth::user()->role === 'admin') {
+            Message::where('chat_id', $id)
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+        }
+
         return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
     }
+
 
 
     public function sendMessage(Request $request, $id)
@@ -93,6 +101,7 @@ class ChatController extends Controller
             $message->chat_id = $chat->id;
             $message->message = $request->message;
             $message->admin_id = Auth::user()->role === 'admin' ? Auth::id() : null;
+            $message->is_read = false; // Oznacz nową wiadomość jako nieprzeczytaną
             $message->save();
             Log::info('Message saved for chat: ' . $chat->id);
 
@@ -134,6 +143,7 @@ class ChatController extends Controller
             ], 500);
         }
     }
+
 
 
     public function takeChat($id)
@@ -207,6 +217,7 @@ class ChatController extends Controller
         $status = $request->get('status');
         $user_id = Auth::id();
 
+        // Pobierz czaty użytkownika na podstawie statusu
         $chats = Chat::where('user_id', $user_id)
             ->where(function ($query) use ($status) {
                 if ($status === 'open') {
@@ -218,6 +229,7 @@ class ChatController extends Controller
             ->orderBy('created_at', 'desc')  // Sortowanie od najnowszych do najstarszych
             ->get();
 
+        // Zwróć wyniki jako JSON
         return response()->json($chats);
     }
 

@@ -21,6 +21,7 @@
                     <th>Author</th>
                     <th>Status</th>
                     <th class="text-center">Actions</th>
+                    <th class="text-center">Notification</th> <!-- Kolumna na ikonki -->
                 </tr>
             </thead>
             <tbody>
@@ -31,6 +32,15 @@
                     <td>{{ $chat->status }}</td>
                     <td class="text-center">
                         <button class="btn btn-primary btn-view" data-chat-id="{{ $chat->id }}">View</button>
+                    </td>
+                    <td class="text-center">
+                        @if($chat->admin_id === null && $chat->messages->where('is_read', false)->count() > 0)
+                        <i class="fas fa-circle text-white"></i> <!-- Ikona dla nieprzypisanego czatu z nowymi wiadomościami -->
+                        @elseif($chat->admin_id !== Auth::id() && $chat->messages->where('is_read', false)->count() > 0)
+                        <i class="fas fa-circle text-primary"></i> <!-- Ikona dla czatu przypisanego do innego admina z nowymi wiadomościami -->
+                        @elseif($chat->admin_id === Auth::id() && $chat->messages->where('is_read', false)->count() > 0)
+                        <i class="fas fa-circle text-success"></i> <!-- Ikona dla czatu przypisanego do aktualnego admina z nowymi wiadomościami -->
+                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -95,8 +105,6 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
-    let notificationBannerShown = false; // Deklaracja na sztywno
-
     document.addEventListener('DOMContentLoaded', function() {
         const chatWindowModal = document.getElementById('chatWindowModal');
         const chatWindow = document.getElementById('chat-window');
