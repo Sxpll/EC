@@ -36,7 +36,7 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'categories' => 'required|array',
+            'categories' => 'required|array|min:1', // Wymagane przynajmniej jedna kategoria
             'categories.*' => 'exists:categories,id',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'attachments.*' => 'file|max:10240',
@@ -46,24 +46,23 @@ class ProductController extends Controller
 
         $product = Product::create($request->only('name', 'description'));
 
-        // Przekształć dane wejściowe i przefiltruj kategorie
+        // Pobierz ID wszystkich zaznaczonych kategorii
         $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
 
-        // Pobierz tylko najniższe kategorie
-        $leafCategoryIds = Category::whereIn('id', $selectedCategoryIds)
-            ->doesntHave('children')
+        // Filtruj kategorie: tylko najniższe (liście) lub te, które nie mają dzieci
+        $validCategoryIds = Category::whereIn('id', $selectedCategoryIds)
+            ->where(function ($query) {
+                $query->doesntHave('children') // Tylko kategorie bez dzieci (liście)
+                    ->orWhereDoesntHave('parent'); // Kategorie, które nie mają rodzica (mogą być przypisane)
+            })
             ->pluck('id')
             ->toArray();
 
-        Log::info('Store Product: Leaf categories to sync', $leafCategoryIds);
+        Log::info('Store Product: Valid categories to sync', $validCategoryIds);
 
-        // Użyj sync, aby przypisać kategorie
-        $product->categories()->sync($leafCategoryIds);
+        $product->categories()->sync($validCategoryIds);
 
-        // Archiwizuj kategorie
-        $this->archiveCategories($product, $leafCategoryIds);
-
-        // Dodaj obrazy i załączniki
+        $this->archiveCategories($product, $validCategoryIds);
         $this->addImagesAndAttachments($request, $product);
 
         ProductHistory::create([
@@ -88,7 +87,7 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'categories' => 'required|array',
+            'categories' => 'required|array|min:1', // Wymagane przynajmniej jedna kategoria
             'categories.*' => 'exists:categories,id',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
             'attachments.*' => 'file|max:10240',
@@ -98,27 +97,29 @@ class ProductController extends Controller
 
         try {
             $oldCategories = $product->categories->pluck('name', 'id')->toArray();
-
             $product->update($request->only('name', 'description'));
 
             Log::info('Update Product: Updated product', $product->toArray());
 
             $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
 
-            $leafCategoryIds = Category::whereIn('id', $selectedCategoryIds)
-                ->doesntHave('children')
+            // Filtruj kategorie: tylko najniższe (liście) lub te, które nie mają dzieci
+            $validCategoryIds = Category::whereIn('id', $selectedCategoryIds)
+                ->where(function ($query) {
+                    $query->doesntHave('children') // Tylko kategorie bez dzieci (liście)
+                        ->orWhereDoesntHave('parent'); // Kategorie, które nie mają rodzica (mogą być przypisane)
+                })
                 ->pluck('id')
                 ->toArray();
 
-            Log::info('Update Product: Leaf categories to sync', $leafCategoryIds);
+            Log::info('Update Product: Valid categories to sync', $validCategoryIds);
 
-            $product->categories()->sync($leafCategoryIds);
+            $product->categories()->sync($validCategoryIds);
+            $this->archiveCategories($product, $validCategoryIds);
 
-            $this->archiveCategories($product, $leafCategoryIds);
+            $newCategories = Category::whereIn('id', $validCategoryIds)->pluck('name', 'id')->toArray();
 
-            $newCategories = Category::whereIn('id', $leafCategoryIds)->pluck('name', 'id')->toArray();
-
-            if (array_diff($leafCategoryIds, array_keys($oldCategories)) || array_diff(array_keys($oldCategories), $leafCategoryIds)) {
+            if (array_diff($validCategoryIds, array_keys($oldCategories)) || array_diff(array_keys($oldCategories), $validCategoryIds)) {
                 ProductHistory::create([
                     'admin_id' => Auth::user()->id,
                     'admin_name' => Auth::user()->name,
@@ -140,6 +141,8 @@ class ProductController extends Controller
             return response()->json(['error' => 'Error updating product'], 500);
         }
     }
+
+
 
     private function archiveCategories($product, $leafCategoryIds)
     {
