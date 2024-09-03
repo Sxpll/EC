@@ -17,8 +17,8 @@ class ChatController extends Controller
         $search = $request->get('search');
         Log::info('Search request received', ['search' => $search]);
 
-        $chats = Chat::with(['user' => function ($query) {
-            $query->select('id', 'name', 'lastname'); // Upewnij się, że wybierasz zarówno imię, jak i nazwisko
+        $chats = Chat::with(['user:id,name,lastname', 'messages' => function ($query) {
+            $query->select('id', 'chat_id', 'is_read', 'admin_id'); // Dodano 'admin_id'
         }])
             ->when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%')
@@ -31,17 +31,20 @@ class ChatController extends Controller
 
         Log::info('Chats found', ['count' => count($chats)]);
 
+        // Logowanie szczegółowych danych
+        foreach ($chats as $chat) {
+            Log::info('Chat details', ['id' => $chat->id, 'title' => $chat->title, 'messages' => $chat->messages->toArray()]);
+        }
+
+        // Zwraca dane w formacie JSON, jeśli jest to żądanie AJAX
         if ($request->ajax()) {
             return response()->json($chats);
         }
 
+        // Dla zwykłych żądań HTTP zwraca widok
         return view('chat.index', compact('chats'));
     }
-
-
-
-
-
+    
 
 
     public function userChats()
@@ -217,20 +220,21 @@ class ChatController extends Controller
         $status = $request->get('status');
         $user_id = Auth::id();
 
-        // Pobierz czaty użytkownika na podstawie statusu
-        $chats = Chat::where('user_id', $user_id)
-            ->where(function ($query) use ($status) {
-                if ($status === 'open') {
-                    $query->whereIn('status', ['open', 'ongoing']);
-                } elseif ($status === 'completed') {
-                    $query->where('status', 'completed');
-                }
-            })
-            ->orderBy('created_at', 'desc')  // Sortowanie od najnowszych do najstarszych
-            ->get();
+        Log::info('FilterChats invoked', ['status' => $status, 'user_id' => $user_id]);
 
-        // Zwróć wyniki jako JSON
-        return response()->json($chats);
+        $chatsQuery = Chat::where('user_id', $user_id);
+
+        if ($status === 'open') {
+            $chatsQuery->whereIn('status', ['open', 'ongoing']);
+        } elseif ($status === 'completed') {
+            $chatsQuery->where('status', 'completed');
+        }
+
+        $chats = $chatsQuery->orderBy('created_at', 'desc')->get();
+
+        Log::info('Chats retrieved', ['count' => $chats->count()]);
+
+        return response()->json(['chats' => $chats]);
     }
 
 

@@ -1226,3 +1226,18 @@ h1.elo {
     color: red;
     font-weight: bold;
 }
+
+/* Kropka dla czatu nieprzypisanego z nieprzeczytanymi wiadomościami */
+.text-white.fas.fa-circle {
+    color: white !important;
+}
+
+/* Kropka dla czatu przypisanego do innego admina */
+.text-primary.fas.fa-circle {
+    color: #007bff !important; /* Kolor niebieski (primary) */
+}
+
+/* Kropka dla czatu przypisanego do aktualnego admina */
+.text-success.fas.fa-circle {
+    color: #28a745 !important; /* Kolor zielony (success) */
+}

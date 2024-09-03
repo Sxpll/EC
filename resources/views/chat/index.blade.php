@@ -21,7 +21,7 @@
                     <th>Author</th>
                     <th>Status</th>
                     <th class="text-center">Actions</th>
-                    <th class="text-center">Notification</th> <!-- Kolumna na ikonki -->
+                    <th class="text-center">Notification</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,16 +34,30 @@
                         <button class="btn btn-primary btn-view" data-chat-id="{{ $chat->id }}">View</button>
                     </td>
                     <td class="text-center">
-                        @if($chat->admin_id === null && $chat->messages->where('is_read', false)->count() > 0)
-                        <i class="fas fa-circle text-white"></i> <!-- Ikona dla nieprzypisanego czatu z nowymi wiadomościami -->
-                        @elseif($chat->admin_id !== Auth::id() && $chat->messages->where('is_read', false)->count() > 0)
-                        <i class="fas fa-circle text-primary"></i> <!-- Ikona dla czatu przypisanego do innego admina z nowymi wiadomościami -->
-                        @elseif($chat->admin_id === Auth::id() && $chat->messages->where('is_read', false)->count() > 0)
-                        <i class="fas fa-circle text-success"></i> <!-- Ikona dla czatu przypisanego do aktualnego admina z nowymi wiadomościami -->
+                        @php
+                        $unreadMessagesCount = $chat->messages->where('is_read', false)->count();
+                        $kropkaColor = '';
+
+                        if ($unreadMessagesCount > 0) {
+                        if ($chat->admin_id === null) {
+                        $kropkaColor = 'text-white';
+                        } elseif ($chat->admin_id !== Auth::id()) {
+                        $kropkaColor = 'text-primary';
+                        } elseif ($chat->admin_id === Auth::id()) {
+                        $kropkaColor = 'text-success';
+                        }
+                        }
+                        @endphp
+
+                        @if ($unreadMessagesCount > 0)
+                        <i class="fas fa-circle {{ $kropkaColor }}" data-chat-id="{{ $chat->id }}" id="chat-dot-{{ $chat->id }}"></i>
+                        @else
+                        <i class="fas fa-circle" data-chat-id="{{ $chat->id }}" id="chat-dot-{{ $chat->id }}" style="display:none;"></i>
                         @endif
                     </td>
                 </tr>
                 @endforeach
+
             </tbody>
         </table>
     </div>
@@ -52,7 +66,6 @@
 <!-- Chat Modal -->
 <div id="chatWindowModal" class="modal">
     <div class="modal-content">
-        <span class="close-custom">&times;</span>
         <div class="modal-header d-flex justify-content-between align-items-center">
             <h5 class="chat-title" id="chatTitle">Chat</h5>
             @if(Auth::user()->is_hr)
@@ -75,7 +88,6 @@
 <!-- Manage Modal -->
 <div id="manageModal" class="modal">
     <div class="modal-content">
-        <span class="close-custom">&times;</span>
         <div class="modal-header">
             <h5>Manage Chat</h5>
         </div>
@@ -101,9 +113,6 @@
     </div>
 </div>
 
-<!-- Załadowanie biblioteki axios -->
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const chatWindowModal = document.getElementById('chatWindowModal');
@@ -115,11 +124,10 @@
         const takeChatButton = document.getElementById('takeChatButton');
         const chatTableBody = document.querySelector('tbody');
         const searchChat = document.getElementById('searchChat');
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationsDropdown = document.getElementById('notificationsDropdown');
         const userId = @json(Auth::id());
         let currentChatId = null;
         let refreshInterval = null;
+        let chatDotsRefreshInterval = null;
 
         function openChatWindow(chatId) {
             fetch(`/chat/${chatId}`)
@@ -153,17 +161,30 @@
             document.querySelectorAll('.btn-view').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
-                    currentChatId = this.getAttribute('data-chat-id');
-                    if (!currentChatId) {
+                    const chatId = this.getAttribute('data-chat-id');
+                    if (!chatId) {
                         console.error('Chat ID is not defined');
                         return;
                     }
-                    openChatWindow(currentChatId);
+                    openChatWindow(chatId);
                 });
             });
         }
 
         bindViewButtons();
+
+        window.addEventListener('click', function(event) {
+            if (event.target === chatWindowModal) {
+                chatWindowModal.style.display = 'none';
+                clearInterval(refreshInterval);
+                updateChatDots();
+            }
+
+            if (event.target === manageModal) {
+                manageModal.style.display = 'none';
+            }
+        });
+
 
         function startAutoRefresh(chatId) {
             if (refreshInterval) {
@@ -187,6 +208,94 @@
                     .catch(error => console.error('Error refreshing messages:', error));
             }, 3000);
         }
+
+        function updateChatDots() {
+            fetch('/chat', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(chats => {
+                    chats.forEach(chat => {
+                        const dotElement = document.querySelector(`#chat-dot-${chat.id}`);
+                        if (dotElement) {
+                            const unreadMessagesCount = chat.messages.filter(msg => !msg.is_read).length;
+
+                            if (unreadMessagesCount > 0) {
+                                if (chat.admin_id === null) {
+                                    dotElement.className = 'fas fa-circle text-white';
+                                    dotElement.style.display = '';
+                                } else if (chat.admin_id !== userId) {
+                                    dotElement.className = 'fas fa-circle text-primary';
+                                    dotElement.style.display = '';
+                                } else if (chat.admin_id === userId) {
+                                    dotElement.className = 'fas fa-circle text-success';
+                                    dotElement.style.display = '';
+                                }
+                            } else {
+                                dotElement.style.display = 'none';
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error updating chat dots:', error));
+        }
+
+        function startChatDotsRefresh() {
+            if (chatDotsRefreshInterval) {
+                clearInterval(chatDotsRefreshInterval);
+            }
+
+            chatDotsRefreshInterval = setInterval(updateChatDots, 5000);
+        }
+
+        startChatDotsRefresh();
+
+        sendMessageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!currentChatId) {
+                console.error('Chat ID is not set');
+                return;
+            }
+            let message = messageInput.value;
+            fetch(sendMessageForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let newMessage = document.createElement('div');
+                        newMessage.classList.add('message', 'user');
+                        newMessage.innerHTML = `${message} <span class="message-time">${new Date().toLocaleTimeString()}</span>`;
+                        chatWindow.appendChild(newMessage);
+                        messageInput.value = '';
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                        updateChatDots();
+                    } else {
+                        toastr.error('Failed to send message.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
+                    toastr.error('Error sending message.');
+                });
+        });
+
+        sendMessageForm.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessageForm.dispatchEvent(new Event('submit'));
+            }
+        });
 
         if (manageButton) {
             manageButton.addEventListener('click', function() {
@@ -227,56 +336,6 @@
                     console.error('Error taking chat:', error);
                     toastr.error('Error taking chat.');
                 });
-        });
-
-        document.querySelectorAll('.close-custom').forEach(closeBtn => {
-            closeBtn.addEventListener('click', function() {
-                this.closest('.modal').style.display = 'none';
-            });
-        });
-
-        sendMessageForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (!currentChatId) {
-                console.error('Chat ID is not set');
-                return;
-            }
-            let message = messageInput.value;
-            fetch(sendMessageForm.action, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({
-                        message: message
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        let newMessage = document.createElement('div');
-                        newMessage.classList.add('message', 'user');
-                        newMessage.innerHTML = `${message} <span class="message-time">${new Date().toLocaleTimeString()}</span>`;
-                        chatWindow.appendChild(newMessage);
-                        messageInput.value = '';
-                        chatWindow.scrollTop = chatWindow.scrollHeight;
-                    } else {
-                        toastr.error('Failed to send message.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error sending message:', error);
-                    toastr.error('Error sending message.');
-                });
-        });
-
-        sendMessageForm.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessageForm.dispatchEvent(new Event('submit'));
-            }
         });
 
         function markAllNotificationsAsRead(chatId) {
@@ -364,23 +423,23 @@
                 .then(data => {
                     try {
                         const chats = JSON.parse(data);
-                        chatTableBody.innerHTML = ''; // Wyczyszczenie zawartości tabeli
+                        chatTableBody.innerHTML = '';
 
                         chats.forEach(chat => {
                             const chatRow = document.createElement('tr');
                             chatRow.setAttribute('data-chat-id', chat.id);
                             chatRow.innerHTML = `
-                                <td>${chat.title}</td>
-                                <td>${chat.user.name} ${chat.user.lastname}</td>
-                                <td>${chat.status}</td>
-                                <td class="text-center">
-                                    <button class="btn btn-primary btn-view" data-chat-id="${chat.id}">View</button>
-                                </td>
-                            `;
+                            <td>${chat.title}</td>
+                            <td>${chat.user.name} ${chat.user.lastname}</td>
+                            <td>${chat.status}</td>
+                            <td class="text-center">
+                                <button class="btn btn-primary btn-view" data-chat-id="${chat.id}">View</button>
+                            </td>
+                        `;
                             chatTableBody.appendChild(chatRow);
                         });
 
-                        bindViewButtons(); // Ponowne przypisanie eventów po zaktualizowaniu listy
+                        bindViewButtons();
                     } catch (error) {
                         console.error('Error parsing JSON:', error);
                     }
@@ -390,34 +449,6 @@
 
         setInterval(fetchNotifications, 5000);
         fetchNotifications();
-
-        window.addEventListener('click', function(event) {
-            if (event.target === chatWindowModal) {
-                chatWindowModal.style.display = 'none';
-                clearInterval(refreshInterval); // Zatrzymaj odświeżanie wiadomości
-            }
-            if (event.target === manageModal) {
-                manageModal.style.display = 'none';
-            }
-        });
-
-        notificationBell.addEventListener('click', function() {
-            if (notificationsDropdown.style.display === 'block') {
-                notificationsDropdown.style.display = 'none';
-            } else {
-                notificationsDropdown.style.display = 'block';
-            }
-        });
-
-        // Sprawdź, czy parametr openChat jest obecny w URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const openChat = urlParams.get('openChat');
-
-        // Jeśli parametr openChat jest obecny, otwórz odpowiedni czat
-        if (openChat) {
-            openChatWindow(openChat);
-        }
-
     });
 </script>
 @endsection

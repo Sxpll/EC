@@ -83,6 +83,8 @@
         const chatStatusFilter = document.getElementById('chatStatusFilter');
         const chatList = document.getElementById('chatList');
 
+
+
         function loadChats(status) {
             axios.get(`/chat/filter`, {
                     params: {
@@ -91,7 +93,7 @@
                 })
                 .then(response => {
                     chatList.innerHTML = '';
-                    response.data.forEach(chat => {
+                    response.data.chats.forEach(chat => { // 'response.data' to obiekt; użyj 'response.data.chats'
                         const chatItem = document.createElement('li');
                         chatItem.classList.add('list-group-item', 'chat-item');
                         chatItem.setAttribute('data-status', chat.status);

@@ -206,12 +206,10 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     @yield('scripts')
+
     @if(auth()->check() && auth()->user()->role === 'admin')
     <script>
-        // Sprawdzenie, czy zmienna została już zdefiniowana
-        if (typeof notificationBannerShown === 'undefined') {
-            var notificationBannerShown = false;
-        }
+        var notificationBannerShown = false;
 
         window.openChatWindow = function(chatId) {
             window.location.href = `/chat?openChat=${chatId}`;
@@ -275,9 +273,6 @@
         });
     </script>
     @endif
-
-
-
 
 </body>
 

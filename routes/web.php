@@ -60,13 +60,17 @@ Route::middleware('auth')->group(function () {
 
     // Chat routes
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    // Route::get('/user-chats/filter', [ChatController::class, 'filterChats'])->name('user-chats.filter');
+    Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filterChats');
+
     Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats');
+
     Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{id}/send-message', [ChatController::class, 'sendMessage'])->name('chat.sendMessage');
     Route::post('/chat/{id}/take', [ChatController::class, 'takeChat'])->name('chat.takeChat');
     Route::post('/chat/create', [ChatController::class, 'createChat'])->name('chat.createChat');
     Route::put('/chat/{id}/manage', [ChatController::class, 'manageChat'])->name('chat.manage');
-    Route::get('/user-chats', [ChatController::class, 'filterChats'])->name('user-chats');
+
     Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
 
     // Notifications routes
