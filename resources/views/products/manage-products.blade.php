@@ -3,14 +3,14 @@
 @section('content')
 <div class="container-admin manage-products-container">
     <div class="card-admin">
-    <div class="card-header">
-    <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none" style="margin-right: 725px;">
-        <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
-    </a>
-    <h1>Manage Products</h1>
-    <button id="openModalBtn" class="btn btn-success">Add Product</button>
-    <input type="text" id="search" placeholder="Search Products" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
-</div>
+        <div class="card-header">
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none" style="margin-right: 725px;">
+                <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
+            </a>
+            <h1>Manage Products</h1>
+            <button id="openModalBtn" class="btn btn-success">Add Product</button>
+            <input type="text" id="search" placeholder="Search Products" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
+        </div>
 
         <div class="card-body">
             <div id="alert-container"></div>
@@ -25,17 +25,26 @@
                         </tr>
                     </thead>
                     <tbody id="products-table">
-    @foreach ($products as $product)
-        <tr class="{{ !$product->isActive ? 'table-danger' : '' }}">
-            <td>{{ $product->name }}</td>
-            <td>{{ $product->category ? $product->category->name : 'No Category' }}</td>
-            <td>{{ $product->description }}</td>
-            <td>
-                <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
-            </td>
-        </tr>
-    @endforeach
-</tbody>
+                        @foreach ($products as $product)
+                        <tr class="{{ $product->isActive == 0 ? 'text-danger' : '' }}">
+                            <td>{{ $product->name }}</td>
+                            <td>
+                                @foreach ($product->categories as $category)
+                                @if ($category->isActive == 0)
+                                <span style="color: gray;">{{ $category->name }}</span>
+                                @else
+                                {{ $category->name }}
+                                @endif
+                                @if (!$loop->last), @endif
+                                @endforeach
+                            </td>
+                            <td>{{ $product->description }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
 
                 </table>
             </div>
@@ -55,13 +64,9 @@
                 <input type="text" name="name" id="name" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="category_id">Category:</label>
-                <select name="category_id" id="category_id" class="form-control">
-                    <option value="">No Category</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
-                </select>
+                <label for="categories">Categories:</label>
+                <div id="category-tree"></div>
+                <input type="hidden" name="categories[]" id="selectedCategories">
             </div>
             <div class="form-group">
                 <label for="description">Description:</label>
@@ -77,7 +82,6 @@
             </div>
             <button type="submit" class="btn btn-success">Add Product</button>
         </form>
-
     </div>
 </div>
 
@@ -93,26 +97,23 @@
             <button class="tab-link" data-tab="Images">Images</button>
             <button class="tab-link" data-tab="Attachments">Attachments</button>
             <button class="tab-link" data-tab="History">History</button>
+            <button class="tab-link" data-tab="ArchivedCategories">Archived Categories</button>
         </div>
 
         <!-- Info tab -->
         <div id="Info" class="tab-content active">
-            <form id="viewProductForm" method="POST">
+            <form id="viewProductForm" method="POST" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
+                <input type="hidden" name="_method" value="PUT">
                 <input type="hidden" id="viewProductId" name="id">
                 <div class="form-group">
                     <label for="viewName">Name:</label>
                     <input type="text" id="viewName" name="name" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="viewCategoryId">Category:</label>
-                    <select id="viewCategoryId" name="category_id" class="form-control">
-                        <option value="">No Category</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
+                    <label for="categories">Categories:</label>
+                    <div id="category-tree-view"></div>
+                    <input type="hidden" name="categories[]" id="selectedCategoriesView">
                 </div>
                 <div class="form-group">
                     <label for="viewDescription">Description:</label>
@@ -163,344 +164,322 @@
                         <th>Date</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="historyTableBody">
+                    <!-- Dane historii zostaną wstawione tutaj dynamicznie przez JavaScript -->
                 </tbody>
             </table>
-
         </div>
-    </div>
 
+        <!-- Archived Categories tab -->
+        <div id="ArchivedCategories" class="tab-content">
+            <div id="archivedCategoriesContainer">
+                <h4>Archived Categories</h4>
+                <ul id="archivedCategoriesList"></ul> <!-- Lista archiwalnych kategorii -->
+            </div>
+        </div>
 
-</div>
+        <!-- Modal for image preview -->
+        <div id="imagePreviewModal">
+            <span class="close-custom" id="closePreviewModal">&times;</span>
+            <img id="previewImage" src="">
+        </div>
 
+        @section('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 
-<!-- Modal for image preview -->
-<div id="imagePreviewModal">
-    <span class="close-custom" id="closePreviewModal">&times;</span>
-    <img id="previewImage" src="">
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var addProductModal = document.getElementById("addProductModal");
-        var viewProductModal = document.getElementById("viewProductModal");
-        var addProductBtn = document.getElementById("openModalBtn");
-        var closeBtns = document.getElementsByClassName("close");
-        var viewBtns = document.getElementsByClassName("btn-view");
-        var deleteProductBtn = document.getElementById("deleteProductBtn");
-
-        // Tab Switching
-        const tabs = document.querySelectorAll('.tab-link');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                const target = document.querySelector(`#${this.dataset.tab}`);
-
-                // Remove active class from all tabs and contents
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-
-                // Add active class to clicked tab and corresponding content
-                this.classList.add('active');
-                target.classList.add('active');
-            });
-        });
-
-        // Open modal to add product
-        addProductBtn.onclick = function() {
-            addProductModal.style.display = "block";
-            console.log("Add Product Modal Opened");
-        };
-
-        // Close modals
-        Array.from(closeBtns).forEach(function(btn) {
-            btn.onclick = function() {
-                addProductModal.style.display = "none";
-                viewProductModal.style.display = "none";
+        <style>
+            .assigned-category {
+                color: gray;
+                font-weight: bold;
             }
-        });
+        </style>
 
-        // Close modal if clicked outside
-        window.onclick = function(event) {
-            if (event.target == addProductModal) {
-                addProductModal.style.display = "none";
-            }
-            if (event.target == viewProductModal) {
-                viewProductModal.style.display = "none";
-            }
-        };
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var addProductModal = document.getElementById("addProductModal");
+                var viewProductModal = document.getElementById("viewProductModal");
+                var addProductBtn = document.getElementById("openModalBtn");
+                var closeBtns = document.getElementsByClassName("close");
+                var viewBtns = document.getElementsByClassName("btn-view");
+                var deleteProductBtn = document.getElementById("deleteProductBtn");
+                var activateProductBtn = document.getElementById("activateProductBtn");
 
-        // View product and history
-        Array.from(viewBtns).forEach(function(btn) {
-            btn.onclick = function() {
-                var productId = this.getAttribute("data-id");
-                console.log("Fetching product with ID:", productId);
+                // Inicjalizacja drzewa kategorii do wyboru
+                $('#category-tree').jstree({
+                    'core': {
+                        'data': {
+                            "url": "{{ route('categories.getTree') }}",
+                            "dataType": "json"
+                        },
+                        "check_callback": true,
+                        "themes": {
+                            "variant": "large"
+                        }
+                    },
+                    "plugins": ["checkbox", "wholerow"]
+                });
 
-                fetch(`/products/${productId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log("Product data received:", data);
-                        document.getElementById("viewProductId").value = data.product.id;
-                        document.getElementById("viewName").value = data.product.name;
-                        document.getElementById("viewCategoryId").value = data.product.category_id;
-                        document.getElementById("viewDescription").value = data.product.description;
+                $('#category-tree-view').jstree({
+                    'core': {
+                        'data': {
+                            "url": "{{ route('categories.getTree') }}",
+                            "dataType": "json",
+                            "data": function(node) {
+                                // Zwróć przypisane kategorie, aby oznaczyć je jako 'assigned-category'
+                                return {
+                                    "assignedCategories": $('#selectedCategoriesView').val()
+                                };
+                            }
+                        },
+                        "check_callback": true,
+                        "themes": {
+                            "variant": "large"
+                        }
+                    },
+                    "plugins": ["checkbox", "wholerow"],
+                    "checkbox": {
+                        "three_state": false
+                    },
+                    "deselect_node": function(node, selected, event) {
+                        // Dodanie klasy dla przypisanych kategorii
+                        if (selected) {
+                            $(node).addClass('assigned-category');
+                        }
+                    }
+                });
 
-                        fetchProductImages(productId);
-                        fetchProductAttachments(productId);
+                $('#category-tree').on("changed.jstree", function(e, data) {
+                    var selectedCategories = data.selected;
+                    $('#selectedCategories').val(selectedCategories.join(','));
+                });
 
-                        // Fetch product history
-                        fetch(`/products/${productId}/history`)
-                            .then(response => response.json())
-                            .then(histories => {
-                                console.log("Product history received:", histories);
-                                const historyTableBody = document.querySelector('#historyTable tbody');
-                                historyTableBody.innerHTML = '';
-                                histories.forEach(history => {
-                                    const row = document.createElement('tr');
-                                    row.innerHTML = `
+                $('#category-tree-view').on("changed.jstree", function(e, data) {
+                    var selectedCategoriesView = data.selected;
+                    $('#selectedCategoriesView').val(selectedCategoriesView.join(','));
+
+                    // Podświetlenie przypisanych kategorii
+                    data.instance.get_node(data.node, true).children('.jstree-anchor').addClass('assigned-category');
+                });
+
+                addProductBtn.onclick = function() {
+                    addProductModal.style.display = "block";
+                };
+
+                for (var i = 0; i < closeBtns.length; i++) {
+                    closeBtns[i].onclick = function() {
+                        addProductModal.style.display = "none";
+                        viewProductModal.style.display = "none";
+                    };
+                }
+
+                activateProductBtn.onclick = function() {
+                    var productId = $('#viewProductId').val();
+                    axios.post(`/products/${productId}/activate`, {
+                            _token: '{{ csrf_token() }}'
+                        })
+                        .then(function(response) {
+                            alert('Product activated successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error activating product:', error);
+                            alert('Failed to activate product');
+                        });
+                };
+
+                function loadArchivedCategories() {
+                    var productId = $('#viewProductId').val();
+                    axios.get(`/products/${productId}/archived-categories`)
+                        .then(function(response) {
+                            var archivedCategories = response.data.archivedCategories || [];
+                            var container = $('#archivedCategoriesList');
+                            container.empty();
+
+                            archivedCategories.forEach(function(category) {
+                                var item = `<li>${category.path}</li>`;
+                                container.append(item);
+                            });
+                        })
+                        .catch(function(error) {
+                            console.error('Error fetching archived categories:', error);
+                        });
+                }
+
+                for (var i = 0; i < viewBtns.length; i++) {
+                    viewBtns[i].onclick = function() {
+                        var productId = $(this).data('id');
+                        axios.get(`/products/${productId}`)
+                            .then(function(response) {
+                                var product = response.data.product;
+                                $('#viewProductId').val(product.id);
+                                $('#viewName').val(product.name);
+                                $('#viewDescription').val(product.description);
+                                $('#category-tree-view').jstree(true).deselect_all(true);
+
+                                if (product.categories) {
+                                    product.categories.forEach(function(category) {
+                                        $('#category-tree-view').jstree(true).select_node(category.id);
+                                    });
+                                }
+
+                                viewProductModal.style.display = "block";
+
+                                var histories = response.data.histories || [];
+                                var historyTableBody = $('#historyTableBody');
+                                historyTableBody.empty();
+
+                                histories.sort(function(a, b) {
+                                    return new Date(b.created_at) - new Date(a.created_at);
+                                });
+
+                                histories.forEach(function(history) {
+                                    var row = `<tr>
                                         <td>${history.admin_name}</td>
                                         <td>${history.action}</td>
                                         <td>${history.field}</td>
-                                        <td>${history.old_value ? history.old_value : 'N/A'}</td>
-                                        <td>${history.new_value ? history.new_value : 'N/A'}</td>
+                                        <td>${history.old_value}</td>
+                                        <td>${history.new_value}</td>
                                         <td>${new Date(history.created_at).toLocaleString()}</td>
-                                    `;
-                                    historyTableBody.appendChild(row);
+                                    </tr>`;
+                                    historyTableBody.append(row);
                                 });
+
+                                var productImages = response.data.product.images || [];
+                                var imagesContainer = $('#productImages');
+                                imagesContainer.empty();
+                                productImages.forEach(function(image) {
+                                    var imgElement = `<div class="gallery-item">
+                                        <img src="data:${image.mime_type};base64,${image.file_data}" class="img-thumbnail" />
+                                        <button class="btn btn-danger btn-sm delete-image" data-id="${image.id}">Delete</button>
+                                    </div>`;
+                                    imagesContainer.append(imgElement);
+                                });
+
+                                var productAttachments = response.data.product.attachments || [];
+                                var attachmentsContainer = $('#productAttachments');
+                                attachmentsContainer.empty();
+                                productAttachments.forEach(function(attachment) {
+                                    var attachmentElement = `<div class="attachment-item">
+                                        <a href="data:${attachment.mime_type};base64,${attachment.file_data}" target="_blank">${attachment.file_name}</a>
+                                        <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
+                                    </div>`;
+                                    attachmentsContainer.append(attachmentElement);
+                                });
+
+                                loadArchivedCategories();
+
+                            })
+                            .catch(function(error) {
+                                console.error('Error fetching product details:', error);
                             });
+                    };
+                }
 
-                        var viewProductForm = document.getElementById("viewProductForm");
-                        viewProductForm.onsubmit = function(event) {
-                            event.preventDefault();
+                $('.tab-link').click(function() {
+                    var tab = $(this).data('tab');
+                    $('.tab-link').removeClass('active');
+                    $(this).addClass('active');
+                    $('.tab-content').removeClass('active');
+                    $('#' + tab).addClass('active');
 
-                            var updatedProduct = {
-                                name: document.getElementById("viewName").value,
-                                category_id: document.getElementById("viewCategoryId").value || null,
-                                description: document.getElementById("viewDescription").value,
-                                _method: 'PUT',
-                                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            };
-
-                            console.log("Updating product with ID:", productId, updatedProduct);
-
-                            axios.post(`/products/${productId}`, updatedProduct)
-                                .then(response => {
-                                    console.log("Product update response:", response.data);
-                                    if (response.data.success) {
-                                        sessionStorage.setItem('message', 'Product updated successfully');
-                                        sessionStorage.setItem('messageType', 'success');
-                                        location.reload();
-                                    } else {
-                                        alert('Error updating product');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Error updating product:", error.response ? error.response.data : error);
-                                    alert('Error updating product');
-                                });
-                        };
-
-                        deleteProductBtn.onclick = function() {
-                            if (confirm('Are you sure you want to delete this product?')) {
-                                console.log("Deleting product with ID:", productId);
-
-                                axios.delete(`/products/${productId}`, {
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                    }
-                                }).then(response => {
-                                    console.log("Product delete response:", response.data);
-                                    if (response.data.success) {
-                                        location.reload();
-                                    } else {
-                                        alert('Error deleting product');
-                                    }
-                                }).catch(error => {
-                                    console.error("Error deleting product:", error.response ? error.response.data : error);
-                                    alert('Error deleting product');
-                                });
-                            }
-                        };
-
-                        viewProductModal.style.display = "block";
-                    })
-                    .catch(error => {
-                        console.error("Error fetching product:", error);
-                    });
-            }
-        });
-
-        function fetchProductImages(productId) {
-            console.log("Fetching images for product ID:", productId);
-            axios.get(`/products/${productId}/images`)
-                .then(response => {
-                    console.log("Images data received:", response.data);
-                    const imageContainer = document.getElementById('productImages');
-                    imageContainer.innerHTML = '';
-                    response.data.forEach(image => {
-                        const imgElement = document.createElement('img');
-                        imgElement.src = `data:${image.mime_type};base64,${image.file_data}`;
-                        imgElement.classList.add('gallery-image');
-
-                        const removeBtn = document.createElement('button');
-                        removeBtn.textContent = 'Remove';
-                        removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
-                        removeBtn.onclick = function() {
-                            console.log("Removing image with ID:", image.id);
-                            axios.delete(`/products/${productId}/images/${image.id}`)
-                                .then(() => {
-                                    fetchProductImages(productId);
-                                })
-                                .catch(error => {
-                                    console.error('Error removing image:', error);
-                                });
-                        };
-
-                        const imageWrapper = document.createElement('div');
-                        imageWrapper.classList.add('gallery-item');
-                        imageWrapper.appendChild(imgElement);
-                        imageWrapper.appendChild(removeBtn);
-
-                        imageContainer.appendChild(imageWrapper);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching images:', error);
+                    if (tab === 'ArchivedCategories') {
+                        loadArchivedCategories();
+                    }
                 });
-        }
 
-
-        document.getElementById('activateProductBtn').onclick = function () {
-    const productId = document.getElementById('viewProductId').value;
-
-    if (confirm('Are you sure you want to activate this product?')) {
-        axios.post(`/products/${productId}/activate`, {
-            _method: 'PUT',
-            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            isActive: 1 // Wartość isActive na 1
-        })
-        .then(response => {
-            console.log("Product activated successfully:", response.data);
-            if (response.data.success) {
-                sessionStorage.setItem('message', 'Product activated successfully');
-                sessionStorage.setItem('messageType', 'success');
-                location.reload(); // Odśwież stronę po aktywacji
-            } else {
-                alert('Error activating product');
-            }
-        })
-        .catch(error => {
-            console.error("Error activating product:", error.response ? error.response.data : error);
-            alert('Error activating product');
-        });
-    }
-};
-
-
-        function fetchProductAttachments(productId) {
-            console.log("Fetching attachments for product ID:", productId);
-            axios.get(`/products/${productId}/attachments`)
-                .then(response => {
-                    console.log("Attachments data received:", response.data);
-                    const attachmentContainer = document.getElementById('productAttachments');
-                    attachmentContainer.innerHTML = '';
-
-                    response.data.forEach(attachment => {
-                        const linkElement = document.createElement('a');
-                        linkElement.href = `data:${attachment.mime_type};base64,${attachment.file}`;
-                        linkElement.textContent = attachment.file_name;
-                        linkElement.download = attachment.file_name;
-                        linkElement.classList.add('btn', 'btn-outline-info', 'mr-2', 'mt-2');
-
-                        const removeBtn = document.createElement('button');
-                        removeBtn.textContent = 'Remove';
-                        removeBtn.classList.add('btn', 'btn-danger', 'mt-2');
-
-                        removeBtn.onclick = function () {
-                            console.log("Removing attachment with ID:", attachment.id);
-                            if (confirm('Are you sure you want to delete this attachment?')) {
-                                axios.delete(`/products/${productId}/attachments/${attachment.id}`)
-                                    .then(response => {
-                                        if (response.data.success) {
-                                            fetchProductAttachments(productId);
-                                        } else {
-                                            alert('Error deleting attachment');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error deleting attachment:', error);
-                                        alert('Error deleting attachment');
-                                    });
-                            }
-                        };
-
-                        const attachmentWrapper = document.createElement('div');
-                        attachmentWrapper.classList.add('d-flex', 'flex-column', 'align-items-center', 'mr-2', 'mt-2');
-                        attachmentWrapper.appendChild(linkElement);
-                        attachmentWrapper.appendChild(removeBtn);
-
-                        attachmentContainer.appendChild(attachmentWrapper);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching attachments:', error);
+                $('#saveNewImagesBtn').click(function() {
+                    var formData = new FormData($('#addImageForm')[0]);
+                    var productId = $('#viewProductId').val();
+                    axios.post(`/products/${productId}/images`, formData)
+                        .then(function(response) {
+                            alert('Images uploaded successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error uploading images:', error);
+                        });
                 });
-        }
 
-        document.getElementById('saveNewImagesBtn').onclick = function () {
-            const productId = document.getElementById('viewProductId').value;
-            const formData = new FormData();
-            const images = document.getElementById('newImages').files;
+                $('#saveNewAttachmentsBtn').click(function() {
+                    var formData = new FormData($('#addAttachmentForm')[0]);
+                    var productId = $('#viewProductId').val();
+                    axios.post(`/products/${productId}/attachments`, formData)
+                        .then(function(response) {
+                            alert('Attachments uploaded successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error uploading attachments:', error);
+                        });
+                });
 
-            for (let i = 0; i < images.length; i++) {
-                formData.append('images[]', images[i]);
-            }
+                $('#deleteProductBtn').click(function() {
+                    var productId = $('#viewProductId').val();
+                    axios.delete(`/products/${productId}`, {
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(function(response) {
+                            alert('Product deleted successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error deleting product:', error);
+                            alert('Failed to delete product');
+                        });
+                });
 
-            console.log("Uploading images for product ID:", productId);
+                $('#productImages').on('click', '.delete-image', function() {
+                    var imageId = $(this).data('id');
+                    var productId = $('#viewProductId').val();
+                    axios.delete(`/products/${productId}/images/${imageId}`, {
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(function(response) {
+                            alert('Image deleted successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error deleting image:', error);
+                        });
+                });
 
-            axios.post(`/products/${productId}/images`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }).then(response => {
-                if (response.data.success) {
-                    fetchProductImages(productId);
-                } else {
-                    alert('Error uploading images');
-                }
-            }).catch(error => {
-                console.error('Error uploading images:', error);
+                $('#productAttachments').on('click', '.delete-attachment', function() {
+                    var attachmentId = $(this).data('id');
+                    var productId = $('#viewProductId').val();
+                    axios.delete(`/products/${productId}/attachments/${attachmentId}`, {
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(function(response) {
+                            alert('Attachment deleted successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error deleting attachment:', error);
+                        });
+                });
+
+                $('#viewProductForm').submit(function(event) {
+                    event.preventDefault();
+                    var productId = $('#viewProductId').val();
+                    var formData = new FormData(this);
+                    axios.post(`/products/${productId}`, formData)
+                        .then(function(response) {
+                            alert('Product updated successfully');
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            console.error('Error updating product:', error);
+                        });
+                });
             });
-        };
-
-        document.getElementById('saveNewAttachmentsBtn').onclick = function () {
-            const productId = document.getElementById('viewProductId').value;
-            const formData = new FormData();
-            const attachments = document.getElementById('newAttachments').files;
-
-            for (let i = 0; i < attachments.length; i++) {
-                formData.append('attachments[]', attachments[i]);
-            }
-
-            console.log("Uploading attachments for product ID:", productId);
-
-            axios.post(`/products/${productId}/attachments`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }).then(response => {
-                if (response.data.success) {
-                    fetchProductAttachments(productId);
-                } else {
-                    alert('Error uploading attachments');
-                }
-            }).catch(error => {
-                console.error('Error uploading attachments:', error);
-            });
-        };
-    });
-</script>
-@endsection
+        </script>
+        @endsection

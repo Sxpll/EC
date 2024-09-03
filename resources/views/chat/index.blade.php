@@ -2,7 +2,6 @@
 
 @section('content')
 
-<!-- Dropdown z listą powiadomień -->
 <div id="notificationsDropdown" class="notifications-dropdown">
     <h6 class="dropdown-header">Notifications</h6>
     <div id="notificationList" class="notification-list"></div>
@@ -22,19 +21,43 @@
                     <th>Author</th>
                     <th>Status</th>
                     <th class="text-center">Actions</th>
+                    <th class="text-center">Notification</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($chats as $chat)
-                    <tr data-chat-id="{{ $chat->id }}">
-                        <td>{{ $chat->title }}</td>
-                        <td>{{ $chat->user->name }} {{ $chat->user->surname }}</td>
-                        <td>{{ $chat->status }}</td>
-                        <td class="text-center">
-                            <button class="btn btn-primary btn-view" data-chat-id="{{ $chat->id }}">View</button>
-                        </td>
-                    </tr>
+                <tr data-chat-id="{{ $chat->id }}">
+                    <td>{{ $chat->title }}</td>
+                    <td>{{ $chat->user->name }} {{ $chat->user->surname }}</td>
+                    <td>{{ $chat->status }}</td>
+                    <td class="text-center">
+                        <button class="btn btn-primary btn-view" data-chat-id="{{ $chat->id }}">View</button>
+                    </td>
+                    <td class="text-center">
+                        @php
+                        $unreadMessagesCount = $chat->messages->where('is_read', false)->count();
+                        $kropkaColor = '';
+
+                        if ($unreadMessagesCount > 0) {
+                        if ($chat->admin_id === null) {
+                        $kropkaColor = 'text-white';
+                        } elseif ($chat->admin_id !== Auth::id()) {
+                        $kropkaColor = 'text-primary';
+                        } elseif ($chat->admin_id === Auth::id()) {
+                        $kropkaColor = 'text-success';
+                        }
+                        }
+                        @endphp
+
+                        @if ($unreadMessagesCount > 0)
+                        <i class="fas fa-circle {{ $kropkaColor }}" data-chat-id="{{ $chat->id }}" id="chat-dot-{{ $chat->id }}"></i>
+                        @else
+                        <i class="fas fa-circle" data-chat-id="{{ $chat->id }}" id="chat-dot-{{ $chat->id }}" style="display:none;"></i>
+                        @endif
+                    </td>
+                </tr>
                 @endforeach
+
             </tbody>
         </table>
     </div>
@@ -43,7 +66,6 @@
 <!-- Chat Modal -->
 <div id="chatWindowModal" class="modal">
     <div class="modal-content">
-        <span class="close-custom">&times;</span>
         <div class="modal-header d-flex justify-content-between align-items-center">
             <h5 class="chat-title" id="chatTitle">Chat</h5>
             @if(Auth::user()->is_hr)
@@ -66,7 +88,6 @@
 <!-- Manage Modal -->
 <div id="manageModal" class="modal">
     <div class="modal-content">
-        <span class="close-custom">&times;</span>
         <div class="modal-header">
             <h5>Manage Chat</h5>
         </div>
@@ -92,79 +113,28 @@
     </div>
 </div>
 
-<!-- Załadowanie biblioteki axios -->
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const chatWindowModal = document.getElementById('chatWindowModal');
-    const chatWindow = document.getElementById('chat-window');
-    const manageModal = document.getElementById('manageModal');
-    const sendMessageForm = document.getElementById('sendMessageForm');
-    const messageInput = sendMessageForm.querySelector('textarea[name="message"]');
-    const manageButton = document.getElementById('manageButton');
-    const takeChatButton = document.getElementById('takeChatButton');
-    const chatTableBody = document.querySelector('tbody');
-    const searchChat = document.getElementById('searchChat');
-    const userId = @json(Auth::id());
-    let currentChatId = null;
-    let refreshInterval = null;
-    let notificationBannerShown = false;
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatWindowModal = document.getElementById('chatWindowModal');
+        const chatWindow = document.getElementById('chat-window');
+        const manageModal = document.getElementById('manageModal');
+        const sendMessageForm = document.getElementById('sendMessageForm');
+        const messageInput = sendMessageForm.querySelector('textarea[name="message"]');
+        const manageButton = document.getElementById('manageButton');
+        const takeChatButton = document.getElementById('takeChatButton');
+        const chatTableBody = document.querySelector('tbody');
+        const searchChat = document.getElementById('searchChat');
+        const userId = @json(Auth::id());
+        let currentChatId = null;
+        let refreshInterval = null;
+        let chatDotsRefreshInterval = null;
 
-    // Funkcja przypisująca eventy do przycisków "View"
-    function bindViewButtons() {
-        document.querySelectorAll('.btn-view').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                currentChatId = this.getAttribute('data-chat-id');
-                if (!currentChatId) {
-                    console.error('Chat ID is not defined');
-                    return;
-                }
-                openChatWindow(currentChatId);
-            });
-        });
-    }
-
-    // Obsługa kliknięcia przycisków "View"
-    bindViewButtons(); // Początkowe przypisanie eventów
-
-    function openChatWindow(chatId) {
-        fetch(`/chat/${chatId}`)
-            .then(response => response.json())
-            .then(data => {
-                chatWindow.innerHTML = '';
-                const messages = data.messages;
-                messages.forEach(msg => {
-                    let messageDiv = document.createElement('div');
-                    let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
-                    messageDiv.classList.add('message', messageClass);
-                    messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
-                    chatWindow.appendChild(messageDiv);
-                });
-
-                sendMessageForm.action = `/chat/${chatId}/send-message`;
-                chatWindowModal.style.display = 'block';
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-                currentChatId = chatId;
-                startAutoRefresh(chatId);
-                markAllNotificationsAsRead(chatId);
-            })
-            .catch(error => {
-                console.error('Error fetching chat messages:', error);
-            });
-    }
-
-    function startAutoRefresh(chatId) {
-        if (refreshInterval) {
-            clearInterval(refreshInterval);
-        }
-
-        refreshInterval = setInterval(() => {
-            fetch(`/chat/${chatId}/messages`)
+        function openChatWindow(chatId) {
+            fetch(`/chat/${chatId}`)
                 .then(response => response.json())
-                .then(messages => {
+                .then(data => {
                     chatWindow.innerHTML = '';
+                    const messages = data.messages;
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
                         let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
@@ -172,219 +142,313 @@ document.addEventListener('DOMContentLoaded', function() {
                         messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
                         chatWindow.appendChild(messageDiv);
                     });
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
-                })
-                .catch(error => console.error('Error refreshing messages:', error));
-        }, 3000);
-    }
 
-    if (manageButton) {
-        manageButton.addEventListener('click', function() {
+                    sendMessageForm.action = `/chat/${chatId}/send-message`;
+                    chatWindowModal.style.display = 'block';
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                    currentChatId = chatId;
+                    startAutoRefresh(chatId);
+                    markAllNotificationsAsRead(chatId);
+                })
+                .catch(error => {
+                    console.error('Error fetching chat messages:', error);
+                });
+        }
+
+        window.openChatWindow = openChatWindow;
+
+        function bindViewButtons() {
+            document.querySelectorAll('.btn-view').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const chatId = this.getAttribute('data-chat-id');
+                    if (!chatId) {
+                        console.error('Chat ID is not defined');
+                        return;
+                    }
+                    openChatWindow(chatId);
+                });
+            });
+        }
+
+        bindViewButtons();
+
+        window.addEventListener('click', function(event) {
+            if (event.target === chatWindowModal) {
+                chatWindowModal.style.display = 'none';
+                clearInterval(refreshInterval);
+                updateChatDots();
+            }
+
+            if (event.target === manageModal) {
+                manageModal.style.display = 'none';
+            }
+        });
+
+
+        function startAutoRefresh(chatId) {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+
+            refreshInterval = setInterval(() => {
+                fetch(`/chat/${chatId}/messages`)
+                    .then(response => response.json())
+                    .then(messages => {
+                        chatWindow.innerHTML = '';
+                        messages.forEach(msg => {
+                            let messageDiv = document.createElement('div');
+                            let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
+                            messageDiv.classList.add('message', messageClass);
+                            messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
+                            chatWindow.appendChild(messageDiv);
+                        });
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                    })
+                    .catch(error => console.error('Error refreshing messages:', error));
+            }, 3000);
+        }
+
+        function updateChatDots() {
+            fetch('/chat', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(chats => {
+                    chats.forEach(chat => {
+                        const dotElement = document.querySelector(`#chat-dot-${chat.id}`);
+                        if (dotElement) {
+                            const unreadMessagesCount = chat.messages.filter(msg => !msg.is_read).length;
+
+                            if (unreadMessagesCount > 0) {
+                                if (chat.admin_id === null) {
+                                    dotElement.className = 'fas fa-circle text-white';
+                                    dotElement.style.display = '';
+                                } else if (chat.admin_id !== userId) {
+                                    dotElement.className = 'fas fa-circle text-primary';
+                                    dotElement.style.display = '';
+                                } else if (chat.admin_id === userId) {
+                                    dotElement.className = 'fas fa-circle text-success';
+                                    dotElement.style.display = '';
+                                }
+                            } else {
+                                dotElement.style.display = 'none';
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error updating chat dots:', error));
+        }
+
+        function startChatDotsRefresh() {
+            if (chatDotsRefreshInterval) {
+                clearInterval(chatDotsRefreshInterval);
+            }
+
+            chatDotsRefreshInterval = setInterval(updateChatDots, 5000);
+        }
+
+        startChatDotsRefresh();
+
+        sendMessageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
             if (!currentChatId) {
                 console.error('Chat ID is not set');
                 return;
             }
-            document.getElementById('manageForm').action = `/chat/${currentChatId}/manage`;
-            manageModal.style.display = 'block';
-        });
-    }
-
-    takeChatButton.addEventListener('click', function() {
-        if (!currentChatId) {
-            console.error('Chat ID is not set');
-            return;
-        }
-        fetch(`/chat/${currentChatId}/take`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                toastr.success('Chat has been taken successfully.');
-                manageModal.style.display = 'none';
-                chatWindowModal.style.display = 'none';
-                location.reload();
-            } else {
-                toastr.error('Failed to take chat.');
-            }
-        })
-        .catch(error => {
-            console.error('Error taking chat:', error);
-            toastr.error('Error taking chat.');
-        });
-    });
-
-    document.querySelectorAll('.close-custom').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function() {
-            this.closest('.modal').style.display = 'none';
-        });
-    });
-
-    sendMessageForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (!currentChatId) {
-            console.error('Chat ID is not set');
-            return;
-        }
-        let message = messageInput.value;
-        fetch(sendMessageForm.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ message: message })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                let newMessage = document.createElement('div');
-                newMessage.classList.add('message', 'user');
-                newMessage.innerHTML = `${message} <span class="message-time">${new Date().toLocaleTimeString()}</span>`;
-                chatWindow.appendChild(newMessage);
-                messageInput.value = '';
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            } else {
-                toastr.error('Failed to send message.');
-            }
-        })
-        .catch(error => {
-            console.error('Error sending message:', error);
-            toastr.error('Error sending message.');
-        });
-    });
-
-    sendMessageForm.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessageForm.dispatchEvent(new Event('submit'));
-        }
-    });
-
-    function markAllNotificationsAsRead(chatId) {
-        axios.post(`/notifications/mark-all-as-read`, { chat_id: chatId })
-            .then(response => {
-                fetchNotifications();
-            })
-            .catch(error => {
-                console.error('Error marking notifications as read:', error);
-            });
-    }
-
-    function fetchNotifications() {
-        axios.get('/notifications')
-            .then(response => {
-                notifications = response.data;
-                updateNotificationUI();
-                checkForNewMessages(notifications);
-            })
-            .catch(error => {
-                console.error('Error fetching notifications:', error);
-            });
-    }
-
-    function updateNotificationUI() {
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationCount = document.getElementById('notificationCount');
-        const notificationList = document.getElementById('notificationList');
-
-        if (!notificationBell || !notificationCount || !notificationList) {
-            console.error('One of the elements is missing in the DOM');
-            return;
-        }
-
-        notificationList.innerHTML = '';
-        if (notifications.length > 0) {
-            notificationCount.style.display = 'inline-block';
-            notificationCount.innerText = notifications.length;
-            notifications.forEach(notification => {
-                const item = document.createElement('div');
-                item.classList.add('notification-item');
-                item.innerText = notification.message;
-                item.addEventListener('click', function() {
-                    openChatWindow(notification.chat_id);
-                    markAllNotificationsAsRead(notification.chat_id);
+            let message = messageInput.value;
+            fetch(sendMessageForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let newMessage = document.createElement('div');
+                        newMessage.classList.add('message', 'user');
+                        newMessage.innerHTML = `${message} <span class="message-time">${new Date().toLocaleTimeString()}</span>`;
+                        chatWindow.appendChild(newMessage);
+                        messageInput.value = '';
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                        updateChatDots();
+                    } else {
+                        toastr.error('Failed to send message.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
+                    toastr.error('Error sending message.');
                 });
-                notificationList.appendChild(item);
-            });
-        } else {
-            notificationCount.style.display = 'none';
-            notificationList.innerHTML = '<div class="text-center">No new notifications</div>';
-        }
-    }
+        });
 
-    function checkForNewMessages(notifications) {
-        if (!notificationBannerShown) {
-            notifications.forEach(notification => {
-                if (!notification.read) {
-                    showNotificationBanner(notification.message);
-                    notificationBannerShown = true;
+        sendMessageForm.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessageForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        if (manageButton) {
+            manageButton.addEventListener('click', function() {
+                if (!currentChatId) {
+                    console.error('Chat ID is not set');
+                    return;
                 }
+                document.getElementById('manageForm').action = `/chat/${currentChatId}/manage`;
+                manageModal.style.display = 'block';
             });
         }
-    }
 
-    function showNotificationBanner(message) {
-        const banner = document.createElement('div');
-        banner.className = 'notification-banner';
-        banner.innerText = message;
-        document.body.appendChild(banner);
-        setTimeout(() => banner.classList.add('show'), 100);
-        setTimeout(() => {
-            banner.classList.add('hide');
-            banner.addEventListener('transitionend', () => banner.remove());
-        }, 3000);
-    }
-
-    // Wyszukiwanie czatów
-    searchChat.addEventListener('input', function() {
-        const searchValue = this.value.toLowerCase();
-
-        fetch(`/chat?search=${encodeURIComponent(searchValue)}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+        takeChatButton.addEventListener('click', function() {
+            if (!currentChatId) {
+                console.error('Chat ID is not set');
+                return;
             }
-        })
-        .then(response => {
-            return response.text(); // Zamieniamy na 'text', aby zobaczyć surową odpowiedź
-        })
-        .then(data => {
-
-            try {
-                const chats = JSON.parse(data);
-                chatTableBody.innerHTML = ''; // Wyczyszczenie zawartości tabeli
-
-                chats.forEach(chat => {
-                    const chatRow = document.createElement('tr');
-                    chatRow.setAttribute('data-chat-id', chat.id);
-                    chatRow.innerHTML = `
-                        <td>${chat.title}</td>
-                        <td>${chat.user.name} ${chat.user.lastname}</td> <!-- Poprawione nazwisko -->
-                        <td>${chat.status}</td>
-                        <td class="text-center">
-                            <button class="btn btn-primary btn-view" data-chat-id="${chat.id}">View</button>
-                        </td>
-                    `;
-                    chatTableBody.appendChild(chatRow);
+            fetch(`/chat/${currentChatId}/take`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        toastr.success('Chat has been taken successfully.');
+                        manageModal.style.display = 'none';
+                        chatWindowModal.style.display = 'none';
+                        location.reload();
+                    } else {
+                        toastr.error('Failed to take chat.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error taking chat:', error);
+                    toastr.error('Error taking chat.');
                 });
+        });
 
-                bindViewButtons(); // Ponowne przypisanie eventów po zaktualizowaniu listy
-            } catch (error) {
-                console.error('Error parsing JSON:', error);
+        function markAllNotificationsAsRead(chatId) {
+            axios.post(`/notifications/mark-all-as-read`, {
+                    chat_id: chatId
+                })
+                .then(response => {
+                    fetchNotifications();
+                })
+                .catch(error => {
+                    console.error('Error marking notifications as read:', error);
+                });
+        }
+
+        function fetchNotifications() {
+            axios.get('/notifications')
+                .then(response => {
+                    const notifications = response.data;
+                    updateNotificationUI(notifications);
+                    checkForNewMessages(notifications);
+                })
+                .catch(error => {
+                    console.error('Error fetching notifications:', error);
+                });
+        }
+
+        function updateNotificationUI(notifications) {
+            const notificationList = document.getElementById('notificationList');
+            const notificationCount = document.getElementById('notificationCount');
+
+            notificationList.innerHTML = '';
+            if (notifications.length > 0) {
+                notificationCount.style.display = 'inline-block';
+                notificationCount.innerText = notifications.length;
+                notifications.forEach(notification => {
+                    const item = document.createElement('div');
+                    item.classList.add('notification-item');
+                    item.innerText = notification.message;
+                    item.addEventListener('click', function() {
+                        openChatWindow(notification.chat_id);
+                        markAllNotificationsAsRead(notification.chat_id);
+                    });
+                    notificationList.appendChild(item);
+                });
+            } else {
+                notificationCount.style.display = 'none';
+                notificationList.innerHTML = '<div class="text-center">No new notifications</div>';
             }
-        })
-        .catch(error => console.error('Error fetching chats:', error));
+        }
+
+        function checkForNewMessages(notifications) {
+            if (!notificationBannerShown) {
+                notifications.forEach(notification => {
+                    if (!notification.read) {
+                        showNotificationBanner(notification.message);
+                        notificationBannerShown = true;
+                    }
+                });
+            }
+        }
+
+        function showNotificationBanner(message) {
+            const banner = document.createElement('div');
+            banner.className = 'notification-banner';
+            banner.innerText = message;
+            document.body.appendChild(banner);
+            setTimeout(() => banner.classList.add('show'), 100);
+            setTimeout(() => {
+                banner.classList.add('hide');
+                banner.addEventListener('transitionend', () => banner.remove());
+            }, 3000);
+        }
+
+        searchChat.addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+
+            fetch(`/chat?search=${encodeURIComponent(searchValue)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    return response.text();
+                })
+                .then(data => {
+                    try {
+                        const chats = JSON.parse(data);
+                        chatTableBody.innerHTML = '';
+
+                        chats.forEach(chat => {
+                            const chatRow = document.createElement('tr');
+                            chatRow.setAttribute('data-chat-id', chat.id);
+                            chatRow.innerHTML = `
+                            <td>${chat.title}</td>
+                            <td>${chat.user.name} ${chat.user.lastname}</td>
+                            <td>${chat.status}</td>
+                            <td class="text-center">
+                                <button class="btn btn-primary btn-view" data-chat-id="${chat.id}">View</button>
+                            </td>
+                        `;
+                            chatTableBody.appendChild(chatRow);
+                        });
+
+                        bindViewButtons();
+                    } catch (error) {
+                        console.error('Error parsing JSON:', error);
+                    }
+                })
+                .catch(error => console.error('Error fetching chats:', error));
+        });
+
+        setInterval(fetchNotifications, 5000);
+        fetchNotifications();
     });
-
-    setInterval(fetchNotifications, 5000);
-    fetchNotifications();
-});
-
 </script>
 @endsection

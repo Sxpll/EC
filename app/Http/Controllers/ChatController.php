@@ -17,8 +17,8 @@ class ChatController extends Controller
         $search = $request->get('search');
         Log::info('Search request received', ['search' => $search]);
 
-        $chats = Chat::with(['user' => function ($query) {
-            $query->select('id', 'name', 'lastname'); // Upewnij się, że wybierasz zarówno imię, jak i nazwisko
+        $chats = Chat::with(['user:id,name,lastname', 'messages' => function ($query) {
+            $query->select('id', 'chat_id', 'is_read', 'admin_id'); // Dodano 'admin_id'
         }])
             ->when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%')
@@ -31,17 +31,20 @@ class ChatController extends Controller
 
         Log::info('Chats found', ['count' => count($chats)]);
 
+        // Logowanie szczegółowych danych
+        foreach ($chats as $chat) {
+            Log::info('Chat details', ['id' => $chat->id, 'title' => $chat->title, 'messages' => $chat->messages->toArray()]);
+        }
+
+        // Zwraca dane w formacie JSON, jeśli jest to żądanie AJAX
         if ($request->ajax()) {
             return response()->json($chats);
         }
 
+        // Dla zwykłych żądań HTTP zwraca widok
         return view('chat.index', compact('chats'));
     }
-
-
-
-
-
+    
 
 
     public function userChats()
@@ -56,13 +59,21 @@ class ChatController extends Controller
     {
         $chat = Chat::with('messages', 'admin')->findOrFail($id);
 
-        // Upewnij się, że tylko użytkownik powiązany z czatem lub admin ma dostęp
+        // Sprawdź, czy użytkownik ma uprawnienia do dostępu do czatu
         if (Auth::user()->role !== 'admin' && $chat->user_id !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized access'], 403);
         }
 
+        // Oznacz wiadomości jako przeczytane, jeśli admin je przegląda
+        if (Auth::user()->role === 'admin') {
+            Message::where('chat_id', $id)
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+        }
+
         return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
     }
+
 
 
     public function sendMessage(Request $request, $id)
@@ -93,33 +104,34 @@ class ChatController extends Controller
             $message->chat_id = $chat->id;
             $message->message = $request->message;
             $message->admin_id = Auth::user()->role === 'admin' ? Auth::id() : null;
+            $message->is_read = false; // Oznacz nową wiadomość jako nieprzeczytaną
             $message->save();
             Log::info('Message saved for chat: ' . $chat->id);
 
-            // Wysyłanie powiadomień tylko dla użytkowników, gdy wiadomość pochodzi od admina
-            if (!$chat->admin_id || $message->admin_id !== Auth::id()) {
-                $admins = \App\Models\User::where('role', 'admin')->get();
-                foreach ($admins as $admin) {
-                    // Sprawdzenie, aby nie wysłać powiadomienia do samego siebie
-                    if ($admin->id !== Auth::id()) {
-                        Notification::create([
-                            'chat_id' => $chat->id,
-                            'user_id' => $admin->id,
-                            'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
-                            'read' => false,
-                        ]);
-                        Log::info('Notification sent to admin ID: ' . $admin->id);
-                    }
+            // Sprawdzenie, czy wiadomość pochodzi od admina
+            if ($message->admin_id) {
+                // Jeśli admin wysłał wiadomość, sprawdź, czy to admin przypisany do czatu
+                if ($chat->admin_id && $chat->admin_id !== $message->admin_id) {
+                    // Powiadom przypisanego admina, że nowa wiadomość została wysłana
+                    Notification::create([
+                        'chat_id' => $chat->id,
+                        'user_id' => $chat->admin_id,
+                        'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
+                        'read' => false,
+                    ]);
+                    Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
                 }
             } else {
-                // Powiadomienie dla przypisanego admina
-                Notification::create([
-                    'chat_id' => $chat->id,
-                    'user_id' => $chat->admin_id,
-                    'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
-                    'read' => false,
-                ]);
-                Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
+                // Wiadomość pochodzi od użytkownika, wyślij powiadomienie do przypisanego admina
+                if ($chat->admin_id) {
+                    Notification::create([
+                        'chat_id' => $chat->id,
+                        'user_id' => $chat->admin_id,
+                        'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
+                        'read' => false,
+                    ]);
+                    Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
+                }
             }
 
             // Zwróć pomyślną odpowiedź
@@ -134,9 +146,6 @@ class ChatController extends Controller
             ], 500);
         }
     }
-
-
-
 
 
 
@@ -211,18 +220,21 @@ class ChatController extends Controller
         $status = $request->get('status');
         $user_id = Auth::id();
 
-        $chats = Chat::where('user_id', $user_id)
-            ->where(function ($query) use ($status) {
-                if ($status === 'open') {
-                    $query->whereIn('status', ['open', 'ongoing']);
-                } elseif ($status === 'completed') {
-                    $query->where('status', 'completed');
-                }
-            })
-            ->orderBy('created_at', 'desc')  // Sortowanie od najnowszych do najstarszych
-            ->get();
+        Log::info('FilterChats invoked', ['status' => $status, 'user_id' => $user_id]);
 
-        return response()->json($chats);
+        $chatsQuery = Chat::where('user_id', $user_id);
+
+        if ($status === 'open') {
+            $chatsQuery->whereIn('status', ['open', 'ongoing']);
+        } elseif ($status === 'completed') {
+            $chatsQuery->where('status', 'completed');
+        }
+
+        $chats = $chatsQuery->orderBy('created_at', 'desc')->get();
+
+        Log::info('Chats retrieved', ['count' => $chats->count()]);
+
+        return response()->json(['chats' => $chats]);
     }
 
 

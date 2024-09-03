@@ -9,11 +9,11 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'category_id', 'isActive'];
+    protected $fillable = ['name', 'description', 'isActive'];
 
-    public function category()
+    public function categories()
     {
-        return $this->belongsTo(Category::class)->withDefault();
+        return $this->belongsToMany(Category::class, 'category_product', 'product_id', 'category_id');
     }
 
     public function images()
@@ -24,5 +24,9 @@ class Product extends Model
     public function attachments()
     {
         return $this->hasMany(ProductAttachment::class);
+    }
+    public function categoryHistory()
+    {
+        return $this->hasMany(ProductCategoryHistory::class);
     }
 }

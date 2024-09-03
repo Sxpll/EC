@@ -33,6 +33,7 @@ body {
     justify-content: center;
     text-align: center;
     text-wrap: wrap;
+
 }
 
 .card-admin {
@@ -55,14 +56,23 @@ body {
 }
 
 .content-wrapper {
-    width: 100%;
-    max-width: 900px;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto;
-    padding: 20px;
+    /* margin-left: 250px; - usuń to jeśli dodajesz margines na main */
+    display: flex;
+    justify-content: center; /* Wyśrodkowanie poziome */
+    align-items: center; /* Wyśrodkowanie pionowe */
+    height: calc(100vh - 60px); /* Dopasowanie wysokości do ekranu, uwzględniając nagłówek */
     box-sizing: border-box;
 }
+
+main.content-wrapper {
+    margin-left: 250px; /* Dodaj margines tylko do main, jeśli div również go posiada */
+    display: flex;
+    justify-content: center; /* Wyśrodkowanie poziome */
+    align-items: center; /* Wyśrodkowanie pionowe */
+    height: calc(100vh - 60px); /* Dopasowanie wysokości do ekranu, uwzględniając nagłówek */
+    box-sizing: border-box;
+}
+
 
 .card-header {
     text-align: center;
@@ -161,14 +171,13 @@ body {
 
 .sidebar {
     height: 100%;
-    width: 0;
+    width: 250px; /* Stała szerokość sidebaru */
     position: fixed;
     z-index: 1;
     top: 0;
-    right: 0;
+    left: 0;
     background-color: #2b2b3b;
     overflow-x: hidden;
-    transition: width 0.5s;
     padding-top: 60px;
     white-space: nowrap;
 }
@@ -176,7 +185,7 @@ body {
 .sidebar a {
     padding: 10px 15px;
     text-decoration: none;
-    font-size: 25px;
+    font-size: 20px;
     color: #ffffff;
     display: block;
     transition: color 0.3s;
@@ -186,24 +195,8 @@ body {
     color: #1abc9c;
 }
 
-.sidebar .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
-}
-
-#sidebarBtn {
-    font-size: 30px;
-    cursor: pointer;
-    color: white;
-    padding: 10px;
-    background-color: transparent;
-    border: none;
-    position: fixed;
-    top: 15px;
-    right: 15px;
+#sidebarBtn, .sidebar .closebtn {
+    display: none;
 }
 
 .navbar-brand {
@@ -225,15 +218,30 @@ body {
     background-color: #2b2b3b;
     border-radius: 10px;
     color: #ffffff;
+    margin-top: 20px;
 }
 
 .table th,
-.table tr td {
-    border-color: #4b3b45;
-    padding: 10px;
-    width: auto;
-    white-space: nowrap;
-    word-wrap: break-word;
+.table td {
+    padding: 15px;
+    text-align: center;
+    border-top: 1px solid #4b4b4b;
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #1abc9c;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.table td {
+    background-color: #2b2b3b;
+    color: #ffffff;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #323246;
 }
 
 .table tr td:nth-child(4) {
@@ -408,21 +416,30 @@ body {
 }
 
 .container {
-    margin-top: 20px;
+    max-width: 800px; /* Zwiększenie szerokości dla listy czatów admina */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
+
+
+
 .list-group-item {
-    background-color: #323252;
+    width: 100%; /* Ustaw szerokość na 100%, aby elementy były w pełni widoczne */
+    background-color: #323252; /* Zachowaj spójność stylów */
     color: #ffffff;
     border: none;
     border-radius: 5px;
     margin-bottom: 5px;
-    list-style-type: none;
+    padding: 10px;
 }
 
 .list-group-item a {
-    color: #007bff;
+    color: #1abc9c; /* Kolor tekstu */
     text-decoration: none;
+    display: block;
+    padding: 10px;
 }
 
 #chat-window {
@@ -589,7 +606,7 @@ textarea.form-control {
 .costest{
     display: flex;
     justify-content: space-between;
-    margin-right: 33px;
+
 }
 
 .modal-header {
@@ -641,12 +658,9 @@ textarea.form-control {
 }
 
 .table-responsive {
-    max-height: 60vh;
+    max-height: 70vh; /* Możesz dostosować wysokość tabeli */
     overflow-y: auto;
-    margin-bottom: 1rem;
-    -webkit-overflow-scrolling: touch;
 }
-
 
 .new-message-dot {
     color: red; /* Kolor kropki */
@@ -654,18 +668,19 @@ textarea.form-control {
 }
 
 
-/* Styl dla powiadomień */
+/* Dodaj do swojego pliku CSS */
 .notification-bell {
     position: fixed;
     top: 20px;
-    left: 20px;
+    right: 20px;
     cursor: pointer;
     font-size: 24px;
     color: #007bff;
     z-index: 1000;
     display: flex;
-
 }
+
+
 
 .notification-count {
     position: absolute;
@@ -680,39 +695,41 @@ textarea.form-control {
 }
 
 .notifications-dropdown {
-    display: none;
+    display: none; /* Początkowo ukryte */
     position: fixed;
-    top: 60px;
-    left: 20px;
-    width: 300px;
-    background-color: rgba(0, 0, 0, 0.75);
-    border: 1px solid #353333;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    backdrop-filter: blur(5px); /* Dodanie rozmytego tła */
+    top: 60px; /* Dostosuj w zależności od wielkości dzwonka */
+    right: 20px; /* Dostosuj pozycję na stronie */
+    width: 300px; /* Szerokość dropdowna */
+    background-color: rgba(0, 0, 0, 0.9); /* Tło z przezroczystością */
+    border: 1px solid #353333; /* Granica */
+    border-radius: 5px; /* Zaokrąglenie rogów */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Cień dla efektu unoszenia */
+    z-index: 2000; /* Warstwa na wierzchu */
+    opacity: 1; /* Pełna widoczność */
+    visibility: visible; /* Widoczność elementu */
+    overflow-y: auto; /* Dodanie paska przewijania w pionie w przypadku dużej ilości powiadomień */
+    max-height: 400px; /* Maksymalna wysokość dropdowna */
 }
 
 .notification-list {
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 10px;
+    padding: 10px; /* Wewnętrzny odstęp */
 }
 
 .notification-item {
-    padding: 10px;
-    border-bottom: 1px solid #c7c27d;
-    cursor: pointer;
+    padding: 10px; /* Wewnętrzny odstęp */
+    border-bottom: 1px solid #c7c27d; /* Dolna granica między powiadomieniami */
+    cursor: pointer; /* Zmiana kursora na wskaźnik */
 }
 
 .notification-item:last-child {
-    border-bottom: none;
+    border-bottom: none; /* Usunięcie dolnej granicy dla ostatniego elementu */
 }
 
 .notification-item:hover {
-    background-color: #858282;
-    color: black;
+    background-color: #858282; /* Kolor tła przy najechaniu */
+    color: black; /* Kolor tekstu przy najechaniu */
 }
+
 
 /* Styl dla dynamicznego banera powiadomień */
 .notification-banner {
@@ -729,6 +746,10 @@ textarea.form-control {
     transition: opacity 0.5s ease, transform 0.5s ease;
     z-index: 2000;
     backdrop-filter: blur(10px); /* Dodanie rozmytego tła */
+}
+
+.show-dropdown {
+    display: block !important;
 }
 
 .notification-banner.show {
@@ -969,12 +990,254 @@ textarea.form-control {
 }
 
 
-.chat-title{
-    color: white;
-    font-size: 15px;
-}
 
 .table-danger {
     background-color: #f8d7da; /* Czerwone tło */
     color: red; /* Ciemny czerwony tekst */
+}
+
+.fa-arrow-left{
+    color: white;
+}
+
+
+.chat-container {
+    background-color: #2c2c3a; /* Ciemniejsze tło */
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px; /* Szerokość prostokąta */
+    margin: 0 auto; /* Wyśrodkowanie */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Delikatny cień */
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.chat-item {
+    background-color: #1e1e2f; /* Ciemniejsze tło dla każdej pozycji na liście */
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px; /* Odstęp między pozycjami */
+    color: #ffffff; /* Kolor tekstu */
+    display: flex;
+    justify-content: space-between; /* Rozdzielenie tytułu i daty */
+    align-items: center;
+}
+
+.chat-item:hover {
+    background-color: #343447; /* Kolor tła po najechaniu */
+}
+
+.chat-link {
+    color: #ffffff;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+}
+
+.chat-title {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.chat-time {
+    font-size: 12px;
+    color: #cccccc;
+}
+
+.new-chat-button {
+    background-color: #1abc9c;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.new-chat-button:hover {
+    background-color: #16a085;
+}
+
+#searchChat {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #444;
+    margin-bottom: 20px;
+    background-color: #3b3b4b;
+    color: #ffffff;
+}
+
+
+.mb-3{
+    margin-right: 30px;
+}
+
+h1.elo {
+    color: #1abc9c;
+    margin-bottom: 20px;
+}
+
+.chat-container {
+    background-color: #2c2c3a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    width: 100%; /* Dodaj pełną szerokość */
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow-x: hidden; /* Eliminacja poziomego przewijania */
+}
+
+.chat-item {
+    background-color: #1e1e2f;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Dodaj pełną szerokość */
+    box-sizing: border-box;
+}
+
+.chat-item a {
+    width: 100%; /* Sprawia, że link w chat-item zajmuje całą szerokość */
+    text-decoration: none;
+    color: #00ffdd; /* Kolor linku */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.new-chat-button, #chatStatusFilter {
+    background-color: #1abc9c; /* Zielony kolor */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+}
+
+.new-chat-button:hover, #chatStatusFilter:hover {
+    background-color: #16a085; /* Kolor przycisku po najechaniu */
+}
+
+#chatStatusFilter {
+    max-width: 150px;
+    width: auto; /* Dynamiczna szerokość */
+    background: color #656465;
+}
+
+.costest{
+    margin-bottom: 20px;
+    justify-content: space-evenly;
+}
+
+
+/* Ogólna stylizacja paska przewijania */
+::-webkit-scrollbar {
+    width: 8px;  /* Szerokość paska przewijania */
+    background-color: #2c2c3a;  /* Kolor tła paska */
+}
+
+/* Styl suwaka */
+::-webkit-scrollbar-thumb {
+    background-color: #1abc9c;  /* Kolor suwaka */
+    border-radius: 10px;  /* Zaokrąglenie suwaka */
+}
+
+/* Styl suwaka po najechaniu */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #16a085;  /* Kolor suwaka po najechaniu */
+}
+
+/* Styl suwaka dla elementów specyficznych */
+.chat-container::-webkit-scrollbar,
+.chat-item::-webkit-scrollbar,
+#chat-window::-webkit-scrollbar {
+    width: 8px;  /* Szerokość paska przewijania */
+    background-color: #2c2c3a;  /* Kolor tła paska */
+}
+
+/* Styl suwaka w kontenerze czatu */
+.chat-container::-webkit-scrollbar-thumb,
+.chat-item::-webkit-scrollbar-thumb,
+#chat-window::-webkit-scrollbar-thumb {
+    background-color: #1abc9c;  /* Kolor suwaka */
+    border-radius: 10px;  /* Zaokrąglenie suwaka */
+}
+
+/* Styl suwaka po najechaniu */
+.chat-container::-webkit-scrollbar-thumb:hover,
+.chat-item::-webkit-scrollbar-thumb:hover,
+#chat-window::-webkit-scrollbar-thumb:hover {
+    background-color: #16a085;  /* Kolor suwaka po najechaniu */
+}
+
+.dd {
+    max-height: 400px; /* Maksymalna wysokość dla kontenera z drzewem kategorii */
+    overflow-y: auto; /* Dodanie przewijania w pionie */
+    background-color: #2c2c2c; /* Kolor tła */
+    padding: 20px; /* Wewnętrzne odstępy */
+    border-radius: 10px; /* Zaokrąglone rogi */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Cień dla efektu unoszenia */
+    margin-bottom: 20px; /* Odstęp poniżej drzewa */
+}
+
+.dd-list {
+    list-style-type: none; /* Usunięcie kropek z listy */
+    padding: 0; /* Usunięcie domyślnych odstępów */
+}
+
+.dd-item > .dd-handle {
+    cursor: move; /* Wskaźnik kursora przy przeciąganiu */
+    background-color: #444; /* Kolor tła uchwytu */
+    color: #fff; /* Kolor tekstu */
+    padding: 10px; /* Wewnętrzne odstępy dla uchwytu */
+    border-radius: 5px; /* Zaokrąglenie krawędzi */
+    margin-bottom: 5px; /* Odstęp poniżej uchwytu */
+}
+
+.text-danger td {
+    color: red;
+}
+
+.jstree-default .jstree-clicked {
+
+    color: black !important;
+}
+
+
+.jstree-default .jstree-hovered {
+
+    color: black !important;
+}
+
+
+.jstree-default .jstree-clicked {
+
+    color: black !important;
+}
+
+.assigned-category {
+    color: red;
+    font-weight: bold;
+}
+
+/* Kropka dla czatu nieprzypisanego z nieprzeczytanymi wiadomościami */
+.text-white.fas.fa-circle {
+    color: white !important;
+}
+
+/* Kropka dla czatu przypisanego do innego admina */
+.text-primary.fas.fa-circle {
+    color: #007bff !important; /* Kolor niebieski (primary) */
+}
+
+/* Kropka dla czatu przypisanego do aktualnego admina */
+.text-success.fas.fa-circle {
+    color: #28a745 !important; /* Kolor zielony (success) */
 }

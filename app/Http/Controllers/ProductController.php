@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\ProductHistory;
 use App\Models\ProductImage;
 use App\Models\ProductAttachment;
-
-use App\Models\ProductHistory;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,11 +19,184 @@ class ProductController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        // Retrieve all products
-        $products = Product::with('category')->get();
+        $products = Product::with('categories')->get();
         $categories = Category::all();
 
         return view('products.manage-products', compact('products', 'categories'));
+    }
+
+    public function create()
+    {
+        $categories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
+        return view('products.create', compact('categories'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'categories' => 'required|array',
+            'categories.*' => 'exists:categories,id',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'attachments.*' => 'file|max:10240',
+        ]);
+
+        Log::info('Store Product: Received input', $request->all());
+
+        $product = Product::create($request->only('name', 'description'));
+
+        // Przekształć dane wejściowe i przefiltruj kategorie
+        $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
+
+        // Pobierz tylko najniższe kategorie
+        $leafCategoryIds = Category::whereIn('id', $selectedCategoryIds)
+            ->doesntHave('children')
+            ->pluck('id')
+            ->toArray();
+
+        Log::info('Store Product: Leaf categories to sync', $leafCategoryIds);
+
+        // Użyj sync, aby przypisać kategorie
+        $product->categories()->sync($leafCategoryIds);
+
+        // Archiwizuj kategorie
+        $this->archiveCategories($product, $leafCategoryIds);
+
+        // Dodaj obrazy i załączniki
+        $this->addImagesAndAttachments($request, $product);
+
+        ProductHistory::create([
+            'admin_id' => Auth::user()->id,
+            'admin_name' => Auth::user()->name,
+            'action' => 'created',
+            'product_id' => $product->id,
+            'field' => 'Product',
+            'old_value' => null,
+            'new_value' => json_encode($product->toArray()),
+        ]);
+
+        Log::info('Store Product: Successfully stored product with ID: ' . $product->id);
+
+        return redirect()->route('products.index')->with('success', 'Product added successfully');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'categories' => 'required|array',
+            'categories.*' => 'exists:categories,id',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+            'attachments.*' => 'file|max:10240',
+        ]);
+
+        Log::info('Update Product: Received input', $request->all());
+
+        try {
+            $oldCategories = $product->categories->pluck('name', 'id')->toArray();
+
+            $product->update($request->only('name', 'description'));
+
+            Log::info('Update Product: Updated product', $product->toArray());
+
+            $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
+
+            $leafCategoryIds = Category::whereIn('id', $selectedCategoryIds)
+                ->doesntHave('children')
+                ->pluck('id')
+                ->toArray();
+
+            Log::info('Update Product: Leaf categories to sync', $leafCategoryIds);
+
+            $product->categories()->sync($leafCategoryIds);
+
+            $this->archiveCategories($product, $leafCategoryIds);
+
+            $newCategories = Category::whereIn('id', $leafCategoryIds)->pluck('name', 'id')->toArray();
+
+            if (array_diff($leafCategoryIds, array_keys($oldCategories)) || array_diff(array_keys($oldCategories), $leafCategoryIds)) {
+                ProductHistory::create([
+                    'admin_id' => Auth::user()->id,
+                    'admin_name' => Auth::user()->name,
+                    'action' => 'updated',
+                    'product_id' => $product->id,
+                    'field' => 'categories',
+                    'old_value' => json_encode(array_values($oldCategories)),
+                    'new_value' => json_encode(array_values($newCategories)),
+                ]);
+
+                Log::info('Update Product: Categories history updated');
+            }
+
+            $this->addImagesAndAttachments($request, $product);
+
+            return redirect()->route('products.index')->with('success', 'Product updated successfully');
+        } catch (\Exception $e) {
+            Log::error("Error updating product: " . $e->getMessage());
+            return response()->json(['error' => 'Error updating product'], 500);
+        }
+    }
+
+    private function archiveCategories($product, $leafCategoryIds)
+    {
+        foreach ($leafCategoryIds as $categoryId) {
+            $path = $this->getCategoryPath($categoryId);
+            $category = Category::find($categoryId);
+
+            // Sprawdzenie, czy kategoria jest nieaktywna
+            if (!$category->isActive) {
+                // Sprawdzenie, czy wpis już istnieje w historii
+                $exists = \DB::table('product_category_history')
+                    ->where('product_id', $product->id)
+                    ->where('category_id', $categoryId)
+                    ->where('path', $path)
+                    ->exists();
+
+                if (!$exists) {
+                    \DB::table('product_category_history')->insert([
+                        'product_id' => $product->id,
+                        'category_id' => $categoryId,
+                        'path' => $path,
+                        'assigned_at' => now(),
+                        'removed_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
+    }
+
+
+
+    private function addImagesAndAttachments($request, $product)
+    {
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'file_data' => base64_encode(file_get_contents($image->getRealPath())),
+                    'mime_type' => $image->getClientMimeType()
+                ]);
+            }
+            Log::info('Store Product: Images added');
+        }
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $attachment) {
+                ProductAttachment::create([
+                    'product_id' => $product->id,
+                    'file_data' => base64_encode(file_get_contents($attachment->getRealPath())),
+                    'mime_type' => $attachment->getClientMimeType(),
+                    'file_name' => $attachment->getClientOriginalName()
+                ]);
+            }
+            Log::info('Store Product: Attachments added');
+        }
     }
 
 
@@ -35,137 +206,29 @@ class ProductController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        $product = Product::with('category')->findOrFail($id);
-        $histories = ProductHistory::where('product_id', $id)->get();
-        return response()->json(['product' => $product, 'histories' => $histories]);
-    }
+        try {
+            $product = Product::with(['categories', 'images', 'attachments'])->findOrFail($id);
+            $histories = ProductHistory::where('product_id', $id)->get();
 
-    public function create()
-    {
-        $categories = Category::all();
-        return view('products.create', compact('categories'));
-    }
-
-    public function store(Request $request) // Tutaj używamy Request
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'attachments.*' => 'file|max:10240',
-        ]);
-
-        Log::info('Storing new product', $request->all());
-
-        // Tworzenie produktu
-        $product = Product::create($request->only('name', 'description', 'category_id'));
-
-        // Pobierz dane produktu bez created_at i updated_at
-        $newData = $product->toArray();
-        unset($newData['created_at'], $newData['updated_at']);
-
-        // Zapis historii tworzenia produktu
-        ProductHistory::create([
-            'admin_id' => Auth::user()->id,
-            'admin_name' => Auth::user()->name,
-            'action' => 'created',
-            'product_id' => $product->id,
-            'field' => 'Product',
-            'new_value' => json_encode($newData),
-        ]);
-
-        // Obsługa zdjęć
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'file_data' => file_get_contents($image),
-                    'mime_type' => $image->getClientMimeType()
-                ]);
-            }
+            return response()->json([
+                'product' => $product,
+                'histories' => $histories
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error fetching product details: " . $e->getMessage());
+            return response()->json(['error' => 'Error fetching product details'], 500);
         }
-
-        // Obsługa załączników
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $attachment) {
-                ProductAttachment::create([
-                    'product_id' => $product->id,
-                    'file_data' => file_get_contents($attachment),
-                    'mime_type' => $attachment->getClientMimeType(),
-                    'file_name' => $attachment->getClientOriginalName()
-                ]);
-            }
-        }
-
-        Log::info('Product stored successfully with images and attachments: ' . $product->id);
-
-        return redirect()->route('products.index')->with('success', 'Product added successfully');
     }
 
 
-
-
-
-
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
-        $oldData = $product->toArray();
-
-        // Usuń 'created_at' i 'updated_at' z oldData
-        unset($oldData['created_at'], $oldData['updated_at']);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'nullable|exists:categories,id',
-        ]);
-
-        // Aktualizacja produktu
-        $product->update($request->except(['_method', '_token']));
-
-        $newData = $product->toArray();
-
-        // Usuń 'created_at' i 'updated_at' z newData
-        unset($newData['created_at'], $newData['updated_at']);
-
-        // Zapis historii edycji produktu
-        foreach ($request->except(['_method', '_token']) as $key => $value) {
-            if (isset($oldData[$key]) && $oldData[$key] != $value) {
-                ProductHistory::create([
-                    'admin_id' => Auth::user()->id,
-                    'admin_name' => Auth::user()->name,
-                    'action' => 'updated',
-                    'product_id' => $product->id,
-                    'field' => $key,
-                    'old_value' => $oldData[$key],
-                    'new_value' => $newData[$key],
-                ]);
-            }
-        }
-
-        return response()->json(['success' => true]);
-    }
 
 
     public function destroy($id)
     {
-        Log::info("Attempting to deactivate product with ID: $id");
-
         try {
             $product = Product::findOrFail($id);
             $oldData = $product->toArray();
-
-            // Usuń 'created_at' i 'updated_at' z oldData
-            unset($oldData['created_at'], $oldData['updated_at']);
-
-            // Zamiast usuwania, ustawiamy isActive na 0
             $product->update(['isActive' => false]);
-            $product->save();
-
-            Log::info('isActive value after update:', ['isActive' => $product->isActive]);
-
 
             ProductHistory::create([
                 'admin_id' => Auth::user()->id,
@@ -176,7 +239,6 @@ class ProductController extends Controller
                 'old_value' => json_encode($oldData),
             ]);
 
-            Log::info("Product deactivated (soft delete) successfully: $id");
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             Log::error("Error deactivating product with ID: $id - " . $e->getMessage());
@@ -184,48 +246,65 @@ class ProductController extends Controller
         }
     }
 
-
-
-    public function showImages($id)
+    public function activate($id)
     {
+        $product = Product::findOrFail($id);
+        $product->update(['isActive' => 1]);
+        return response()->json(['success' => true]);
+    }
+
+    public function storeImages(Request $request, $id)
+    {
+        $request->validate([
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+        ]);
+
+        $product = Product::findOrFail($id);
+
         try {
-            $product = Product::findOrFail($id);
-            $images = $product->images->map(function ($image) {
-                return [
-                    'id' => $image->id,
-                    'file_data' => base64_encode($image->file_data),
-                    'mime_type' => $image->mime_type
-                ];
-            });
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $encodedData = base64_encode(file_get_contents($image->getRealPath()));
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'file_data' => $encodedData,
+                        'mime_type' => $image->getClientMimeType()
+                    ]);
+                }
+            }
 
-            Log::info("Fetched images for product ID: $id", $images->toArray());
-
-            return response()->json($images);
+            return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error("Error fetching images for product ID: $id - " . $e->getMessage());
-            return response()->json(['error' => 'Error fetching images'], 500);
+            Log::error("Error uploading images: " . $e->getMessage());
+            return response()->json(['error' => 'Error uploading images'], 500);
         }
     }
 
-    public function showAttachments($id)
+    public function storeAttachments(Request $request, $id)
     {
+        $request->validate([
+            'attachments.*' => 'required|file|max:10240',
+        ]);
+
+        $product = Product::findOrFail($id);
+
         try {
-            $product = Product::findOrFail($id);
-            $attachments = $product->attachments->map(function ($attachment) {
-                return [
-                    'id' => $attachment->id,
-                    'file' => base64_encode($attachment->file_data),
-                    'mime_type' => $attachment->mime_type,
-                    'file_name' => $attachment->file_name,
-                ];
-            });
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $attachment) {
+                    $encodedData = base64_encode(file_get_contents($attachment->getRealPath()));
+                    ProductAttachment::create([
+                        'product_id' => $product->id,
+                        'file_data' => $encodedData,
+                        'mime_type' => $attachment->getClientMimeType(),
+                        'file_name' => $attachment->getClientOriginalName()
+                    ]);
+                }
+            }
 
-            Log::info("Fetched attachments for product ID: $id");
-
-            return response()->json($attachments);
+            return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error("Error fetching attachments for product ID: $id - " . $e->getMessage());
-            return response()->json(['error' => 'Error fetching attachments'], 500);
+            Log::error("Error uploading attachments: " . $e->getMessage());
+            return response()->json(['error' => 'Error uploading attachments'], 500);
         }
     }
 
@@ -234,12 +313,8 @@ class ProductController extends Controller
         try {
             $image = ProductImage::where('product_id', $productId)->where('id', $imageId)->firstOrFail();
             $image->delete();
-
-            Log::info("Deleted image with ID: $imageId for product ID: $productId");
-
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error("Error deleting image for product ID: $productId - " . $e->getMessage());
             return response()->json(['error' => 'Error deleting image'], 500);
         }
     }
@@ -247,86 +322,41 @@ class ProductController extends Controller
     public function deleteAttachment($productId, $attachmentId)
     {
         try {
-            $attachment = ProductAttachment::where('product_id', $productId)
-                ->where('id', $attachmentId)
-                ->firstOrFail();
+            $attachment = ProductAttachment::where('product_id', $productId)->where('id', $attachmentId)->firstOrFail();
             $attachment->delete();
-
-            Log::info("Deleted attachment with ID: $attachmentId for product ID: $productId");
-
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error("Error deleting attachment for product ID: $productId - " . $e->getMessage());
             return response()->json(['error' => 'Error deleting attachment'], 500);
         }
     }
-
-    public function storeImages(Request $request, $id)
+    public function getArchivedCategories($id)
     {
-        $request->validate([
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        try {
+            $archivedCategories = \DB::table('product_category_history')
+                ->join('categories', 'product_category_history.category_id', '=', 'categories.id')
+                ->where('product_category_history.product_id', $id)
+                ->where('categories.isActive', 0) // Tylko nieaktywne kategorie
+                ->select('product_category_history.path')
+                ->get();
 
-        $product = Product::findOrFail($id);
-
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'file_data' => file_get_contents($image),
-                    'mime_type' => $image->getClientMimeType()
-                ]);
-            }
+            return response()->json(['archivedCategories' => $archivedCategories]);
+        } catch (\Exception $e) {
+            Log::error("Error fetching archived categories for product ID: $id - " . $e->getMessage());
+            return response()->json(['error' => 'Error fetching archived categories'], 500);
         }
-
-        Log::info("Images stored successfully for product ID: $id");
-        return response()->json(['success' => true]);
     }
 
-    public function storeAttachments(Request $request, $id)
+
+    private function getCategoryPath($categoryId)
     {
-        $request->validate([
-            'attachments.*' => 'file|max:10240',
-        ]);
+        $category = Category::find($categoryId);
+        $path = [];
 
-        $product = Product::findOrFail($id);
-
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $attachment) {
-                ProductAttachment::create([
-                    'product_id' => $product->id,
-                    'file_data' => file_get_contents($attachment),
-                    'mime_type' => $attachment->getClientMimeType(),
-                    'file_name' => $attachment->getClientOriginalName()
-                ]);
-            }
+        while ($category) {
+            array_unshift($path, $category->name); // Dodaj kategorię na początek
+            $category = $category->parent; // Przejdź do rodzica
         }
 
-        Log::info("Attachments stored successfully for product ID: $id");
-        return response()->json(['success' => true]);
-    }
-
-    public function fetchHistory($id)
-    {
-        $histories = ProductHistory::where('product_id', $id)->get();
-
-        if ($histories->isEmpty()) {
-            return response()->json(['error' => 'No history found for this product'], 404);
-        }
-
-        return response()->json($histories);
-    }
-
-    public function activate($id)
-    {
-        $product = Product::findOrFail($id);
-
-        // Zmiana isActive na 1
-        $product->update(['isActive' => 1]);
-
-        // Dodaj logowanie lub inne działania, jeśli potrzebne
-        Log::info('Product activated successfully: ' . $id);
-
-        return response()->json(['success' => true]);
+        return implode('\\', $path); // Zwraca ścieżkę jako ciąg znaków z separatorami
     }
 }
