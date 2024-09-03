@@ -14,6 +14,10 @@ class ChatController extends Controller
 {
     public function index(Request $request)
     {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
         $search = $request->get('search');
         Log::info('Search request received', ['search' => $search]);
 
@@ -44,7 +48,7 @@ class ChatController extends Controller
         // Dla zwykłych żądań HTTP zwraca widok
         return view('chat.index', compact('chats'));
     }
-    
+
 
 
     public function userChats()
