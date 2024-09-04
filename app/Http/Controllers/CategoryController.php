@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
@@ -35,12 +37,25 @@ class CategoryController extends Controller
             'parent_id' => 'nullable|exists:categories,id',
         ]);
 
-        Category::create([
-            'name' => $request->name,
-            'parent_id' => $request->parent_id,
-        ]);
+        try {
+            // Tworzenie nowej kategorii
+            $category = Category::create([
+                'name' => $request->name,
+                'parent_id' => $request->parent_id,
+            ]);
 
-        return redirect()->route('categories.index')->with('success', 'Category added successfully');
+            Log::info('Category created successfully', ['category_id' => $category->id]);
+
+            // Jeśli żądanie jest typu AJAX, zwróć odpowiedź JSON z ID nowej kategorii
+            if ($request->ajax()) {
+                return response()->json(['success' => 'Category added successfully', 'category_id' => $category->id]);
+            }
+
+            return redirect()->route('categories.index')->with('success', 'Category added successfully');
+        } catch (\Exception $e) {
+            Log::error('Error creating category: ' . $e->getMessage());
+            return response()->json(['error' => 'Error creating category: ' . $e->getMessage()], 500);
+        }
     }
 
     public function edit(Category $category)
@@ -69,14 +84,12 @@ class CategoryController extends Controller
             'parent_id' => $request->parent_id,
         ]);
 
-        // Sprawdzamy, czy żądanie jest typu AJAX
         if ($request->ajax()) {
             return response()->json(['success' => 'Category renamed successfully.']);
         }
 
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
-
 
     public function destroy($id)
     {
@@ -141,10 +154,7 @@ class CategoryController extends Controller
 
     public function getTree()
     {
-        // Pobierz wszystkie aktywne kategorie bez rodzica i ich dzieci
         $categories = Category::where('isActive', 1)->whereNull('parent_id')->with('childrenRecursive')->get();
-
-        // Przekształć kategorie na format oczekiwany przez jstree
         $treeData = $this->buildTree($categories);
 
         return response()->json($treeData);
@@ -157,10 +167,68 @@ class CategoryController extends Controller
             $node = [
                 'id' => $category->id,
                 'text' => $category->name,
-                'children' => $this->buildTree($category->childrenRecursive) // Rekurencyjnie budujemy drzewo
+                'children' => $this->buildTree($category->childrenRecursive)
             ];
             $tree[] = $node;
         }
         return $tree;
+    }
+
+    public function moveProductsToNewSubcategory(Request $request)
+    {
+        try {
+            Log::info('Received input for moving products:', $request->all());
+
+            $request->validate([
+                'parent_category_id' => 'required|exists:categories,id',
+                'new_category_id' => 'required|exists:categories,id',
+                'product_ids' => 'array',
+                'product_ids.*' => 'exists:products,id'
+            ]);
+
+            Log::info('Validation passed.');
+
+            $parentCategoryId = $request->input('parent_category_id');
+            $newCategoryId = $request->input('new_category_id');
+            $productIds = $request->input('product_ids', []);
+
+            Log::info('Moving products', [
+                'parent_category_id' => $parentCategoryId,
+                'new_category_id' => $newCategoryId,
+                'product_ids' => $productIds
+            ]);
+
+            foreach ($productIds as $productId) {
+                $product = Product::findOrFail($productId);
+
+                if ($product->categories()->where('categories.id', $parentCategoryId)->exists()) {
+                    $product->categories()->detach($parentCategoryId);
+                    Log::info("Detached product ID {$productId} from category {$parentCategoryId}.");
+
+                    $product->categories()->attach($newCategoryId);
+                    Log::info("Attached product ID {$productId} to category {$newCategoryId}.");
+                } else {
+                    Log::warning("Product ID {$productId} was not assigned to category {$parentCategoryId}, nothing to detach.");
+                }
+            }
+
+            return response()->json(['success' => 'Products moved successfully.']);
+        } catch (\Exception $e) {
+            Log::error('Error moving products: ' . $e->getMessage());
+            return response()->json(['error' => 'Error moving products: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getProducts($id)
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/home')->with('error', 'Unauthorized access');
+        }
+
+        $products = Product::whereHas('categories', function ($query) use ($id) {
+            $query->where('categories.id', $id);
+        })->get();
+
+        return response()->json(['products' => $products]);
     }
 }

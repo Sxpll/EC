@@ -2,43 +2,38 @@
 
 @section('content')
 <div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <h1>Edit Category</h1>
-            <form action="{{ route('categories.update', $category->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-
-                <div class="form-group">
-                    <label for="name">Category Name</label>
-                    <input type="text" name="name" id="name" class="form-control" value="{{ $category->name }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="parent_id">Parent Category</label>
-                    <div id="category-tree">
-                        @include('categories.category-tree', ['categories' => $categories, 'selected' => $category->parent_id])
-                    </div>
-                </div>
-
-                <input type="hidden" name="parent_id" id="selected-parent-id" value="{{ $category->parent_id }}">
-                <div class="form-group text-center">
-                    <button type="submit" class="btn btn-primary">Update Category</button>
-                </div>
-
-                <div class="form-group text-center">
-                    <a href="{{ route('categories.index') }}" class="btn btn-secondary btn-back" style="display: inline-block; width: auto;">Back</a>
-                </div>
-            </form>
+    <h1>Edit Category</h1>
+    <form id="categoryForm" action="{{ route('categories.update', $category->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="form-group">
+            <label for="name">Category Name</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ $category->name }}" required>
         </div>
-    </div>
-</div>
 
+        <div class="form-group">
+            <label for="parent_id">Parent Category</label>
+            <select name="parent_id" id="parent_id" class="form-control">
+                <option value="">No Parent</option>
+                @foreach($categories as $parentCategory)
+                <option value="{{ $parentCategory->id }}" {{ $category->parent_id == $parentCategory->id ? 'selected' : '' }}>
+                    {{ $parentCategory->name }}
+                </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Przycisk do zapisywania zmian -->
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{{ route('categories.index') }}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+@endsection
+
+@section('scripts')
 <script>
-    document.querySelectorAll('#category-tree input[type="radio"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            document.getElementById('selected-parent-id').value = this.value;
-        });
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("Edit category loaded.");
     });
 </script>
 @endsection

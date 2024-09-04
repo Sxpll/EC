@@ -13,7 +13,7 @@
 
     <!-- Przewijalne drzewo kategorii -->
     <div id="scrollable-category-tree" class="card p-3" style="max-height: 500px; overflow-y: auto;">
-        <div id="category-tree"></div> <!-- Kontener dla jsTree -->
+        <div id="category-tree"></div>
     </div>
 
     <!-- Przycisk do zapisywania zmian -->
@@ -22,7 +22,6 @@
 @endsection
 
 @section('scripts')
-<!-- Dodanie jsTree -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
@@ -32,29 +31,28 @@
         $('#category-tree').jstree({
             'core': {
                 'data': {
-                    "url": "{{ route('categories.getTree') }}", // Trasa zwracająca JSON drzewa
+                    "url": "{{ route('categories.getTree') }}",
                     "dataType": "json"
                 },
-                "check_callback": true, // Umożliwia edytowanie struktury drzewa
+                "check_callback": true,
                 "themes": {
                     "variant": "large"
                 }
             },
-            "plugins": ["dnd", "contextmenu", "wholerow"], // Wtyczki jsTree
+            "plugins": ["dnd", "contextmenu", "wholerow"],
             "contextmenu": {
                 "items": function(node) {
                     return {
                         "Create": {
                             "label": "Create",
                             "action": function(obj) {
-                                // Obsługa tworzenia kategorii
-                                alert('Create new category functionality not yet implemented.');
+                                window.location.href = '{{ route("categories.create") }}';
                             }
                         },
                         "Rename": {
                             "label": "Rename",
                             "action": function(obj) {
-                                $('#category-tree').jstree(true).edit(node); // Edytuj węzeł
+                                $('#category-tree').jstree(true).edit(node);
                             }
                         },
                         "Delete": {
@@ -82,28 +80,28 @@
             }
         });
 
-        // Obsługa zmiany nazwy
-        $('#category-tree').on('rename_node.jstree', function(e, data) {
+        $('#category-tree').on('move_node.jstree', function(e, data) {
+            var parentCategoryId = data.parent;
+            var nodeId = data.node.id;
+
             $.ajax({
-                url: '{{ route("categories.update", ":id") }}'.replace(':id', data.node.id),
-                method: 'PUT',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    name: data.text // Nowa nazwa węzła
-                },
+                url: '/categories/' + parentCategoryId + '/products',
+                method: 'GET',
                 success: function(response) {
-                    alert('Category renamed successfully');
-                },
-                error: function(error) {
-                    console.error('Error renaming category:', error);
-                    alert('Failed to rename category');
-                    $('#category-tree').jstree('refresh'); // Odśwież drzewo, jeśli wystąpił błąd
+                    if (response.products.length > 0) {
+                        if (confirm('The parent category has products. Do you want to move them to the new subcategory?')) {
+                            openMoveProductsModal(parentCategoryId, nodeId);
+                        } else {
+                            $('#category-tree').jstree('refresh');
+                        }
+                    } else {
+                        updateCategoryHierarchy(nodeId, parentCategoryId);
+                    }
                 }
             });
         });
 
-        // Obsługa przenoszenia węzłów
-        $('#category-tree').on('move_node.jstree', function(e, data) {
+        function updateCategoryHierarchy(nodeId, parentId) {
             $.ajax({
                 url: '{{ route("categories.updateHierarchy") }}',
                 method: 'POST',
@@ -119,7 +117,62 @@
                     alert('Failed to update hierarchy');
                 }
             });
+        }
+
+        $('#category-tree').on('rename_node.jstree', function(e, data) {
+            $.ajax({
+                url: '{{ route("categories.update", ":id") }}'.replace(':id', data.node.id),
+                method: 'PUT',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    name: data.text
+                },
+                success: function(response) {
+                    alert('Category renamed successfully');
+                },
+                error: function(error) {
+                    console.error('Error renaming category:', error);
+                    alert('Failed to rename category');
+                    $('#category-tree').jstree('refresh');
+                }
+            });
         });
     });
+
+    function openMoveProductsModal(parentCategoryId, newCategoryId) {
+        $('#parent_category_id').val(parentCategoryId);
+        $('#new_category_id').val(newCategoryId);
+
+        $.ajax({
+            url: '/categories/' + parentCategoryId + '/products',
+            method: 'GET',
+            success: function(response) {
+                var productList = $('#product-list');
+                productList.empty();
+
+                response.products.forEach(function(product) {
+                    productList.append('<div><input type="checkbox" name="product_ids[]" value="' + product.id + '"> ' + product.name + '</div>');
+                });
+
+                $('#moveProductsModal').modal('show');
+            }
+        });
+    }
+
+    function submitMoveProducts() {
+        $.ajax({
+            url: '/categories/move-products',
+            method: 'POST',
+            data: $('#moveProductsForm').serialize(),
+            success: function(response) {
+                $('#moveProductsModal').modal('hide');
+                alert(response.success);
+                $('#category-tree').jstree('refresh');
+            },
+            error: function(response) {
+                alert('Error moving products.');
+            }
+        });
+    }
 </script>
 @endsection
