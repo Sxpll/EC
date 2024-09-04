@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
 
+    // Product routes
     Route::resource('products', ProductController::class)->except(['show']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::get('/products/{id}/images', [ProductController::class, 'showImages']);
@@ -47,30 +48,27 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
 
-
-
     // Categories routes
     Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
-    Route::resource('categories', CategoryController::class)->except(['show']);
-    Route::post('categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');
+    Route::post('/categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/{id}/products', [CategoryController::class, 'getProducts'])->name('categories.getProducts');
+    Route::post('/categories/move-products', [CategoryController::class, 'moveProductsToNewSubcategory'])->name('categories.moveProducts');
+
+    // Resource route for categories should be at the end
+    Route::resource('categories', CategoryController::class)->except(['show']);
 
     // Chat routes
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
-    // Route::get('/user-chats/filter', [ChatController::class, 'filterChats'])->name('user-chats.filter');
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filterChats');
-
     Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats');
-
     Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{id}/send-message', [ChatController::class, 'sendMessage'])->name('chat.sendMessage');
     Route::post('/chat/{id}/take', [ChatController::class, 'takeChat'])->name('chat.takeChat');
     Route::post('/chat/create', [ChatController::class, 'createChat'])->name('chat.createChat');
     Route::put('/chat/{id}/manage', [ChatController::class, 'manageChat'])->name('chat.manage');
-
     Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
 
     // Notifications routes
