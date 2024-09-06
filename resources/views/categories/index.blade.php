@@ -2,8 +2,11 @@
 
 @section('content')
 <div class="container">
+
     <h1>Manage Categories</h1>
+
     <a href="{{ route('categories.create') }}" class="btn btn-success mb-3">Add New Category</a>
+
 
     @if(session('success'))
     <div class="alert alert-success">
@@ -39,7 +42,12 @@
                     "variant": "large"
                 }
             },
-            "plugins": ["dnd", "contextmenu", "wholerow"],
+            "plugins": ["checkbox", "dnd", "contextmenu", "wholerow"],
+            "checkbox": {
+                "three_state": false,
+                "cascade": "down"
+
+            },
             "contextmenu": {
                 "items": function(node) {
                     return {

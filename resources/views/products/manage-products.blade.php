@@ -45,7 +45,6 @@
                         </tr>
                         @endforeach
                     </tbody>
-
                 </table>
             </div>
         </div>
@@ -174,7 +173,7 @@
         <div id="ArchivedCategories" class="tab-content">
             <div id="archivedCategoriesContainer">
                 <h4>Archived Categories</h4>
-                <ul id="archivedCategoriesList"></ul> <!-- Lista archiwalnych kategorii -->
+                <ul id="archivedCategoriesList"></ul>
             </div>
         </div>
 
@@ -219,7 +218,11 @@
                             "variant": "large"
                         }
                     },
-                    "plugins": ["checkbox", "wholerow"]
+                    "plugins": ["checkbox", "wholerow"],
+                    "checkbox": {
+                        "three_state": false,
+                        "cascade": ""
+                    }
                 });
 
                 $('#category-tree-view').jstree({
@@ -228,7 +231,6 @@
                             "url": "{{ route('categories.getTree') }}",
                             "dataType": "json",
                             "data": function(node) {
-                                // Zwróć przypisane kategorie, aby oznaczyć je jako 'assigned-category'
                                 return {
                                     "assignedCategories": $('#selectedCategoriesView').val()
                                 };
@@ -241,13 +243,8 @@
                     },
                     "plugins": ["checkbox", "wholerow"],
                     "checkbox": {
-                        "three_state": false
-                    },
-                    "deselect_node": function(node, selected, event) {
-                        // Dodanie klasy dla przypisanych kategorii
-                        if (selected) {
-                            $(node).addClass('assigned-category');
-                        }
+                        "three_state": false,
+                        "cascade": ""
                     }
                 });
 
@@ -259,9 +256,6 @@
                 $('#category-tree-view').on("changed.jstree", function(e, data) {
                     var selectedCategoriesView = data.selected;
                     $('#selectedCategoriesView').val(selectedCategoriesView.join(','));
-
-                    // Podświetlenie przypisanych kategorii
-                    data.instance.get_node(data.node, true).children('.jstree-anchor').addClass('assigned-category');
                 });
 
                 addProductBtn.onclick = function() {
@@ -307,6 +301,7 @@
                             console.error('Error fetching archived categories:', error);
                         });
                 }
+
 
                 for (var i = 0; i < viewBtns.length; i++) {
                     viewBtns[i].onclick = function() {
@@ -363,15 +358,13 @@
                                 attachmentsContainer.empty();
                                 productAttachments.forEach(function(attachment) {
                                     var attachmentElement = `<div class="attachment-item">
-    <a href="data:${attachment.mime_type};base64,${attachment.file_data}" download="${attachment.file_name}">${attachment.file_name}</a>
-    <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
-</div>`;
-
+                                        <a href="data:${attachment.mime_type};base64,${attachment.file_data}" download="${attachment.file_name}">${attachment.file_name}</a>
+                                        <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
+                                    </div>`;
                                     attachmentsContainer.append(attachmentElement);
                                 });
 
                                 loadArchivedCategories();
-
                             })
                             .catch(function(error) {
                                 console.error('Error fetching product details:', error);
