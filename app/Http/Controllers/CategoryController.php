@@ -100,6 +100,9 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $category->update(['isActive' => 0]);
 
+        // Rekurencyjna funkcja do deaktywacji dzieci kategorii
+        $this->deactivateChildren($category);
+
         return response()->json(['success' => 'Category deactivated successfully.']);
     }
 
@@ -127,6 +130,10 @@ class CategoryController extends Controller
                     'order' => $index,
                 ]);
 
+                if ($categoryData['isActive'] == 0) {
+                    $this->deactivateChildren($category); // Dezaktywacja dzieci, jeśli rodzic jest nieaktywny
+                }
+
                 if (!empty($categoryData['children'])) {
                     $this->updateChildCategories($categoryData['children'], $category->id);
                 }
@@ -136,6 +143,7 @@ class CategoryController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
     private function updateChildCategories($children, $parentId)
     {
@@ -230,5 +238,13 @@ class CategoryController extends Controller
         })->get();
 
         return response()->json(['products' => $products]);
+    }
+
+    private function deactivateChildren(Category $category)
+    {
+        foreach ($category->childrenRecursive as $child) {
+            $child->update(['isActive' => 0]);
+            $this->deactivateChildren($child); // Rekurencyjnie deaktywuj wszystkie dzieci
+        }
     }
 }

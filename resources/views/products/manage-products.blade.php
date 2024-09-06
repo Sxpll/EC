@@ -363,9 +363,10 @@
                                 attachmentsContainer.empty();
                                 productAttachments.forEach(function(attachment) {
                                     var attachmentElement = `<div class="attachment-item">
-                                        <a href="data:${attachment.mime_type};base64,${attachment.file_data}" target="_blank">${attachment.file_name}</a>
-                                        <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
-                                    </div>`;
+    <a href="data:${attachment.mime_type};base64,${attachment.file_data}" download="${attachment.file_name}">${attachment.file_name}</a>
+    <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
+</div>`;
+
                                     attachmentsContainer.append(attachmentElement);
                                 });
 
