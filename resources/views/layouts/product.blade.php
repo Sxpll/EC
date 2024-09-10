@@ -8,158 +8,151 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Laravel') }} - Products</title>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <!-- Import Bootstrapa tylko dla tego widoku -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Inne style potrzebne dla tego widoku -->
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
-
-    <!-- jQuery UI -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
+    <!-- Dodatkowe style dla widoku produktów -->
     <style>
-        .table td {
-            white-space: normal;
-            word-break: break-word;
+        body {
+            background-color: #1e1e2f;
+            color: #ffffff;
+            margin: 0;
+            padding-top: 0;
+            overflow-x: hidden;
         }
 
-        .modal-content {
-            width: 80%;
-            max-height: 90vh;
-            overflow-y: auto;
+        .navbar {
+            background-color: transparent !important;
+            border: none;
+            box-shadow: none !important;
         }
 
-        .table-responsive {
-            max-height: 60vh;
-            overflow-y: auto;
+        .container-products {
+            margin-left: 250px;
+            margin-top: 20px;
         }
 
-        body.modal-open {
-            overflow: hidden;
+        .card {
+            background-color: #2b2b3b;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 15px;
+            width: 250px;
+            height: 300px;
         }
 
-        .history-value {
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .history-table td {
-            vertical-align: top;
-        }
-
-        .history-table .new-value-column {
-            width: 300px;
-        }
-
-        .navbar-brand {
+        .product-grid {
             display: flex;
-            align-items: center;
+            flex-wrap: wrap;
+            justify-content: space-between;
         }
 
-        .notification-bell-container {
-            display: flex;
-            align-items: center;
-            margin-left: 30px;
+        .card-title,
+        .card-text {
+            color: #ffffff;
         }
 
-        .notification-bell {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            cursor: pointer;
-            font-size: 24px;
-            color: #007bff;
-            z-index: 1000;
+        .btn-outline-secondary {
+            color: #ffffff;
+            border-color: #1abc9c;
+            margin-left: 10px;
         }
 
-        .notification-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: rgb(121, 30, 30);
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 12px;
+        .btn-outline-secondary:hover {
+            background-color: #1abc9c;
+            color: #ffffff;
+            border-color: #16a085;
         }
 
-        .notification-banner {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 16px;
-            opacity: 0;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            z-index: 2000;
-            backdrop-filter: blur(10px);
-        }
-
-        .notification-banner.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .notification-banner.hide {
-            opacity: 0;
-            transform: translateX(-50%) translateY(-20px);
-        }
-
-        .notifications-dropdown {
-            display: none;
-            position: fixed;
-            top: 60px;
-            right: 20px;
-            width: 300px;
-            background-color: rgba(0, 0, 0, 0.75);
-            border: 1px solid #353333;
+        .form-control {
+            margin-left: 300px;
             border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+            margin-right: 300px;
         }
 
-        .notification-list {
-            max-height: 200px;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .notification-item {
-            padding: 10px;
+        .add-to-cart {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #1abc9c;
             cursor: pointer;
+            transition: color 0.3s;
         }
 
-        .notification-item:hover {
-            background-color: #858282;
-            color: black;
+        .add-to-cart:hover {
+            color: #16a085;
+        }
+
+        .search-bar {
+            margin: 20px;
+            margin-left: 250px;
+        }
+
+        @media (max-width: 768px) {
+            .container-products {
+                margin-left: 0;
+                padding: 10px;
+            }
+
+            .sidebar {
+                position: fixed;
+                width: 200px;
+                height: 100%;
+                overflow-y: auto;
+                z-index: 1000;
+                background-color: #2b2b3b;
+                transition: all 0.3s ease-in-out;
+            }
+
+            .navbar {
+                position: fixed;
+                width: 100%;
+                top: 0;
+                left: 0;
+                z-index: 1001;
+                background-color: #1e1e2f;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            main {
+                margin-top: 60px;
+                margin-left: 0;
+                padding: 10px;
+            }
+
+            .search-bar {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
         }
     </style>
+
+    <!-- Skrypty -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
 
 <body>
     <div id="app">
+        <!-- Sidebar -->
         <div id="mySidebar" class="sidebar">
             @guest
             <a href="{{ route('login') }}">Login</a>
             <a href="{{ route('register') }}">Register</a>
             @else
             <a href="{{ url('/home') }}">Home</a>
-            <a href="{{ route ('products.publicIndex') }}">Products</a>
+            <a href="{{ route('products.publicIndex') }}">Products</a>
             <a href="{{ route('account.edit') }}">My Account</a>
             @if(Auth::user()->role === 'admin')
             <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
@@ -181,7 +174,8 @@
             @endguest
         </div>
 
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-md">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="{{ asset('img/logo.png') }}" alt="Logo" style="height: 40px;">
@@ -195,19 +189,57 @@
             </div>
         </nav>
 
-        <main class="content-wrapper">
-            @yield('content')
+        <!-- Wyszukiwarka -->
+        <div class="search-bar">
+            <form action="{{ route('products.publicIndex') }}" method="GET" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search products..."
+                        value="{{ request()->input('search') }}">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Główna zawartość -->
+        <main class="container-products py-4">
+            <div class="product-grid">
+                @foreach($products as $product)
+                <div class="col-md-3 mb-4 d-flex align-items-stretch position-relative">
+                    <div class="card h-100 shadow-sm rounded">
+                        @if($product->images->count())
+                        <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}" style="height: 150px; object-fit: cover;">
+                        @else
+                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}" style="height: 150px; object-fit: cover;">
+                        @endif
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $product->name }}</h5>
+                            <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
+                        </div>
+                        <!-- Ikonka koszyka -->
+                        <i class="fas fa-shopping-cart add-to-cart"></i>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+
+            <!-- Paginacja -->
+            <div class="d-flex justify-content-center">
+                {{ $products->links() }}
+            </div>
         </main>
     </div>
 
+    <!-- Dropdown z powiadomieniami -->
     <div id="notificationsDropdown" class="notifications-dropdown">
         <h6 class="dropdown-header">Notifications</h6>
         <div id="notificationList" class="notification-list"></div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!-- Skrypty Bootstrapa -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+
+    <!-- Inne skrypty -->
     <script src="https://cdn.jsdelivr.net/npm/nestable2@1.6.0/dist/jquery.nestable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -215,6 +247,7 @@
 
     @yield('scripts')
 
+    <!-- Skrypty dla powiadomień -->
     @if(auth()->check() && auth()->user()->role === 'admin')
     <script>
         var notificationBannerShown = false;
@@ -281,7 +314,6 @@
         });
     </script>
     @endif
-
 </body>
 
 </html>
