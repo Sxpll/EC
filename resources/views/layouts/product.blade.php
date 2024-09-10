@@ -27,6 +27,7 @@
             margin: 0;
             padding-top: 0;
             overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .navbar {
@@ -50,9 +51,10 @@
         }
 
         .product-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            justify-items: start;
         }
 
         .card-title,
@@ -131,6 +133,10 @@
                 padding: 10px;
             }
 
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .search-bar {
                 margin-left: 10px;
                 margin-right: 10px;
@@ -204,7 +210,7 @@
         <main class="container-products py-4">
             <div class="product-grid">
                 @foreach($products as $product)
-                <div class="col-md-3 mb-4 d-flex align-items-stretch position-relative">
+                <div class="d-flex align-items-stretch position-relative">
                     <div class="card h-100 shadow-sm rounded">
                         @if($product->images->count())
                         <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}" style="height: 150px; object-fit: cover;">

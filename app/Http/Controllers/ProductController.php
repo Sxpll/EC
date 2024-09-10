@@ -365,14 +365,16 @@ class ProductController extends Controller
 
     public function publicIndex(Request $request)
     {
-        // Pobierz produkty z możliwością filtrowania po nazwie
-        $query = Product::query();
+        // Pobierz tylko aktywne produkty
+        $products = Product::where('isActive', true);
 
+        // Obsługa wyszukiwania
         if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->input('search') . '%');
+            $search = $request->input('search');
+            $products = $products->where('name', 'LIKE', "%{$search}%");
         }
 
-        $products = $query->with('images')->paginate(12); // Paginate by 12 products
+        $products = $products->paginate(10); // Paginacja
 
         return view('products.publicIndex', compact('products'));
     }
