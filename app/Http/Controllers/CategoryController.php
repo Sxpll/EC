@@ -97,30 +97,41 @@ class CategoryController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        $category = Category::findOrFail($id);
+        try {
+            // Znajdź kategorię
+            $category = Category::findOrFail($id);
 
-        // Pobierz produkty przypisane do tej kategorii przed jej dezaktywacją
-        $products = $category->products;
+            // Najpierw rekurencyjnie usuń wszystkie dzieci tej kategorii
+            foreach ($category->childrenRecursive as $child) {
+                // Wywołaj samą siebie dla każdego dziecka
+                $this->destroy($child->id);
+            }
 
-        // Aktualizuj stan kategorii na nieaktywny
-        $category->update(['isActive' => 0]);
+            // Po usunięciu wszystkich dzieci, dezaktywuj kategorię
+            $category->update(['isActive' => 0]);
 
-        // Rekurencyjna funkcja do deaktywacji dzieci kategorii
-        $this->deactivateChildren($category);
+            // Zapisz historię produktów przed usunięciem
+            $products = $category->products;
 
-        // Zapisz historię kategorii dla każdego produktu
-        foreach ($products as $product) {
-            \DB::table('product_category_history')->insert([
-                'product_id' => $product->id,
-                'category_id' => $category->id,
-                'path' => $this->getCategoryPath($category), // Funkcja do uzyskania ścieżki kategorii
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            foreach ($products as $product) {
+                \DB::table('product_category_history')->insert([
+                    'product_id' => $product->id,
+                    'category_id' => $category->id,
+                    'path' => $this->getCategoryPath($category),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Zwróć odpowiedź o powodzeniu
+            return response()->json(['success' => 'Category and its subcategories deactivated successfully.']);
+        } catch (\Exception $e) {
+            Log::error('Error deactivating category: ' . $e->getMessage());
+            return response()->json(['error' => 'Error deactivating category: ' . $e->getMessage()], 500);
         }
-
-        return response()->json(['success' => 'Category and its subcategories deactivated successfully.']);
     }
+
+
 
 
     public function activate($id)
@@ -257,13 +268,13 @@ class CategoryController extends Controller
         return response()->json(['products' => $products]);
     }
 
-    private function deactivateChildren(Category $category)
-    {
-        foreach ($category->childrenRecursive as $child) {
-            $child->update(['isActive' => 0]);
-            $this->deactivateChildren($child); // Rekurencyjnie deaktywuj wszystkie dzieci
-        }
-    }
+    // private function deactivateChildren(Category $category)
+    // {
+    //     foreach ($category->childrenRecursive as $child) {
+    //         $child->update(['isActive' => 0]);
+    //         $this->deactivateChildren($child); // Rekurencyjnie deaktywuj wszystkie dzieci
+    //     }
+    // }
 
     private function getCategoryPath($category)
     {
