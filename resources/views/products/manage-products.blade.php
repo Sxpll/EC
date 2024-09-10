@@ -302,7 +302,6 @@
                         });
                 }
 
-
                 for (var i = 0; i < viewBtns.length; i++) {
                     viewBtns[i].onclick = function() {
                         var productId = $(this).data('id');
@@ -393,7 +392,19 @@
                             location.reload();
                         })
                         .catch(function(error) {
-                            console.error('Error uploading images:', error);
+                            if (error.response && error.response.status === 422) {
+                                const errors = error.response.data.errors;
+                                let errorMessages = [];
+                                for (const field in errors) {
+                                    if (errors.hasOwnProperty(field)) {
+                                        errorMessages.push(errors[field].join(' '));
+                                    }
+                                }
+                                alert('Validation errors: \n' + errorMessages.join('\n'));
+                            } else {
+                                console.error('Error uploading images:', error.message);
+                                alert('Error uploading images. Please try again.');
+                            }
                         });
                 });
 
@@ -406,7 +417,19 @@
                             location.reload();
                         })
                         .catch(function(error) {
-                            console.error('Error uploading attachments:', error);
+                            if (error.response && error.response.status === 422) {
+                                const errors = error.response.data.errors;
+                                let errorMessages = [];
+                                for (const field in errors) {
+                                    if (errors.hasOwnProperty(field)) {
+                                        errorMessages.push(errors[field].join(' '));
+                                    }
+                                }
+                                alert('Validation errors: \n' + errorMessages.join('\n'));
+                            } else {
+                                console.error('Error uploading attachments:', error.message);
+                                alert('Error uploading attachments. Please try again.');
+                            }
                         });
                 });
 
@@ -471,7 +494,19 @@
                             location.reload();
                         })
                         .catch(function(error) {
-                            console.error('Error updating product:', error);
+                            if (error.response && error.response.status === 422) {
+                                const errors = error.response.data.errors;
+                                let errorMessages = [];
+                                for (const field in errors) {
+                                    if (errors.hasOwnProperty(field)) {
+                                        errorMessages.push(errors[field].join(' '));
+                                    }
+                                }
+                                alert('Validation errors: \n' + errorMessages.join('\n'));
+                            } else {
+                                console.error('Error updating product:', error.message);
+                                alert('Error updating product. Please try again.');
+                            }
                         });
                 });
             });

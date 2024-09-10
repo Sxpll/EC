@@ -36,10 +36,10 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'categories' => 'required|array|min:1', // Wymagane przynajmniej jedna kategoria
+            'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'attachments.*' => 'file|max:10240',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+            'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
         ]);
 
         Log::info('Store Product: Received input', $request->all());
@@ -87,10 +87,10 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'categories' => 'required|array|min:1', // Wymagane przynajmniej jedna kategoria
+            'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
-            'attachments.*' => 'file|max:10240',
+            'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
         ]);
 
         Log::info('Update Product: Received input', $request->all());
@@ -286,7 +286,7 @@ class ProductController extends Controller
     public function storeAttachments(Request $request, $id)
     {
         $request->validate([
-            'attachments.*' => 'required|file|max:10240',
+            'attachments.*' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
         ]);
 
         $product = Product::findOrFail($id);
