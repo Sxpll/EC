@@ -362,4 +362,18 @@ class ProductController extends Controller
 
         return implode('\\', $path); // Zwraca ścieżkę jako ciąg znaków z separatorami
     }
+
+    public function publicIndex(Request $request)
+    {
+        // Pobierz produkty z możliwością filtrowania po nazwie
+        $query = Product::query();
+
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->input('search') . '%');
+        }
+
+        $products = $query->with('images')->paginate(12); // Paginate by 12 products
+
+        return view('products.publicIndex', compact('products'));
+    }
 }
