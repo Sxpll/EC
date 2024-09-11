@@ -1255,3 +1255,38 @@ h1.elo {
 .card-img-top {
     border-bottom: 1px solid #ddd;
 } */
+
+/* Dodaj to do swojego pliku CSS */
+.message {
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 70%;
+    clear: both;
+    word-wrap: break-word;
+}
+
+.user {
+    background-color: #007bff; /* niebieskie tło dla wiadomości użytkownika */
+    color: white;
+    align-self: flex-end; /* wiadomość wyświetla się po prawej stronie */
+}
+
+.admin {
+    background-color: #dc3545; /* czerwone tło dla wiadomości admina */
+    color: white;
+    align-self: flex-start; /* wiadomość wyświetla się po lewej stronie */
+}
+
+.other {
+    background-color: #f0f0f0; /* szare tło dla innych wiadomości */
+    color: black;
+    align-self: flex-start;
+}
+
+.message-time {
+    display: block;
+    font-size: 0.8em;
+    margin-top: 5px;
+    color: rgba(0, 0, 0, 0.5);
+}
