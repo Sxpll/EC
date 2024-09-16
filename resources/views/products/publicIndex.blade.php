@@ -13,16 +13,16 @@
     </form>
 
     <!-- Wyświetlanie produktów w siatce -->
-    <div class="row">
+    <div class="container-products">
         @foreach($products->where('isActive', true) as $product)
-        <div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
-            <div class="card h-100 shadow-sm rounded">
+        <div class="product-card">
+            <div class="card shadow-sm rounded">
                 @if($product->images->count())
-                <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}">
                 @else
-                <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}">
                 @endif
-                <div class="card-body">
+                <div class="card-body d-flex flex-column justify-content-between">
                     <h5 class="card-title">{{ $product->name }}</h5>
                     <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
                 </div>
@@ -32,7 +32,7 @@
     </div>
 
     <!-- Paginacja -->
-    <div class="d-flex justify-content-center">
+    <div class="d-flex justify-content-center mt-4">
         {{ $products->links() }}
     </div>
 </div>

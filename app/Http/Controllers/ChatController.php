@@ -14,50 +14,49 @@ class ChatController extends Controller
 {
     public function index(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
+        // Sprawdzenie, czy użytkownik jest zalogowany
+        if (!Auth::check()) {
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        $search = $request->get('search');
-        Log::info('Search request received', ['search' => $search]);
+        if (Auth::user()->role === 'admin') {
+            // Jeśli użytkownik jest adminem, pobierz wszystkie czaty dla widoku admina
+            $search = $request->get('search');
+            $chats = Chat::with(['user:id,name,lastname', 'messages' => function ($query) {
+                $query->select('id', 'chat_id', 'is_read', 'admin_id');
+            }])
+                ->when($search, function ($query, $search) {
+                    return $query->where('title', 'like', '%' . $search . '%')
+                        ->orWhereHas('user', function ($q) use ($search) {
+                            $q->where('name', 'like', '%' . $search . '%');
+                        });
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        $chats = Chat::with(['user:id,name,lastname', 'messages' => function ($query) {
-            $query->select('id', 'chat_id', 'is_read', 'admin_id'); // Dodano 'admin_id'
-        }])
-            ->when($search, function ($query, $search) {
-                return $query->where('title', 'like', '%' . $search . '%')
-                    ->orWhereHas('user', function ($q) use ($search) {
-                        $q->where('name', 'like', '%' . $search . '%');
-                    });
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+            // Sprawdzenie, czy żądanie jest AJAX-owe i zwrócenie JSON-a
+            if ($request->ajax()) {
+                return response()->json($chats);
+            }
 
-        Log::info('Chats found', ['count' => count($chats)]);
-
-        // Logowanie szczegółowych danych
-        foreach ($chats as $chat) {
-            Log::info('Chat details', ['id' => $chat->id, 'title' => $chat->title, 'messages' => $chat->messages->toArray()]);
+            // Zwraca widok dla admina
+            return view('chat.index', compact('chats'));
+        } else {
+            // Dla zwykłego użytkownika przekieruj do jego widoku czatów
+            return redirect()->route('chat.userChats');
         }
-
-        // Zwraca dane w formacie JSON, jeśli jest to żądanie AJAX
-        if ($request->ajax()) {
-            return response()->json($chats);
-        }
-
-        // Dla zwykłych żądań HTTP zwraca widok
-        return view('chat.index', compact('chats'));
     }
-
 
 
     public function userChats()
     {
+        // Widok dla zwykłego użytkownika, który wyświetla jego własne czaty
         $chats = Chat::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
         return view('chat.userChats', compact('chats'));
     }
+
 
     public function show($id)
     {
