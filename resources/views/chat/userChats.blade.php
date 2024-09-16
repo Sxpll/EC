@@ -19,7 +19,6 @@
     </div>
 </div>
 
-
 <!-- New Chat Modal -->
 <div id="newChatModal" class="modal" tabindex="-1" role="dialog" style="display:none;">
     <div class="modal-dialog" role="document">
@@ -82,8 +81,9 @@
         const chatTitle = document.getElementById('chatTitle');
         const chatStatusFilter = document.getElementById('chatStatusFilter');
         const chatList = document.getElementById('chatList');
-
-
+        const userId = @json(Auth::id());
+        let currentChatId = null;
+        let refreshInterval = null;
 
         function loadChats(status) {
             axios.get(`/chat/filter`, {
@@ -93,7 +93,7 @@
                 })
                 .then(response => {
                     chatList.innerHTML = '';
-                    response.data.chats.forEach(chat => { // 'response.data' to obiekt; użyj 'response.data.chats'
+                    response.data.chats.forEach(chat => {
                         const chatItem = document.createElement('li');
                         chatItem.classList.add('list-group-item', 'chat-item');
                         chatItem.setAttribute('data-status', chat.status);
@@ -120,118 +120,46 @@
                 });
         }
 
-        // Load default open chats on page load
-        if (chatStatusFilter) {
-            loadChats(chatStatusFilter.value);
-        }
-
-        // Handle status filter change
-        if (chatStatusFilter) {
-            chatStatusFilter.addEventListener('change', function() {
-                loadChats(this.value);
-            });
-        }
-
-        if (newThreadButton) {
-            newThreadButton.addEventListener('click', function() {
-                if (newChatModal) {
-                    newChatModal.style.display = 'block';
-                }
-            });
-        }
-
-        // Close modals
-        document.querySelectorAll('.close-custom').forEach(button => {
-            button.addEventListener('click', function() {
-                const modal = this.closest('.modal');
-                if (modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        });
-
-        // Create new chat
-        if (createChatForm) {
-            createChatForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                let formData = new FormData(this);
-                axios.post(this.action, formData)
-                    .then(response => {
-                        if (response.data.success) {
-                            let newChatItem = document.createElement('li');
-                            newChatItem.classList.add('list-group-item', 'chat-item');
-                            newChatItem.setAttribute('data-status', 'open');
-                            newChatItem.innerHTML = `
-                            <a href="#" class="chat-link" data-chat-id="${response.data.chat.id}">
-                                <div class="chat-title">${response.data.chat.title}</div>
-                                <div class="chat-time">${new Date(response.data.chat.created_at).toLocaleString()}</div>
-                            </a>
-                        `;
-                            chatList.insertBefore(newChatItem, chatList.firstChild);
-                            newChatModal.style.display = 'none';
-                            document.getElementById('title').value = '';
-
-                            const chatLink = newChatItem.querySelector('.chat-link');
-                            if (chatLink) {
-                                chatLink.addEventListener('click', function(e) {
-                                    e.preventDefault();
-                                    openChatWindow(response.data.chat.id);
-                                });
-                            }
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            });
-        }
-
         function openChatWindow(chatId) {
-            let url = `/chat/${chatId}`;
-            axios.get(url)
+            fetch(`/chat/${chatId}`)
                 .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || !data.messages) {
+                        console.error('Invalid data format:', data);
+                        return;
+                    }
+
+                    const isAdmin = data.is_admin;
                     chatWindow.innerHTML = '';
+                    const messages = data.messages;
 
-                    if (response.data && response.data.messages) {
-                        let messages = response.data.messages;
-                        if (messages.length > 0 && messages[0].chat) {
-                            chatTitle.textContent = messages[0].chat.title;
-                        } else {
-                            chatTitle.textContent = 'Chat';
-                        }
-                        messages.forEach(msg => {
-                            let messageDiv = document.createElement('div');
-                            let messageClass = msg.admin_id ? 'admin' : 'user';
-                            messageDiv.classList.add('message', messageClass);
-                            messageDiv.innerHTML = `${msg.message}`;
-                            let messageTime = document.createElement('div');
-                            messageTime.classList.add('message-time');
-                            messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                            messageTime.style.display = 'none';
-                            messageDiv.appendChild(messageTime);
-                            messageDiv.addEventListener('click', () => {
-                                messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
-                            });
-                            chatWindow.appendChild(messageDiv);
-                        });
-                    } else {
-                        console.error('No messages found or no chat data in response:', response.data);
-                        chatTitle.textContent = 'Chat';
-                    }
+                    messages.forEach(msg => {
+                        let messageDiv = document.createElement('div');
+                        let messageClass = msg.admin_id ? 'admin' : (msg.user && msg.user.id === userId) ? 'user' : 'other';
+                        messageDiv.classList.add('message', messageClass);
 
-                    const sendMessageForm = document.getElementById('sendMessageForm');
-                    if (sendMessageForm) {
-                        sendMessageForm.action = url + '/send-message';
-                    }
+                        let senderName = msg.admin_id ? 'Admin' : (msg.user ? `${msg.user.name} ${msg.user.lastname}` : 'Unknown');
+                        const messageContent = `<strong>${senderName}:</strong> ${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
+
+                        messageDiv.innerHTML = messageContent;
+                        chatWindow.appendChild(messageDiv);
+                    });
+
+                    sendMessageForm.action = `/chat/${chatId}/send-message`;
                     chatWindowModal.style.display = 'block';
                     chatWindow.scrollTop = chatWindow.scrollHeight;
+                    currentChatId = chatId;
                     startAutoRefresh(chatId);
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error fetching chat messages:', error);
+                });
         }
-
-        let refreshInterval = null;
 
         function startAutoRefresh(chatId) {
             if (refreshInterval) {
@@ -245,9 +173,12 @@
                         chatWindow.innerHTML = '';
                         messages.forEach(msg => {
                             let messageDiv = document.createElement('div');
-                            let messageClass = msg.admin_id ? 'admin' : 'user';
+                            let messageClass = msg.admin_id ? 'admin' : (msg.user && msg.user.id === userId) ? 'user' : 'other';
                             messageDiv.classList.add('message', messageClass);
-                            messageDiv.innerHTML = `${msg.message}`;
+
+                            let senderName = msg.admin_id ? 'Admin' : (msg.user ? `${msg.user.name} ${msg.user.lastname}` : 'Unknown');
+                            messageDiv.innerHTML = `<strong>${senderName}:</strong> ${msg.message}`;
+
                             let messageTime = document.createElement('div');
                             messageTime.classList.add('message-time');
                             messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], {
@@ -279,7 +210,7 @@
                         if (response.data.success) {
                             let newMessage = document.createElement('div');
                             newMessage.classList.add('message', 'user');
-                            newMessage.innerHTML = `${message}`;
+                            newMessage.innerHTML = `You: ${message}`;
                             let messageTime = document.createElement('div');
                             messageTime.classList.add('message-time');
                             messageTime.textContent = new Date().toLocaleTimeString([], {
@@ -299,6 +230,31 @@
                     .catch(error => console.error('Error:', error));
             });
         }
+
+        // Initial chat loading and event bindings
+        if (chatStatusFilter) {
+            loadChats(chatStatusFilter.value);
+            chatStatusFilter.addEventListener('change', function() {
+                loadChats(this.value);
+            });
+        }
+
+        if (newThreadButton) {
+            newThreadButton.addEventListener('click', function() {
+                if (newChatModal) {
+                    newChatModal.style.display = 'block';
+                }
+            });
+        }
+
+        document.querySelectorAll('.close-custom').forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
     });
 </script>
 @endsection

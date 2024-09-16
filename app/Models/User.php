@@ -31,18 +31,21 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    // Relacja do czatów utworzonych przez użytkownika
     public function chats()
     {
-        return $this->hasMany(Chat::class);
+        return $this->hasMany(Chat::class, 'user_id');
     }
 
+    // Relacja do wiadomości wysłanych przez użytkownika
     public function messages()
     {
         return $this->hasMany(Message::class);
     }
 
-    public function admin()
+    // Relacja do czatów, w których użytkownik jest administratorem
+    public function managedChats()
     {
-        return $this->belongsTo(User::class, 'admin_id');
+        return $this->hasMany(Chat::class, 'admin_id');
     }
 }

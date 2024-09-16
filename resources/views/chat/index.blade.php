@@ -36,21 +36,21 @@
                     <td class="text-center">
                         @php
                         $unreadMessagesCount = $chat->messages->where('is_read', false)->count();
-                        $kropkaColor = '';
+                        $dotColor = '';
 
                         if ($unreadMessagesCount > 0) {
                         if ($chat->admin_id === null) {
-                        $kropkaColor = 'text-white';
+                        $dotColor = 'text-white';
                         } elseif ($chat->admin_id !== Auth::id()) {
-                        $kropkaColor = 'text-primary';
+                        $dotColor = 'text-primary';
                         } elseif ($chat->admin_id === Auth::id()) {
-                        $kropkaColor = 'text-success';
+                        $dotColor = 'text-success';
                         }
                         }
                         @endphp
 
                         @if ($unreadMessagesCount > 0)
-                        <i class="fas fa-circle {{ $kropkaColor }}" data-chat-id="{{ $chat->id }}" id="chat-dot-{{ $chat->id }}"></i>
+                        <i class="fas fa-circle {{ $dotColor }}" data-chat-id="{{ $chat->id }}" id="chat-dot-{{ $chat->id }}"></i>
                         @else
                         <i class="fas fa-circle" data-chat-id="{{ $chat->id }}" id="chat-dot-{{ $chat->id }}" style="display:none;"></i>
                         @endif
@@ -131,21 +131,56 @@
 
         function openChatWindow(chatId) {
             fetch(`/chat/${chatId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    if (!data || !data.messages) {
+                        console.error('Invalid data format:', data);
+                        return;
+                    }
+
+                    const isAdmin = data.is_admin;
                     chatWindow.innerHTML = '';
                     const messages = data.messages;
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
                         let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
                         messageDiv.classList.add('message', messageClass);
-                        messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
+
+                        let senderName = 'Unknown';
+
+                        if (msg.admin_id && msg.admin_id === userId) {
+                            // Wyświetl "You" dla wiadomości wysłanych przez aktualnego admina
+                            senderName = 'You';
+                        } else if (isAdmin) {
+                            // Dla admina: pokaż imię i nazwisko wszystkich
+                            senderName = msg.user ? `${msg.user.name} ${msg.user.lastname}` : 'Unknown';
+                        } else {
+                            // Dla użytkownika: pokaż "Admin" dla wiadomości admina
+                            if (msg.admin_id) {
+                                senderName = 'Admin';
+                            } else if (msg.user && msg.user.id === userId) {
+                                // Jeśli wiadomość pochodzi od zalogowanego użytkownika, nie pokazuj etykiety
+                                senderName = '';
+                            } else {
+                                // W przeciwnym razie, pokaż imię i nazwisko użytkownika
+                                senderName = msg.user ? `${msg.user.name} ${msg.user.lastname}` : 'Unknown';
+                            }
+                        }
+
+                        const messageContent = senderName ? `<strong>${senderName}:</strong> ${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>` : `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
+
+                        messageDiv.innerHTML = messageContent;
                         chatWindow.appendChild(messageDiv);
                     });
 
                     sendMessageForm.action = `/chat/${chatId}/send-message`;
                     chatWindowModal.style.display = 'block';
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                    chatWindow.scrollTop = chatWindow.scrollHeight; // Przewiń na dół
                     currentChatId = chatId;
                     startAutoRefresh(chatId);
                     markAllNotificationsAsRead(chatId);
@@ -185,13 +220,14 @@
             }
         });
 
-
         function startAutoRefresh(chatId) {
             if (refreshInterval) {
                 clearInterval(refreshInterval);
             }
 
             refreshInterval = setInterval(() => {
+                const previousScrollHeightMinusTop = chatWindow.scrollHeight - chatWindow.scrollTop;
+
                 fetch(`/chat/${chatId}/messages`)
                     .then(response => response.json())
                     .then(messages => {
@@ -200,10 +236,15 @@
                             let messageDiv = document.createElement('div');
                             let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
                             messageDiv.classList.add('message', messageClass);
-                            messageDiv.innerHTML = `${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
+
+                            const senderName = msg.admin_id === userId ? 'You' : (msg.user ? `${msg.user.name} ${msg.user.lastname}` : 'Unknown');
+                            const messageContent = `<strong>${senderName}:</strong> ${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
+
+                            messageDiv.innerHTML = messageContent;
                             chatWindow.appendChild(messageDiv);
                         });
-                        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                        chatWindow.scrollTop = chatWindow.scrollHeight - previousScrollHeightMinusTop;
                     })
                     .catch(error => console.error('Error refreshing messages:', error));
             }, 3000);
@@ -275,7 +316,10 @@
                     if (data.success) {
                         let newMessage = document.createElement('div');
                         newMessage.classList.add('message', 'user');
-                        newMessage.innerHTML = `${message} <span class="message-time">${new Date().toLocaleTimeString()}</span>`;
+
+                        const senderName = 'You';
+                        newMessage.innerHTML = `<strong>${senderName}:</strong> ${message} <span class="message-time">${new Date().toLocaleTimeString()}</span>`;
+
                         chatWindow.appendChild(newMessage);
                         messageInput.value = '';
                         chatWindow.scrollTop = chatWindow.scrollHeight;

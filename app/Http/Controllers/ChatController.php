@@ -61,21 +61,31 @@ class ChatController extends Controller
 
     public function show($id)
     {
-        $chat = Chat::with('messages', 'admin')->findOrFail($id);
+        try {
+            $chat = Chat::with(['messages.user', 'admin'])->findOrFail($id);
 
-        // Sprawdź, czy użytkownik ma uprawnienia do dostępu do czatu
-        if (Auth::user()->role !== 'admin' && $chat->user_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized access'], 403);
+            if (Auth::user()->role !== 'admin' && $chat->user_id !== Auth::id()) {
+                return response()->json(['error' => 'Unauthorized access'], 403);
+            }
+
+            if (Auth::user()->role === 'admin') {
+                Message::where('chat_id', $id)
+                    ->where('is_read', false)
+                    ->update(['is_read' => true]);
+            }
+
+            // Logowanie odpowiedzi
+            Log::info('Chat details fetched', ['chat' => $chat]);
+
+            return response()->json([
+                'messages' => $chat->messages,
+                'admin' => $chat->admin, // Upewnij się, że pełne dane o adminie są zwracane
+                'is_admin' => Auth::user()->role === 'admin',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching chat: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while fetching the chat'], 500);
         }
-
-        // Oznacz wiadomości jako przeczytane, jeśli admin je przegląda
-        if (Auth::user()->role === 'admin') {
-            Message::where('chat_id', $id)
-                ->where('is_read', false)
-                ->update(['is_read' => true]);
-        }
-
-        return response()->json(['messages' => $chat->messages, 'admin' => $chat->admin]);
     }
 
 
@@ -107,7 +117,14 @@ class ChatController extends Controller
             $message = new Message();
             $message->chat_id = $chat->id;
             $message->message = $request->message;
-            $message->admin_id = Auth::user()->role === 'admin' ? Auth::id() : null;
+
+            // Przypisanie admin_id lub user_id w zależności od roli
+            if (Auth::user()->role === 'admin') {
+                $message->admin_id = Auth::id();
+            } else {
+                $message->user_id = Auth::id();
+            }
+
             $message->is_read = false; // Oznacz nową wiadomość jako nieprzeczytaną
             $message->save();
             Log::info('Message saved for chat: ' . $chat->id);
@@ -250,7 +267,7 @@ class ChatController extends Controller
             return response()->json(['error' => 'Unauthorized access'], 403);
         }
 
-        $messages = Message::where('chat_id', $id)
+        $messages = Message::with('user')->where('chat_id', $id)
             ->orderBy('created_at', 'asc')
             ->get();
 
