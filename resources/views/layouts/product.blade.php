@@ -19,131 +19,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <!-- Dodatkowe style dla widoku produktów -->
-    <style>
-        body {
-            background-color: #1e1e2f;
-            color: #ffffff;
-            margin: 0;
-            padding-top: 0;
-            overflow-x: hidden;
-            overflow-y: auto;
-        }
-
-        .navbar {
-            background-color: transparent !important;
-            border: none;
-            box-shadow: none !important;
-        }
-
-        .container-products {
-            margin-left: 250px;
-            margin-top: 20px;
-        }
-
-        .card {
-            background-color: #2b2b3b;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin: 15px;
-            width: 250px;
-            height: 300px;
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            justify-items: start;
-        }
-
-        .card-title,
-        .card-text {
-            color: #ffffff;
-        }
-
-        .btn-outline-secondary {
-            color: #ffffff;
-            border-color: #1abc9c;
-            margin-left: 10px;
-        }
-
-        .btn-outline-secondary:hover {
-            background-color: #1abc9c;
-            color: #ffffff;
-            border-color: #16a085;
-        }
-
-        .form-control {
-            margin-left: 300px;
-            border-radius: 5px;
-            margin-right: 300px;
-        }
-
-        .add-to-cart {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            color: #1abc9c;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .add-to-cart:hover {
-            color: #16a085;
-        }
-
-        .search-bar {
-            margin: 20px;
-            margin-left: 250px;
-        }
-
-        @media (max-width: 768px) {
-            .container-products {
-                margin-left: 0;
-                padding: 10px;
-            }
-
-            .sidebar {
-                position: fixed;
-                width: 200px;
-                height: 100%;
-                overflow-y: auto;
-                z-index: 1000;
-                background-color: #2b2b3b;
-                transition: all 0.3s ease-in-out;
-            }
-
-            .navbar {
-                position: fixed;
-                width: 100%;
-                top: 0;
-                left: 0;
-                z-index: 1001;
-                background-color: #1e1e2f;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            main {
-                margin-top: 60px;
-                margin-left: 0;
-                padding: 10px;
-            }
-
-            .product-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .search-bar {
-                margin-left: 10px;
-                margin-right: 10px;
-            }
-        }
-    </style>
-
     <!-- Skrypty -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -151,56 +26,34 @@
 
 <body>
     <div id="app">
-        <!-- Sidebar -->
-        <div id="mySidebar" class="sidebar">
-            @guest
-            <a href="{{ route('login') }}">Login</a>
-            <a href="{{ route('register') }}">Register</a>
-            @else
-            <a href="{{ url('/home') }}">Home</a>
-            <a href="{{ route('products.publicIndex') }}">Products</a>
-            <a href="{{ route('account.edit') }}">My Account</a>
-            @if(Auth::user()->role === 'admin')
-            <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
-            @endif
-            @if (auth()->check() && auth()->user()->role == 'admin')
-            <a href="{{ route('chat.index') }}">Chat</a>
-            @endif
-            @if(auth()->check() && auth()->user()->role == 'user')
-            <a href="{{ route('chat.userChats') }}">Chat</a>
-            @endif
-            <a href="{{ route('logout') }}"
-                onclick="event.preventDefault();
-                             document.getElementById('logout-form').submit();">
-                {{ __('Logout') }}
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                @csrf
-            </form>
-            @endguest
-        </div>
-
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-md">
-            <div class="container">
+        <header>
+            <div class="navbar-container">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="{{ asset('img/logo.png') }}" alt="Logo" style="height: 40px;">
                 </a>
-                @if(auth()->check() && auth()->user()->role === 'admin')
-                <div id="notificationBell" class="notification-bell">
-                    <span class="notification-count" id="notificationCount">0</span>
-                    <i class="fa fa-bell"></i>
+                <nav class="navbar-links">
+                    <a href="{{ url('/home') }}">Home</a>
+                    <a href="{{ route('products.publicIndex') }}">Products</a>
+                    @if(Auth::user()->role === 'admin')
+                    <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
+                    @endif
+                    <a href="{{ route('chat.index') }}">Chat</a>
+                </nav>
+                <div class="navbar-icons">
+                    <a href="{{ route('account.edit') }}"><i class="fa fa-user"></i></a>
+                    <a><i class="fa fa-shopping-cart"></i></a>
+                    <a id="notificationBell" href="#"><i class="fa fa-bell"></i></a>
+                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fa fa-sign-out-alt"></i></a>
                 </div>
-                @endif
             </div>
-        </nav>
+        </header>
 
         <!-- Wyszukiwarka -->
         <div class="search-bar">
             <form action="{{ route('products.publicIndex') }}" method="GET" class="mb-4">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search products..."
-                        value="{{ request()->input('search') }}">
+                    <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ request()->input('search') }}">
                     <button class="btn btn-outline-secondary" type="submit">Search</button>
                 </div>
             </form>
@@ -208,21 +61,22 @@
 
         <!-- Główna zawartość -->
         <main class="container-products py-4">
-            <div class="product-grid">
+            <div class="row justify-content-center">
                 @foreach($products as $product)
-                <div class="d-flex align-items-stretch position-relative">
-                    <div class="card h-100 shadow-sm rounded">
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
+                    <div class="card h-100 shadow-sm rounded" style="min-height: 350px;">
                         @if($product->images->count())
-                        <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}" style="height: 150px; object-fit: cover;">
+                        <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
                         @else
-                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}" style="height: 150px; object-fit: cover;">
+                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
                         @endif
-                        <div class="card-body">
+                        <div class="card-body d-flex flex-column justify-content-between">
                             <h5 class="card-title">{{ $product->name }}</h5>
                             <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
                         </div>
-                        <!-- Ikonka koszyka -->
-                        <i class="fas fa-shopping-cart add-to-cart"></i>
+                        <div class="card-footer text-center">
+                            <i class="fas fa-shopping-cart add-to-cart"></i>
+                        </div>
                     </div>
                 </div>
                 @endforeach
@@ -233,13 +87,22 @@
                 {{ $products->links() }}
             </div>
         </main>
+
+        <!-- Footer -->
+        <footer class="footer-bar">
+            <div class="footer-bar-content">
+                <a href="#">About Us</a>
+                <a href="#">Privacy</a>
+                <a href="#">FAQ</a>
+                <a href="#">Careers</a>
+            </div>
+        </footer>
     </div>
 
-    <!-- Dropdown z powiadomieniami -->
-    <div id="notificationsDropdown" class="notifications-dropdown">
-        <h6 class="dropdown-header">Notifications</h6>
-        <div id="notificationList" class="notification-list"></div>
-    </div>
+    <!-- Logout Form -->
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+        @csrf
+    </form>
 
     <!-- Skrypty Bootstrapa -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
@@ -250,8 +113,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    @yield('scripts')
 
     <!-- Skrypty dla powiadomień -->
     @if(auth()->check() && auth()->user()->role === 'admin')

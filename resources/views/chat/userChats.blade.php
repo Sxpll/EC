@@ -12,7 +12,7 @@
             </select>
         </div>
     </div>
-    <div class="chat-container">
+    <div class="chat-container" style="overflow-x: hidden;">
         <ul class="list-group mt-3" id="chatList">
             <!-- Lista czatów będzie ładowana dynamicznie za pomocą JavaScript -->
         </ul>
