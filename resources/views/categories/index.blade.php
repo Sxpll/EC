@@ -2,8 +2,11 @@
 
 @section('content')
 <div class="container">
-
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none" style="margin-right: 725px" ;>
+        <i class="fas fa-arrow-left" style="font-size: 24px; color: black;"></i>
+    </a>
     <h1>Manage Categories</h1>
+
 
     <a href="{{ route('categories.create') }}" class="btn btn-success mb-3">Add New Category</a>
 

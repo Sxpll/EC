@@ -61,21 +61,22 @@
 
         <!-- Główna zawartość -->
         <main class="container-products py-4">
-            <div class="product-grid">
+            <div class="row justify-content-center">
                 @foreach($products as $product)
-                <div class="d-flex align-items-stretch position-relative">
-                    <div class="card h-100 shadow-sm rounded">
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
+                    <div class="card h-100 shadow-sm rounded" style="min-height: 350px;">
                         @if($product->images->count())
-                        <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}" style="height: 150px; object-fit: cover;">
+                        <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
                         @else
-                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}" style="height: 150px; object-fit: cover;">
+                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
                         @endif
-                        <div class="card-body">
+                        <div class="card-body d-flex flex-column justify-content-between">
                             <h5 class="card-title">{{ $product->name }}</h5>
                             <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
                         </div>
-                        <!-- Ikonka koszyka -->
-                        <i class="fas fa-shopping-cart add-to-cart"></i>
+                        <div class="card-footer text-center">
+                            <i class="fas fa-shopping-cart add-to-cart"></i>
+                        </div>
                     </div>
                 </div>
                 @endforeach

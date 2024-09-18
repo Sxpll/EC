@@ -4,8 +4,8 @@
 <div class="container-admin manage-users-container">
     <div class="card-admin">
         <div class="card-header">
-        <a href="{{ url()->previous() }}" class="btn btn-link text-decoration-none" style="margin-right: 725px";>
-            <i class="fas fa-arrow-left" style="font-size: 24px;"></i>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none" style="margin-right: 725px" ;>
+                <i class="fas fa-arrow-left" style="font-size: 24px; color: black;"></i>
             </a>
             <h1>Manage Users</h1>
             <button id="openModalBtn" class="btn btn-success">Add User</button>
@@ -25,14 +25,14 @@
                     </thead>
                     <tbody id="users-table">
                         @foreach ($users as $user)
-                            <tr>
-                                <td>{{ $user->name }}</td>
-                                <td>{{ $user->lastname }}</td>
-                                <td>{{ $user->email }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-view" data-id="{{ $user->id }}">View</button>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->lastname }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-view" data-id="{{ $user->id }}">View</button>
+                            </td>
+                        </tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -154,7 +154,6 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
-
     function openTab(evt, tabName) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");
@@ -170,116 +169,116 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-    var addUserModal = document.getElementById("addUserModal");
-    var viewUserModal = document.getElementById("viewUserModal");
-    var addUserBtn = document.getElementById("openModalBtn");
-    var closeBtns = document.getElementsByClassName("close");
-    var viewBtns = document.getElementsByClassName("btn-view");
-    var deleteUserBtn = document.getElementById("deleteUserBtn");
+        var addUserModal = document.getElementById("addUserModal");
+        var viewUserModal = document.getElementById("viewUserModal");
+        var addUserBtn = document.getElementById("openModalBtn");
+        var closeBtns = document.getElementsByClassName("close");
+        var viewBtns = document.getElementsByClassName("btn-view");
+        var deleteUserBtn = document.getElementById("deleteUserBtn");
 
-    addUserBtn.onclick = function() {
-        addUserModal.style.display = "block";
-    }
-
-    Array.from(closeBtns).forEach(function(btn) {
-        btn.onclick = function() {
-            addUserModal.style.display = "none";
-            viewUserModal.style.display = "none";
+        addUserBtn.onclick = function() {
+            addUserModal.style.display = "block";
         }
-    });
 
-    window.onclick = function(event) {
-        if (event.target == addUserModal) {
-            addUserModal.style.display = "none";
+        Array.from(closeBtns).forEach(function(btn) {
+            btn.onclick = function() {
+                addUserModal.style.display = "none";
+                viewUserModal.style.display = "none";
+            }
+        });
+
+        window.onclick = function(event) {
+            if (event.target == addUserModal) {
+                addUserModal.style.display = "none";
+            }
+            if (event.target == viewUserModal) {
+                viewUserModal.style.display = "none";
+            }
         }
-        if (event.target == viewUserModal) {
-            viewUserModal.style.display = "none";
-        }
-    }
 
-    Array.from(viewBtns).forEach(function(btn) {
-        btn.onclick = function() {
-            var userId = this.getAttribute("data-id");
+        Array.from(viewBtns).forEach(function(btn) {
+            btn.onclick = function() {
+                var userId = this.getAttribute("data-id");
 
-            fetch(`/admin/user/${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("viewUserId").value = data.id;
-                    document.getElementById("viewName").value = data.name;
-                    document.getElementById("viewLastname").value = data.lastname;
-                    document.getElementById("viewEmail").value = data.email;
-                    document.getElementById("viewRole").value = data.role;
-                    document.getElementById("viewActive").checked = data.isActive;
+                fetch(`/admin/user/${userId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("viewUserId").value = data.id;
+                        document.getElementById("viewName").value = data.name;
+                        document.getElementById("viewLastname").value = data.lastname;
+                        document.getElementById("viewEmail").value = data.email;
+                        document.getElementById("viewRole").value = data.role;
+                        document.getElementById("viewActive").checked = data.isActive;
 
-                    var viewUserForm = document.getElementById("viewUserForm");
-                    viewUserForm.onsubmit = function(event) {
-                        event.preventDefault();
+                        var viewUserForm = document.getElementById("viewUserForm");
+                        viewUserForm.onsubmit = function(event) {
+                            event.preventDefault();
 
-                        var updatedUser = {
-                            name: document.getElementById("viewName").value,
-                            lastname: document.getElementById("viewLastname").value,
-                            email: document.getElementById("viewEmail").value,
-                            role: document.getElementById("viewRole").value,
-                            isActive: document.getElementById("viewActive").checked,
-                            _method: 'PUT',
-                            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            var updatedUser = {
+                                name: document.getElementById("viewName").value,
+                                lastname: document.getElementById("viewLastname").value,
+                                email: document.getElementById("viewEmail").value,
+                                role: document.getElementById("viewRole").value,
+                                isActive: document.getElementById("viewActive").checked,
+                                _method: 'PUT',
+                                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            };
+
+                            var password = document.getElementById("viewPassword").value;
+                            if (password) {
+                                updatedUser.password = password;
+                            }
+
+                            axios.post(`/admin/user/${userId}`, updatedUser)
+                                .then(response => {
+                                    if (response.data.success) {
+                                        sessionStorage.setItem('message', 'User updated successfully');
+                                        sessionStorage.setItem('messageType', 'success');
+                                        location.reload();
+                                    } else {
+                                        alert('Error updating user');
+                                    }
+                                })
+                                .catch(error => {
+                                    if (error.response && error.response.data && error.response.data.errors) {
+                                        sessionStorage.setItem('message', error.response.data.errors.email[0]);
+                                        sessionStorage.setItem('messageType', 'danger');
+                                        location.reload();
+                                    } else {
+                                        alert('Error updating user');
+                                    }
+                                });
                         };
 
-                        var password = document.getElementById("viewPassword").value;
-                        if (password) {
-                            updatedUser.password = password;
-                        }
-
-                        axios.post(`/admin/user/${userId}`, updatedUser)
-                            .then(response => {
-                                if (response.data.success) {
-                                    sessionStorage.setItem('message', 'User updated successfully');
-                                    sessionStorage.setItem('messageType', 'success');
-                                    location.reload();
-                                } else {
-                                    alert('Error updating user');
-                                }
-                            })
-                            .catch(error => {
-                                if (error.response && error.response.data && error.response.data.errors) {
-                                    sessionStorage.setItem('message', error.response.data.errors.email[0]);
-                                    sessionStorage.setItem('messageType', 'danger');
-                                    location.reload();
-                                } else {
-                                    alert('Error updating user');
-                                }
-                            });
-                    };
-
-                    deleteUserBtn.onclick = function() {
-                        if (confirm('Are you sure you want to delete this user?')) {
-                            axios.delete(`/admin/user/${userId}`, {
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                }
-                            }).then(response => {
-                                if (response.data.success) {
-                                    sessionStorage.setItem('message', 'User deleted successfully');
-                                    sessionStorage.setItem('messageType', 'success');
-                                    location.reload();
-                                } else {
+                        deleteUserBtn.onclick = function() {
+                            if (confirm('Are you sure you want to delete this user?')) {
+                                axios.delete(`/admin/user/${userId}`, {
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                    }
+                                }).then(response => {
+                                    if (response.data.success) {
+                                        sessionStorage.setItem('message', 'User deleted successfully');
+                                        sessionStorage.setItem('messageType', 'success');
+                                        location.reload();
+                                    } else {
+                                        alert('Error deleting user');
+                                    }
+                                }).catch(error => {
                                     alert('Error deleting user');
-                                }
-                            }).catch(error => {
-                                alert('Error deleting user');
-                            });
-                        }
-                    };
+                                });
+                            }
+                        };
 
-                    // Fetch user history
-                    fetch(`/admin/user/${userId}/history`)
-                        .then(response => response.json())
-                        .then(histories => {
-                            const historyTableBody = document.querySelector('#historyTable tbody');
-                            historyTableBody.innerHTML = '';
-                            histories.forEach(history => {
-                                const row = document.createElement('tr');
-                                row.innerHTML = `
+                        // Fetch user history
+                        fetch(`/admin/user/${userId}/history`)
+                            .then(response => response.json())
+                            .then(histories => {
+                                const historyTableBody = document.querySelector('#historyTable tbody');
+                                historyTableBody.innerHTML = '';
+                                histories.forEach(history => {
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
                                     <td>${history.admin_name}</td>
                                     <td>${history.admin_lastname}</td>
                                     <td>${history.action}</td>
@@ -288,99 +287,98 @@
                                     <td>${history.new_value ? history.new_value : 'N/A'}</td>
                                     <td>${new Date(history.created_at).toLocaleString()}</td>
                                 `;
-                                historyTableBody.appendChild(row);
+                                    historyTableBody.appendChild(row);
+                                });
                             });
-                        });
 
-                    viewUserModal.style.display = "block";
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                });
-        }
-    });
-
-    document.getElementById('search').addEventListener('input', function() {
-        let query = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#users-table tr');
-
-        rows.forEach(row => {
-            let name = row.cells[0].textContent.toLowerCase();
-            let lastname = row.cells[1].textContent.toLowerCase();
-            let email = row.cells[2].textContent.toLowerCase();
-
-            if (name.includes(query) || lastname.includes(query) || email.includes(query)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
+                        viewUserModal.style.display = "block";
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                    });
             }
         });
-    });
 
-    // Display message from sessionStorage
-    if (sessionStorage.getItem('message')) {
-        var message = sessionStorage.getItem('message');
-        var messageType = sessionStorage.getItem('messageType');
+        document.getElementById('search').addEventListener('input', function() {
+            let query = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#users-table tr');
 
-        var alertBox = document.createElement('div');
-        alertBox.className = 'alert alert-' + messageType;
-        alertBox.textContent = message;
+            rows.forEach(row => {
+                let name = row.cells[0].textContent.toLowerCase();
+                let lastname = row.cells[1].textContent.toLowerCase();
+                let email = row.cells[2].textContent.toLowerCase();
 
-        document.getElementById('alert-container').prepend(alertBox);
-
-        setTimeout(() => {
-            alertBox.style.display = 'none';
-            sessionStorage.removeItem('message');
-            sessionStorage.removeItem('messageType');
-        }, 2000);
-    }
-
-    // Form submission for adding user
-    var addUserForm = document.querySelector('#addUserModal form');
-    addUserForm.onsubmit = function(event) {
-        event.preventDefault();
-
-        var formData = new FormData(addUserForm);
-
-        axios.post(addUserForm.action, formData)
-            .then(response => {
-                if (response.data.success) {
-                    sessionStorage.setItem('message', response.data.message);
-                    sessionStorage.setItem('messageType', 'success');
-                    addUserModal.style.display = "none";
-                    location.reload();
+                if (name.includes(query) || lastname.includes(query) || email.includes(query)) {
+                    row.style.display = '';
                 } else {
-                    alert('Error adding user');
-                }
-            })
-            .catch(error => {
-                if (error.response && error.response.data && error.response.data.errors) {
-                    var errorMessage = Object.values(error.response.data.errors).flat().join(' ');
-                    sessionStorage.setItem('message', errorMessage);
-                    sessionStorage.setItem('messageType', 'danger');
-                    addUserModal.style.display = "none";
-                    location.reload();
-                } else {
-                    alert('Error adding user');
+                    row.style.display = 'none';
                 }
             });
-    };
-});
+        });
 
-function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tab-link");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
-}
+        // Display message from sessionStorage
+        if (sessionStorage.getItem('message')) {
+            var message = sessionStorage.getItem('message');
+            var messageType = sessionStorage.getItem('messageType');
 
+            var alertBox = document.createElement('div');
+            alertBox.className = 'alert alert-' + messageType;
+            alertBox.textContent = message;
+
+            document.getElementById('alert-container').prepend(alertBox);
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+                sessionStorage.removeItem('message');
+                sessionStorage.removeItem('messageType');
+            }, 2000);
+        }
+
+        // Form submission for adding user
+        var addUserForm = document.querySelector('#addUserModal form');
+        addUserForm.onsubmit = function(event) {
+            event.preventDefault();
+
+            var formData = new FormData(addUserForm);
+
+            axios.post(addUserForm.action, formData)
+                .then(response => {
+                    if (response.data.success) {
+                        sessionStorage.setItem('message', response.data.message);
+                        sessionStorage.setItem('messageType', 'success');
+                        addUserModal.style.display = "none";
+                        location.reload();
+                    } else {
+                        alert('Error adding user');
+                    }
+                })
+                .catch(error => {
+                    if (error.response && error.response.data && error.response.data.errors) {
+                        var errorMessage = Object.values(error.response.data.errors).flat().join(' ');
+                        sessionStorage.setItem('message', errorMessage);
+                        sessionStorage.setItem('messageType', 'danger');
+                        addUserModal.style.display = "none";
+                        location.reload();
+                    } else {
+                        alert('Error adding user');
+                    }
+                });
+        };
+    });
+
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
 </script>
 
 
