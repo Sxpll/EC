@@ -56,6 +56,7 @@
                         <tbody id="products-table">
                             @foreach ($products as $product)
                             <tr class="{{ $product->isActive == 0 ? 'text-danger' : '' }}">
+
                                 <td>{{ $product->name }}</td>
                                 <td>
                                     @foreach ($product->categories as $category)
@@ -72,6 +73,7 @@
                                     <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
                                 </td>
                             </tr>
+
                             @endforeach
                         </tbody>
                     </table>

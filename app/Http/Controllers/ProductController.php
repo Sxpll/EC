@@ -62,8 +62,19 @@ class ProductController extends Controller
 
         $product->categories()->sync($validCategoryIds);
 
+        // Pobranie nazw kategorii
+        $categoryNames = Category::whereIn('id', $validCategoryIds)->pluck('name')->toArray();
+        $categoryNamesString = implode(', ', $categoryNames);
+
         $this->archiveCategories($product, $validCategoryIds);
         $this->addImagesAndAttachments($request, $product);
+
+        // Formatowanie danych produktu dla historii
+        $productData = [
+            'name' => $product->name,
+            'description' => $product->description,
+            'categories' => $categoryNamesString,
+        ];
 
         ProductHistory::create([
             'admin_id' => Auth::user()->id,
@@ -72,13 +83,15 @@ class ProductController extends Controller
             'product_id' => $product->id,
             'field' => 'Product',
             'old_value' => null,
-            'new_value' => json_encode($product->toArray()),
+            'new_value' => 'Name: ' . $product->name . ', Description: ' . $product->description . ', Categories: ' . $categoryNamesString,
         ]);
 
         Log::info('Store Product: Successfully stored product with ID: ' . $product->id);
 
         return redirect()->route('products.index')->with('success', 'Product added successfully');
     }
+
+
 
     public function update(Request $request, $id)
     {
@@ -96,11 +109,35 @@ class ProductController extends Controller
         Log::info('Update Product: Received input', $request->all());
 
         try {
-            $oldCategories = $product->categories->pluck('name', 'id')->toArray();
-            $product->update($request->only('name', 'description'));
+            $oldProductData = $product->only(['name', 'description']);
+            $newProductData = $request->only(['name', 'description']);
 
-            Log::info('Update Product: Updated product', $product->toArray());
+            // Sprawdzenie zmian w polach
+            foreach ($newProductData as $field => $newValue) {
+                $oldValue = $oldProductData[$field];
+                if ($oldValue != $newValue) {
+                    // Sformatuj wartości jako zwykły tekst
+                    $oldValueFormatted = is_null($oldValue) ? 'null' : $oldValue;
+                    $newValueFormatted = is_null($newValue) ? 'null' : $newValue;
 
+                    // Tworzenie osobnego wpisu dla każdej zmiany pola
+                    ProductHistory::create([
+                        'admin_id' => Auth::user()->id,
+                        'admin_name' => Auth::user()->name,
+                        'action' => 'updated',
+                        'product_id' => $product->id,
+                        'field' => ucfirst($field), // Pole, które zostało zmienione
+                        'old_value' => $oldValueFormatted,
+                        'new_value' => $newValueFormatted,
+                    ]);
+
+                    Log::info("Update Product: Field '$field' updated from '$oldValueFormatted' to '$newValueFormatted'");
+                }
+            }
+
+            $product->update($newProductData);
+
+            // Aktualizacja kategorii
             $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
 
             // Filtruj kategorie: tylko najniższe (liście) lub te, które nie mają dzieci
@@ -112,25 +149,24 @@ class ProductController extends Controller
                 ->pluck('id')
                 ->toArray();
 
-            Log::info('Update Product: Valid categories to sync', $validCategoryIds);
+            $oldCategories = $product->categories->pluck('id')->toArray();
+            if (array_diff($validCategoryIds, $oldCategories) || array_diff($oldCategories, $validCategoryIds)) {
+                $newCategories = Category::whereIn('id', $validCategoryIds)->pluck('name')->toArray();
+                $oldCategoriesNames = Category::whereIn('id', $oldCategories)->pluck('name')->toArray();
 
-            $product->categories()->sync($validCategoryIds);
-            $this->archiveCategories($product, $validCategoryIds);
-
-            $newCategories = Category::whereIn('id', $validCategoryIds)->pluck('name', 'id')->toArray();
-
-            if (array_diff($validCategoryIds, array_keys($oldCategories)) || array_diff(array_keys($oldCategories), $validCategoryIds)) {
                 ProductHistory::create([
                     'admin_id' => Auth::user()->id,
                     'admin_name' => Auth::user()->name,
                     'action' => 'updated',
                     'product_id' => $product->id,
-                    'field' => 'categories',
-                    'old_value' => json_encode(array_values($oldCategories)),
-                    'new_value' => json_encode(array_values($newCategories)),
+                    'field' => 'Categories',
+                    'old_value' => implode(', ', $oldCategoriesNames),
+                    'new_value' => implode(', ', $newCategories),
                 ]);
 
-                Log::info('Update Product: Categories history updated');
+                Log::info('Update Product: Categories updated from [' . implode(', ', $oldCategoriesNames) . '] to [' . implode(', ', $newCategories) . ']');
+                $product->categories()->sync($validCategoryIds);
+                $this->archiveCategories($product, $validCategoryIds);
             }
 
             $this->addImagesAndAttachments($request, $product);
@@ -141,6 +177,9 @@ class ProductController extends Controller
             return response()->json(['error' => 'Error updating product'], 500);
         }
     }
+
+
+
 
 
 

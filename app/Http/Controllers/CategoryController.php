@@ -103,7 +103,7 @@ class CategoryController extends Controller
 
             // Najpierw rekurencyjnie usuń wszystkie dzieci tej kategorii
             foreach ($category->childrenRecursive as $child) {
-                // Wywołaj samą siebie dla każdego dziecka
+                // tu wywoluje sama siebie dla kazdego dziecka
                 $this->destroy($child->id);
             }
 
