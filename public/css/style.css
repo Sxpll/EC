@@ -7,6 +7,7 @@ body {
     padding: 0;
     min-height: 100vh;
     overflow-x: hidden;
+    overflow: hidden;
 }
 
 .banner {
@@ -46,6 +47,16 @@ body {
 
 .banner button:hover {
     background-color: #0056b3;
+}
+.container-admin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    margin-top: 60px;
+    overflow-x: hidden; /* Avoid horizontal overflow */
 }
 
 .container-admin-dashboard {
@@ -99,12 +110,12 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
     width: 100%;
-    max-width: 1000px;
+    max-width: 1200px;
     height: 95%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-x: hidden; /* Brak poziomego przewijania */
 }
 
 .manage-users-container .card-admin {
@@ -234,14 +245,15 @@ body {
     border-radius: 10px;
     color: #333333;
     margin-top: 20px;
+    table-layout: auto;
 }
 
-.table th,
-.table td {
+.table th, .table td {
     padding: 15px;
     text-align: center;
     border-top: 1px solid #dddddd;
     vertical-align: middle;
+    word-wrap: break-word; /* Zapewnienie zawijania tekstu */
 }
 
 .table th {
@@ -1332,7 +1344,10 @@ header {
 .card-body {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+
 }
 
 .row {
@@ -1408,9 +1423,12 @@ header {
     text-align: center;
 }
 
-.scrollable-table {
-    max-height: 500px;
-    overflow-y: auto;
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
 }
 
 #History {
@@ -1476,4 +1494,110 @@ header {
 .chat-title {
     font-size: 1.5rem;
     text-align: center;
+}
+
+.table-responsive {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    table-layout: fixed; /* Ustawienie stałej szerokości kolumn */
+    word-wrap: break-word; /* Zawijanie tekstu w komórkach */
+}
+
+.table th, .table td {
+    padding: 15px;
+    text-align: center;
+    border-top: 1px solid #dddddd;
+    vertical-align: middle;
+    word-wrap: break-word;
+    overflow: hidden;
+    white-space: nowrap; /* Zawijanie w jednej linii */
+    text-overflow: ellipsis; /* Dodanie kropek dla długiego tekstu */
+}
+
+.table th {
+    position: sticky;
+    top: 0;
+    z-index: 2; /* Zwiększ indeks, aby nagłówki były nad zawartością */
+    background-color: #f0f0f0; /* Tło nagłówka */
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1); /* Drobny cień, by nagłówek był bardziej widoczny */
+}
+
+.table td {
+    background-color: #ffffff;
+    color: #333333;
+}
+
+.table td:nth-child(1) {
+    width: 15%; /* Dostosuj szerokość pierwszej kolumny */
+}
+
+.table td:nth-child(2) {
+    width: 25%; /* Dostosuj szerokość drugiej kolumny */
+}
+
+.table td:nth-child(3), .table td:nth-child(4), .table td:nth-child(5) {
+    width: 20%; /* Dostosuj szerokości pozostałych kolumn */
+}
+
+
+/* Styl dla pływającego prostokąta */
+.floating-sidebar {
+    position: fixed;
+    top: 120px; /* Ustawienie początku od tej samej wysokości co produkty */
+    left: 50px;
+    width: 200px;
+    height: auto;
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Styl dla siatki produktów */
+.products-section {
+    margin-left: 260px;
+    padding: 20px;
+}
+
+#product-grid .col-lg-3 {
+    max-width: 20%; /* Cztery produkty w jednym rzędzie */
+    margin-bottom: 20px;
+}
+
+.product-card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 270px; /* Zmniejszona wysokość produktu */
+}
+
+.product-card img {
+    object-fit: cover;
+    height: 120px;
+    width: 100%;
+}
+
+.card-title {
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.card-footer {
+    background-color: #fff;
+    border-top: none;
+}
+
+.card-footer i {
+    font-size: 20px;
+    color: #007bff;
+}
+
+.products-section .row {
+    gap: 20px;
 }
