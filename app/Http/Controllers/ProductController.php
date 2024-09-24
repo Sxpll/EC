@@ -10,6 +10,7 @@ use App\Models\ProductAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\Paginator;
 
 class ProductController extends Controller
 {
@@ -413,8 +414,10 @@ class ProductController extends Controller
             $products = $products->where('name', 'LIKE', "%{$search}%");
         }
 
-        $products = $products->paginate(10); // Paginacja
+        $products = $products->paginate(12); // Paginacja
 
         return view('products.publicIndex', compact('products'));
     }
+
+
 }
