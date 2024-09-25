@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- jQuery UI -->
@@ -41,6 +43,14 @@
                     <a href="{{ route('chat.index') }}">Chat</a>
                 </nav>
                 <div class="navbar-icons">
+                    <div class="theme-switch">
+                        <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                        <label for="theme-toggle" class="theme-toggle-label">
+                            <span class="theme-icon theme-sun"><i class="fas fa-sun"></i></span>
+                            <span class="theme-icon theme-moon"><i class="fas fa-moon"></i></span>
+                        </label>
+                    </div>
+
                     <!-- Ikonka edycji konta widoczna tylko dla zalogowanego użytkownika -->
                     @if(auth()->check())
                     <a href="{{ route('account.edit') }}"><i class="fa fa-user"></i></a>
@@ -90,6 +100,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggleInput = document.getElementById('theme-toggle');
+
+            // Sprawdź preferencje zapisane w localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+            themeToggleInput.checked = savedTheme === 'dark';
+
+            // Funkcja przełączania motywu
+            themeToggleInput.addEventListener('change', () => {
+                const isDarkMode = themeToggleInput.checked;
+                document.body.classList.toggle('dark-mode', isDarkMode);
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            });
+        });
+    </script>
 
     @yield('scripts')
 
