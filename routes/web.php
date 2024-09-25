@@ -48,6 +48,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
     Route::get('/products2', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
+    Route::get('/products00', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
+
+
 
 
     // Categories routes

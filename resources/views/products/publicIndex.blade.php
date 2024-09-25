@@ -26,7 +26,7 @@
         </div>
 
         <!-- Grid produktów -->
-        <div class="product-grid row">
+        <div class="product-grid row" id="products-list">
             @foreach($products as $product)
             <div class="product-card col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
                 <div class="card">
@@ -48,13 +48,43 @@
             @endforeach
         </div>
 
-        <!-- Paginacja -->
+        <!-- Pokaż więcej - Tylko jeśli są jeszcze produkty do wyświetlenia -->
+        @if($hasMorePages)
         <div class="pagination-wrapper">
-            {{ $products->links() }}
+            <button id="show-more-btn" class="btn btn-primary">Pokaż więcej</button>
         </div>
-        <div class="pagination-info">
-            <p>Showing {{ $products->firstItem() }} to {{ $products->lastItem() }} of {{ $products->total() }} results</p>
-        </div>
+        @endif
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    let page = 2; // Zaczynamy od drugiej strony, ponieważ pierwsza jest już załadowana.
+
+    document.getElementById('show-more-btn').addEventListener('click', function() {
+        fetch(`/products00?page=${page}`, { // Zmieniliśmy trasę na /products/load-more
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Informuje serwer, że to zapytanie AJAX
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Błąd sieci');
+                }
+                return response.json(); // Oczekuj odpowiedzi JSON
+            })
+            .then(data => {
+                console.log(data); // Zobacz odpowiedź z serwera w konsoli
+                document.getElementById('products-list').innerHTML += data.html; // Dodaj nowe produkty
+                page++; // Zwiększ numer strony
+                if (!data.hasMore) {
+                    document.getElementById('show-more-btn').style.display = 'none'; // Ukryj przycisk, jeśli nie ma więcej produktów
+                }
+            })
+            .catch(error => {
+                console.error('Błąd:', error); // Obsłuż błąd
+            });
+    });
+</script>
 @endsection

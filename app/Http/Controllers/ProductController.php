@@ -405,6 +405,9 @@ class ProductController extends Controller
 
     public function publicIndex(Request $request)
     {
+        // Pobierz numer strony (jeśli nie ma, domyślnie strona 1)
+        $page = $request->get('page', 1);
+
         // Pobierz tylko aktywne produkty
         $products = Product::where('isActive', true);
 
@@ -414,10 +417,23 @@ class ProductController extends Controller
             $products = $products->where('name', 'LIKE', "%{$search}%");
         }
 
-        $products = $products->paginate(12); // Paginacja
+        // Paginacja - 10 produktów na stronę
+        $products = $products->paginate(10, ['*'], 'page', $page);
 
-        return view('products.publicIndex', compact('products'));
+        // Sprawdzenie, czy istnieje więcej stron
+        $hasMorePages = $products->hasMorePages();
+
+        // Sprawdź, czy jest to zapytanie AJAX
+        if ($request->ajax()) {
+            // Zrenderuj widok produktów dla AJAX i zwróć JSON
+            $view = view('partials.products', compact('products'))->render();
+            return response()->json([
+                'html' => $view, // HTML produktów
+                'hasMore' => $hasMorePages, // Czy są jeszcze produkty do załadowania
+            ]);
+        }
+
+        // Jeśli nie jest to zapytanie AJAX, zwróć pełny widok
+        return view('products.publicIndex', compact('products', 'hasMorePages'));
     }
-
-
 }
