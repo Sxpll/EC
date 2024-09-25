@@ -1676,11 +1676,7 @@ ul.pagination svg {
 
 }
 
-.filter-sort {
-    margin-bottom: 20px;
-    padding: 20px;
 
-}
 
 .search-form {
     display: flex;
@@ -1786,7 +1782,24 @@ ul.pagination svg {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Delikatny cień */
     margin-bottom: 20px; /* Odstęp od następnych elementów */
     margin-top: 20px;
+
 }
+.filter-sort {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    margin-top: 20px;
+    max-width: calc(100% - 100px); /* Maksymalna szerokość uwzględnia odstępy */
+    margin-left: auto; /* Automatyczne marginesy wyśrodkowujące */
+    margin-right: auto; /* Automatyczne marginesy wyśrodkowujące */
+}
+
+
 .search-form {
     display: flex;
     align-items: center;
@@ -1849,4 +1862,378 @@ ul.pagination svg {
 
 .row.mt-4 {
     margin-top: auto; /* Ustaw przyciski na dole */
+}
+
+
+
+
+/* Styl dla przełącznika */
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.theme-toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-toggle-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    border-radius: 34px;
+    transition: 0.4s;
+}
+
+.theme-toggle-label:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.theme-toggle-input:checked + .theme-toggle-label {
+    background-color: #007bff;
+}
+
+.theme-toggle-input:checked + .theme-toggle-label:before {
+    transform: translateX(26px);
+}
+
+.theme-icon {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 4px;
+    transition: 0.3s;
+}
+
+.theme-sun {
+    left: 8px;
+    background-color: #ffdd57;
+    border-radius: 50%;
+}
+
+.theme-moon {
+    right: 8px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* Ukrycie ikony po zmianie */
+.theme-toggle-input:not(:checked) ~ .theme-toggle-label .theme-moon {
+    opacity: 0;
+}
+
+.theme-toggle-input:checked ~ .theme-toggle-label .theme-sun {
+    opacity: 0;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0; /* Use lighter text for better contrast */
+}
+
+.dark-mode .navbar,
+.dark-mode .footer-bar {
+    background-color: #333;
+}
+
+.dark-mode .navbar-links a {
+    color: #e0e0e0;
+}
+.dark-mode .banner {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+.dark-mode .container-admin,
+.dark-mode .card-admin-dashboard {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+.dark-mode .btn {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+.dark-mode .btn:hover {
+    background-color: #555;
+}
+
+.dark-mode .navbar-links a:hover {
+    background-color: #555;
+}
+.dark-mode .modal-content,
+.dark-mode .notification-item {
+    background-color: #222;
+    color: #e0e0e0;
+}
+
+.dark-mode .notification-item:hover {
+    background-color: #333;
+}
+.dark-mode .table th {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+.dark-mode .table td {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+.dark-mode .custom-sidebar {
+    background-color: #1e1e1e;
+}
+
+.dark-mode .main-content {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+.dark-mode .product-card {
+    background-color: #2a2a2a;
+    border-color: #444;
+}
+
+.dark-mode .product-card img {
+    filter: brightness(0.9);
+}
+
+/* Navbar styles for dark mode */
+body.dark-mode .navbar {
+    background-color: #1f1f1f;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Slight shadow for better visibility */
+}
+
+body.dark-mode .navbar-links a {
+    color: #e0e0e0; /* Light color for the links */
+}
+
+body.dark-mode .navbar-links a:hover {
+    background-color: #333333; /* Darker hover state */
+    color: #ffffff;
+}
+
+body.dark-mode .navbar-icons a {
+    color: #e0e0e0; /* Icons should match the text color */
+}
+
+body.dark-mode .navbar-icons a:hover {
+    color: #ffffff; /* Brighten on hover */
+}
+
+/* Button styles for dark mode */
+body.dark-mode .btn {
+    background-color: #333333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .btn:hover {
+    background-color: #555555;
+    color: #ffffff;
+}
+
+/* Input fields for dark mode */
+body.dark-mode input, body.dark-mode select {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    border: 1px solid #444444;
+}
+
+body.dark-mode input::placeholder {
+    color: #888888; /* Lighten the placeholder text */
+}
+
+body.dark-mode input:focus, body.dark-mode select:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue focus ring */
+}
+
+/* Product card styles for dark mode */
+body.dark-mode .product-card {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border: 1px solid #444444;
+}
+
+body.dark-mode .product-card .btn {
+    background-color: #333333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .product-card .btn:hover {
+    background-color: #555555;
+}
+
+body.dark-mode .product-card img {
+    filter: brightness(0.9); /* Slightly darker images to match dark mode */
+}
+
+/* Pagination in dark mode */
+body.dark-mode .pagination .page-link {
+    background-color: #333333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .pagination .page-link:hover {
+    background-color: #555555;
+    color: #ffffff;
+}
+
+/* Footer styles for dark mode */
+body.dark-mode .footer-bar {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-mode .footer-bar a {
+    color: #e0e0e0;
+}
+
+body.dark-mode .footer-bar a:hover {
+    color: #007bff; /* Brighter color on hover */
+}
+/* Navbar w trybie ciemnym */
+body.dark-mode .navbar {
+    background-color: #1f1f1f; /* Ciemniejsze tło */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Delikatny cień */
+}
+
+body.dark-mode .navbar-links a {
+    color: #e0e0e0; /* Jaśniejsze linki */
+}
+
+body.dark-mode .navbar-links a:hover {
+    background-color: #333333; /* Ciemniejsze tło po najechaniu */
+    color: #ffffff; /* Jaśniejszy tekst po najechaniu */
+}
+
+body.dark-mode .navbar-icons a {
+    color: #e0e0e0; /* Ikony w kolorze tekstu */
+}
+
+body.dark-mode .navbar-icons a:hover {
+    color: #ffffff; /* Jaśniejszy kolor po najechaniu */
+}
+
+body.dark-mode .navbar-container {
+    background-color: #1f1f1f; /* Tło dla ciemnego motywu */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Mocniejszy cień dla ciemnego motywu */
+}
+body.dark-mode .navbar-container .navbar-links a {
+    color: #e0e0e0; /* Jaśniejsze linki dla ciemnego motywu */
+}
+body.dark-mode .navbar-container .navbar-links a:hover {
+    background-color: #333333; /* Ciemniejsze tło po najechaniu */
+    color: #ffffff; /* Jaśniejszy tekst po najechaniu */
+}
+body.dark-mode .navbar-container .navbar-icons a {
+    color: #e0e0e0; /* Ikony w ciemnym motywie */
+}
+body.dark-mode .navbar-container .navbar-icons a:hover {
+    color: #ffffff; /* Zmiana koloru ikon na jaśniejszy w trybie ciemnym */
+}
+
+body.dark-mode header {
+    background-color: #1f1f1f;
+}
+
+body.dark-mode .main-content .filter-sort {
+    background-color: #1f1f1f;
+}
+
+
+
+body.dark-mode .login-card  {
+    background-color: #1f1f1f;
+    color: white;
+}
+
+body.dark-mode h1{
+    color: white;
+}
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.theme-toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-toggle-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    border-radius: 34px;
+    transition: 0.4s;
+}
+
+.theme-toggle-label:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.theme-toggle-input:checked + .theme-toggle-label {
+    background-color: #007bff;
+}
+
+.theme-toggle-input:checked + .theme-toggle-label:before {
+    transform: translateX(26px);
+}
+
+.theme-icon {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 4px;
+    transition: 0.3s;
+}
+
+.theme-sun {
+    left: 8px;
+    color: #ffdd57;
+}
+
+.theme-moon {
+    right: 8px;
+    color: white;
+    opacity: 0;
+}
+
+.theme-toggle-input:checked ~ .theme-toggle-label .theme-moon {
+    opacity: 1;
+}
+
+.theme-toggle-input:checked ~ .theme-toggle-label .theme-sun {
+    opacity: 0;
 }
