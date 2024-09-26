@@ -2,11 +2,15 @@
 
 @section('content')
 <div class="main-container">
-    <!-- Sidebar z filtrami -->
+    <!-- Sidebar z kategoriami -->
     <div class="custom-sidebar">
         <div class="floating-sidebar shadow">
-            <h3>Kategorie & Filtry</h3>
-            <!-- Puste miejsce na przyszłe funkcje -->
+            <h3>Kategorie</h3>
+            <ul class="category-tree">
+                @foreach ($categories as $category)
+                @include('partials.category-node', ['category' => $category])
+                @endforeach
+            </ul>
         </div>
     </div>
 
@@ -76,10 +80,26 @@
 
 @section('scripts')
 <script>
-    let page = 2; // Zaczynamy od drugiej strony, ponieważ pierwsza jest już załadowana.
+    let page = 2;
 
     document.getElementById('show-more-btn').addEventListener('click', function() {
-        fetch(`/products?page=${page}`, {
+        // Konstruowanie dynamicznego URL z kategorią i sortowaniem
+        let url = `/products00?page=${page}`;
+
+        // Sprawdzamy, czy istnieje wartość dla category_id
+        let categoryId = "{{ request()->input('category_id') }}";
+        if (categoryId) {
+            url += `&category_id=${categoryId}`;
+        }
+
+        // Sprawdzamy, czy istnieje wartość dla sort_by
+        let sortBy = "{{ request()->input('sort_by') }}";
+        if (sortBy) {
+            url += `&sort_by=${sortBy}`;
+        }
+
+        // Wysyłanie zapytania AJAX
+        fetch(url, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest' // Informuje serwer, że to zapytanie AJAX
                 }
@@ -91,14 +111,22 @@
                 return response.json(); // Oczekuj odpowiedzi JSON
             })
             .then(data => {
-                document.getElementById('products-list').innerHTML += data.html; // Dodaj nowe produkty
+                // Sprawdzenie, czy zwrócone dane zawierają html i hasMore
+                if (!data.html || typeof data.hasMore === 'undefined') {
+                    throw new Error('Błąd: Nieprawidłowa struktura danych z serwera');
+                }
+
+                // Dodawanie nowych produktów
+                document.getElementById('products-list').innerHTML += data.html;
                 page++; // Zwiększ numer strony
+
+                // Ukryj przycisk, jeśli nie ma więcej produktów
                 if (!data.hasMore) {
-                    document.getElementById('show-more-btn').style.display = 'none'; // Ukryj przycisk, jeśli nie ma więcej produktów
+                    document.getElementById('show-more-btn').style.display = 'none';
                 }
             })
             .catch(error => {
-                console.error('Błąd:', error); // Obsłuż błąd
+                console.error('Błąd podczas przetwarzania:', error); // Obsłuż błąd
             });
     });
 </script>
