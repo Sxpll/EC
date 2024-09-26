@@ -50,6 +50,8 @@
                                 <th>Name</th>
                                 <th>Category</th>
                                 <th>Description</th>
+                                <th>Price (PLN)</th>
+                                <th>Availability</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -69,6 +71,22 @@
                                     @endforeach
                                 </td>
                                 <td>{{ $product->description }}</td>
+                                <td>{{ $product->price }}</td>
+                                <td>
+                                    @switch($product->availability)
+                                    @case('available')
+                                    Na stanie
+                                    @break
+                                    @case('available_in_7_days')
+                                    Dostępny w ciągu 7 dni
+                                    @break
+                                    @case('available_in_14_days')
+                                    Dostępny w ciągu 14 dni
+                                    @break
+                                    @default
+                                    Niedostępny
+                                    @endswitch
+                                </td>
                                 <td>
                                     <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
                                 </td>
@@ -102,6 +120,19 @@
                 <div class="form-group">
                     <label for="description">Description:</label>
                     <textarea name="description" id="description" class="form-control" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="price">Cena (PLN):</label>
+                    <input type="number" step="0.01" name="price" id="price" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="availability">Dostępność:</label>
+                    <select name="availability" id="availability" class="form-control">
+                        <option value="available">Dostępny</option>
+                        <option value="available_in_7_days">Dostępny w ciągu 7 dni</option>
+                        <option value="available_in_14_days">Dostępny w ciągu 14 dni</option>
+                        <option value="unavailable">Niedostępny</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="images">Upload Images:</label>
@@ -145,6 +176,19 @@
                     <div class="form-group">
                         <label for="viewDescription">Description:</label>
                         <textarea id="viewDescription" name="description" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="viewPrice">Cena (PLN):</label>
+                        <input type="number" step="0.01" id="viewPrice" name="price" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="viewAvailability">Dostępność:</label>
+                        <select name="availability" id="viewAvailability" class="form-control">
+                            <option value="available">Dostępny</option>
+                            <option value="available_in_7_days">Dostępny w ciągu 7 dni</option>
+                            <option value="available_in_14_days">Dostępny w ciągu 14 dni</option>
+                            <option value="unavailable">Niedostępny</option>
+                        </select>
                     </div>
                     <div class="form-group d-flex justify-content-center">
                         <button type="submit" class="btn btn-primary mx-2">Update Product</button>
@@ -222,6 +266,8 @@
         <a href="#">Careers</a>
     </div>
 </footer>
+@endsection
+
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
@@ -352,6 +398,8 @@
                         $('#viewProductId').val(product.id);
                         $('#viewName').val(product.name);
                         $('#viewDescription').val(product.description);
+                        $('#viewPrice').val(product.price);
+                        $('#viewAvailability').val(product.availability);
                         $('#category-tree-view').jstree(true).deselect_all(true);
 
                         if (product.categories) {

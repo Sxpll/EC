@@ -37,6 +37,8 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'availability' => 'required|string|in:available,available_in_7_days,available_in_14_days,unavailable',
             'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
@@ -45,17 +47,13 @@ class ProductController extends Controller
 
         Log::info('Store Product: Received input', $request->all());
 
-        $product = Product::create($request->only('name', 'description'));
+        $product = Product::create($request->only('name', 'description', 'price', 'availability'));
 
         // Pobierz ID wszystkich zaznaczonych kategorii
         $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
 
         // Filtruj kategorie: tylko najniższe (liście) lub te, które nie mają dzieci
         $validCategoryIds = Category::whereIn('id', $selectedCategoryIds)
-            ->where(function ($query) {
-                $query->doesntHave('children') // Tylko kategorie bez dzieci (liście)
-                    ->orWhereDoesntHave('parent'); // Kategorie, które nie mają rodzica (mogą być przypisane)
-            })
             ->pluck('id')
             ->toArray();
 
@@ -75,6 +73,8 @@ class ProductController extends Controller
             'name' => $product->name,
             'description' => $product->description,
             'categories' => $categoryNamesString,
+            'price' => $product->price,
+            'availability' => $product->availability,
         ];
 
         ProductHistory::create([
@@ -84,7 +84,7 @@ class ProductController extends Controller
             'product_id' => $product->id,
             'field' => 'Product',
             'old_value' => null,
-            'new_value' => 'Name: ' . $product->name . ', Description: ' . $product->description . ', Categories: ' . $categoryNamesString,
+            'new_value' => json_encode($productData),
         ]);
 
         Log::info('Store Product: Successfully stored product with ID: ' . $product->id);
@@ -101,6 +101,8 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'availability' => 'required|string|in:available,available_in_7_days,available_in_14_days,unavailable',
             'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
@@ -110,29 +112,24 @@ class ProductController extends Controller
         Log::info('Update Product: Received input', $request->all());
 
         try {
-            $oldProductData = $product->only(['name', 'description']);
-            $newProductData = $request->only(['name', 'description']);
+            $oldProductData = $product->only(['name', 'description', 'price', 'availability']);
+            $newProductData = $request->only(['name', 'description', 'price', 'availability']);
 
             // Sprawdzenie zmian w polach
             foreach ($newProductData as $field => $newValue) {
                 $oldValue = $oldProductData[$field];
                 if ($oldValue != $newValue) {
-                    // Sformatuj wartości jako zwykły tekst
-                    $oldValueFormatted = is_null($oldValue) ? 'null' : $oldValue;
-                    $newValueFormatted = is_null($newValue) ? 'null' : $newValue;
-
-                    // Tworzenie osobnego wpisu dla każdej zmiany pola
                     ProductHistory::create([
                         'admin_id' => Auth::user()->id,
                         'admin_name' => Auth::user()->name,
                         'action' => 'updated',
                         'product_id' => $product->id,
-                        'field' => ucfirst($field), // Pole, które zostało zmienione
-                        'old_value' => $oldValueFormatted,
-                        'new_value' => $newValueFormatted,
+                        'field' => ucfirst($field),
+                        'old_value' => $oldValue,
+                        'new_value' => $newValue,
                     ]);
 
-                    Log::info("Update Product: Field '$field' updated from '$oldValueFormatted' to '$newValueFormatted'");
+                    Log::info("Update Product: Field '$field' updated from '$oldValue' to '$newValue'");
                 }
             }
 
@@ -141,12 +138,7 @@ class ProductController extends Controller
             // Aktualizacja kategorii
             $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
 
-            // Filtruj kategorie: tylko najniższe (liście) lub te, które nie mają dzieci
             $validCategoryIds = Category::whereIn('id', $selectedCategoryIds)
-                ->where(function ($query) {
-                    $query->doesntHave('children') // Tylko kategorie bez dzieci (liście)
-                        ->orWhereDoesntHave('parent'); // Kategorie, które nie mają rodzica (mogą być przypisane)
-                })
                 ->pluck('id')
                 ->toArray();
 
@@ -190,9 +182,7 @@ class ProductController extends Controller
             $path = $this->getCategoryPath($categoryId);
             $category = Category::find($categoryId);
 
-            // Sprawdzenie, czy kategoria jest nieaktywna
             if (!$category->isActive) {
-                // Sprawdzenie, czy wpis już istnieje w historii
                 $exists = \DB::table('product_category_history')
                     ->where('product_id', $product->id)
                     ->where('category_id', $categoryId)
@@ -409,16 +399,30 @@ class ProductController extends Controller
         $page = $request->get('page', 1);
 
         // Pobierz tylko aktywne produkty
-        $products = Product::where('isActive', true);
+        $productsQuery = Product::where('isActive', true);
 
         // Obsługa wyszukiwania
         if ($request->has('search')) {
             $search = $request->input('search');
-            $products = $products->where('name', 'LIKE', "%{$search}%");
+            $productsQuery = $productsQuery->where('name', 'LIKE', "%{$search}%");
+        }
+
+        // Obsługa sortowania
+        if ($request->has('sort_by')) {
+            $sortBy = $request->input('sort_by');
+            if ($sortBy === 'price_asc') {
+                $productsQuery->orderBy('price', 'asc');
+            } elseif ($sortBy === 'price_desc') {
+                $productsQuery->orderBy('price', 'desc');
+            } elseif ($sortBy === 'name_asc') {
+                $productsQuery->orderBy('name', 'asc');
+            } elseif ($sortBy === 'name_desc') {
+                $productsQuery->orderBy('name', 'desc');
+            }
         }
 
         // Paginacja - 10 produktów na stronę
-        $products = $products->paginate(10, ['*'], 'page', $page);
+        $products = $productsQuery->paginate(10, ['*'], 'page', $page);
 
         // Sprawdzenie, czy istnieje więcej stron
         $hasMorePages = $products->hasMorePages();

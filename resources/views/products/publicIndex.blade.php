@@ -18,11 +18,16 @@
                 <input type="text" name="search" class="search-input" placeholder="Wyszukaj produkty..." value="{{ request()->input('search') }}">
                 <button class="btn btn-primary ml-2">Szukaj</button>
             </form>
-            <select class="filter-select" name="sort_by">
-                <option value="">Sortuj według</option>
-                <option value="price" {{ request()->input('sort_by') == 'price' ? 'selected' : '' }}>Cena</option>
-                <option value="name" {{ request()->input('sort_by') == 'name' ? 'selected' : '' }}>Nazwa</option>
-            </select>
+            <!-- Sortowanie -->
+            <form action="{{ route('products.publicIndex') }}" method="GET" class="d-flex">
+                <select class="filter-select" name="sort_by" onchange="this.form.submit()">
+                    <option value="">Sortuj według</option>
+                    <option value="name_asc" {{ request()->input('sort_by') == 'name_asc' ? 'selected' : '' }}>Nazwa (A-Z)</option>
+                    <option value="name_desc" {{ request()->input('sort_by') == 'name_desc' ? 'selected' : '' }}>Nazwa (Z-A)</option>
+                    <option value="price_asc" {{ request()->input('sort_by') == 'price_asc' ? 'selected' : '' }}>Cena (od najniższej)</option>
+                    <option value="price_desc" {{ request()->input('sort_by') == 'price_desc' ? 'selected' : '' }}>Cena (od najwyższej)</option>
+                </select>
+            </form>
         </div>
 
         <!-- Grid produktów -->
@@ -37,7 +42,18 @@
                     @endif
                     <div class="card-body">
                         <h5 class="card-title">{{ $product->name }}</h5>
-                        <p class="card-text">{{ Str::limit($product->description, 60) }}</p>
+                        <p class="card-text"><strong>Cena:</strong> {{ number_format($product->price, 2) }} zł</p>
+                        <p class="card-text"><strong>Dostępność:</strong>
+                            @if ($product->availability === 'available')
+                            Dostępny
+                            @elseif ($product->availability === 'available_in_7_days')
+                            Dostępny w ciągu 7 dni
+                            @elseif ($product->availability === 'available_in_14_days')
+                            Dostępny w ciągu 14 dni
+                            @else
+                            Niedostępny
+                            @endif
+                        </p>
                     </div>
                     <div class="card-footer text-center">
                         <i class="fas fa-shopping-cart"></i>
@@ -63,7 +79,7 @@
     let page = 2; // Zaczynamy od drugiej strony, ponieważ pierwsza jest już załadowana.
 
     document.getElementById('show-more-btn').addEventListener('click', function() {
-        fetch(`/products00?page=${page}`, { // Zmieniliśmy trasę na /products/load-more
+        fetch(`/products?page=${page}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest' // Informuje serwer, że to zapytanie AJAX
                 }
@@ -75,7 +91,6 @@
                 return response.json(); // Oczekuj odpowiedzi JSON
             })
             .then(data => {
-                console.log(data); // Zobacz odpowiedź z serwera w konsoli
                 document.getElementById('products-list').innerHTML += data.html; // Dodaj nowe produkty
                 page++; // Zwiększ numer strony
                 if (!data.hasMore) {
