@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
 
 
 
+
     // Categories routes
     Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
     Route::post('/categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');

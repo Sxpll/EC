@@ -2237,3 +2237,29 @@ body.dark-mode h1{
 .theme-toggle-input:checked ~ .theme-toggle-label .theme-sun {
     opacity: 0;
 }
+
+.category-tree a {
+    color: black; /* Ustawia kolor linków na czarno */
+    text-decoration: none; /* Usuwa podkreślenie */
+    font-weight: bold; /* Ustawia pogrubienie */
+}
+
+.category-tree a:hover {
+    color: black; /* Kolor podczas najechania */
+}
+
+.category-tree a:visited {
+    color: black; /* Kolor dla odwiedzonych linków */
+}
+
+.category-tree ul {
+    list-style-type: disc; /* Ustawia kropki na wszystkie poziomy listy */
+}
+
+.category-tree ul ul {
+    list-style-type: disc; /* Zapewnia, że nawet zagnieżdżone listy mają kropki */
+}
+
+body.dark-mode .category-tree a{
+    color: white;
+}

@@ -399,45 +399,59 @@ class ProductController extends Controller
         $page = $request->get('page', 1);
 
         // Pobierz tylko aktywne produkty
-        $productsQuery = Product::where('isActive', true);
+        try {
+            $productsQuery = Product::where('isActive', true);
 
-        // Obsługa wyszukiwania
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $productsQuery = $productsQuery->where('name', 'LIKE', "%{$search}%");
-        }
-
-        // Obsługa sortowania
-        if ($request->has('sort_by')) {
-            $sortBy = $request->input('sort_by');
-            if ($sortBy === 'price_asc') {
-                $productsQuery->orderBy('price', 'asc');
-            } elseif ($sortBy === 'price_desc') {
-                $productsQuery->orderBy('price', 'desc');
-            } elseif ($sortBy === 'name_asc') {
-                $productsQuery->orderBy('name', 'asc');
-            } elseif ($sortBy === 'name_desc') {
-                $productsQuery->orderBy('name', 'desc');
+            // Obsługa wyszukiwania
+            if ($request->has('search')) {
+                $search = $request->input('search');
+                $productsQuery = $productsQuery->where('name', 'LIKE', "%{$search}%");
             }
+
+            // Obsługa filtrowania po kategorii
+            if ($request->has('category_id')) {
+                $categoryId = $request->input('category_id');
+                $productsQuery->whereHas('categories', function ($query) use ($categoryId) {
+                    $query->where('categories.id', $categoryId);
+                });
+            }
+
+            // Obsługa sortowania
+            if ($request->has('sort_by')) {
+                $sortBy = $request->input('sort_by');
+                if ($sortBy === 'price_asc') {
+                    $productsQuery->orderBy('price', 'asc');
+                } elseif ($sortBy === 'price_desc') {
+                    $productsQuery->orderBy('price', 'desc');
+                } elseif ($sortBy === 'name_asc') {
+                    $productsQuery->orderBy('name', 'asc');
+                } elseif ($sortBy === 'name_desc') {
+                    $productsQuery->orderBy('name', 'desc');
+                }
+            }
+
+            // Paginacja - 10 produktów na stronę
+            $products = $productsQuery->paginate(10, ['*'], 'page', $page);
+
+            // Sprawdzenie, czy istnieje więcej stron
+            $hasMorePages = $products->hasMorePages();
+
+            // Sprawdź, czy jest to zapytanie AJAX
+            if ($request->expectsJson()) {
+                $view = view('partials.products', compact('products'))->render();
+                return response()->json([
+                    'html' => $view,
+                    'hasMore' => $hasMorePages,
+                ]);
+            }
+
+            // Pobierz wszystkie kategorie do wyświetlenia w sidebarze
+            $categories = Category::whereNull('parent_id')->with('childrenRecursive')->where('isActive', 1)->get();
+
+            // Jeśli nie jest to zapytanie AJAX, zwróć pełny widok
+            return view('products.publicIndex', compact('products', 'hasMorePages', 'categories'));
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error fetching product details'], 500);
         }
-
-        // Paginacja - 10 produktów na stronę
-        $products = $productsQuery->paginate(10, ['*'], 'page', $page);
-
-        // Sprawdzenie, czy istnieje więcej stron
-        $hasMorePages = $products->hasMorePages();
-
-        // Sprawdź, czy jest to zapytanie AJAX
-        if ($request->ajax()) {
-            // Zrenderuj widok produktów dla AJAX i zwróć JSON
-            $view = view('partials.products', compact('products'))->render();
-            return response()->json([
-                'html' => $view, // HTML produktów
-                'hasMore' => $hasMorePages, // Czy są jeszcze produkty do załadowania
-            ]);
-        }
-
-        // Jeśli nie jest to zapytanie AJAX, zwróć pełny widok
-        return view('products.publicIndex', compact('products', 'hasMorePages'));
     }
 }
