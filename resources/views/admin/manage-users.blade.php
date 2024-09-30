@@ -4,8 +4,8 @@
 <div class="container-admin manage-users-container">
     <div class="card-admin">
         <div class="card-header">
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none" style="margin-right: 725px" ;>
-                <i class="fas fa-arrow-left" style="font-size: 24px; color: black;"></i>
+            <a href="{{ route('admin.dashboard') }}" class="back-arrow" style="margin-right: auto;">
+                <i class="fas fa-arrow-left"></i>
             </a>
             <h1>Manage Users</h1>
             <button id="openModalBtn" class="btn btn-success">Add User</button>

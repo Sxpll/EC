@@ -945,6 +945,13 @@ textarea.form-control {
     color: white;
 }
 
+.dark-mode .fa-arrow-left {
+    color: white;
+    background-color: transparent;
+}
+
+
+
 .chat-container {
     background-color: #f9f9f9;
     padding: 20px;
@@ -1222,6 +1229,7 @@ header {
     padding: 10px 15px;
     border-radius: 5px;
     transition: background-color 0.3s;
+    margin-right: 10px;
 }
 
 .navbar-links a:hover {
@@ -1234,6 +1242,7 @@ header {
     display: flex;
     gap: 15px;
 }
+
 
 .navbar-icons a {
     color: #333333;
@@ -2262,4 +2271,298 @@ body.dark-mode h1{
 
 body.dark-mode .category-tree a{
     color: white;
+}
+
+/* Ogólne style w trybie ciemnym */
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* Nagłówek w trybie ciemnym */
+body.dark-mode header {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-mode .navbar-links a {
+    color: #e0e0e0;
+}
+
+body.dark-mode .navbar-icons a {
+    color: #e0e0e0;
+}
+
+/* Karty w trybie ciemnym */
+body.dark-mode .card-admin,
+body.dark-mode .modal-content,
+body.dark-mode .card-admin-dashboard {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+    border: 1px solid #333;
+}
+
+/* Przyciski w trybie ciemnym */
+body.dark-mode .btn {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+body.dark-mode .btn:hover {
+    background-color: #555;
+    color: #ffffff;
+}
+
+/* Tabela w trybie ciemnym */
+body.dark-mode .table {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+    border-color: #333;
+}
+
+body.dark-mode .table th {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+body.dark-mode .table td {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+/* Formularze w trybie ciemnym */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #888;
+}
+
+/* Ikony w trybie ciemnym */
+body.dark-mode .fa {
+    color: #e0e0e0;
+}
+
+/* Przewijanie w trybie ciemnym */
+body.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background-color: #007bff;
+    border-radius: 10px;
+}
+
+.navbar-icons {
+    display: flex;
+    gap: 15px;
+    margin-left: auto;
+    padding-right: 40px; /* Zwiększ odstęp od prawej krawędzi */
+}
+
+.tab-link {
+    background-color: #f0f0f0;
+    color: #333333;
+}
+
+.tab-link.active {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+/* Ciemny motyw */
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-mode .tab-link {
+    background-color: #333333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .tab-link.active {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+/* Zakładki w trybie ciemnym */
+.dark-mode .tab-link {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.dark-mode .tab-link:hover {
+    background-color: #3d3d3d;
+}
+
+.dark-mode .tab-link.active {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+/* Stylizacja zakładek */
+.dark-mode .tabs {
+    background-color: #1f1f1f;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid #333;
+}
+
+.dark-mode .tab-link {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+    border: none;
+    outline: none;
+    margin: 0 5px;
+    border-radius: 5px 5px 0 0;
+}
+
+.dark-mode .tab-link.active {
+    background-color: #007bff;
+    color: #ffffff;
+    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .tab-link:hover {
+    background-color: #333;
+}
+
+.dark-mode .tab-content {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+    padding: 20px;
+    border-radius: 0 0 5px 5px;
+    border: 1px solid #333;
+}
+
+
+/* Przyciski w ciemnym motywie */
+.dark-mode .btn-link.custom-link {
+    background-color: #333; /* Tło dla ciemnego motywu */
+    color: #e0e0e0; /* Kolor tekstu */
+    border: none; /* Usuń obramowanie */
+    border-radius: 5px; /* Zaokrąglone rogi */
+    padding: 10px 20px; /* Dodaj padding */
+    text-align: center; /* Wyrównanie tekstu */
+    display: block; /* Ustawienie jako blok */
+    transition: background-color 0.3s, color 0.3s; /* Dodanie efektu przejścia */
+}
+
+/* Efekt hover dla przycisków w ciemnym motywie */
+.dark-mode .btn-link.custom-link:hover {
+    background-color: #555; /* Zmiana tła po najechaniu */
+    color: #ffffff; /* Zmiana koloru tekstu po najechaniu */
+    text-decoration: none; /* Usuń podkreślenie */
+}
+
+/* Styl dla przycisków w jasnym motywie */
+.btn-link.custom-link {
+    background-color: #007bff; /* Tło dla jasnego motywu */
+    color: #ffffff; /* Kolor tekstu */
+    border: none; /* Usuń obramowanie */
+    border-radius: 5px; /* Zaokrąglone rogi */
+    padding: 10px 20px; /* Dodaj padding */
+    text-align: center; /* Wyrównanie tekstu */
+    display: block; /* Ustawienie jako blok */
+    transition: background-color 0.3s, color 0.3s; /* Dodanie efektu przejścia */
+}
+
+/* Efekt hover dla przycisków w jasnym motywie */
+.btn-link.custom-link:hover {
+    background-color: #0056b3; /* Zmiana tła po najechaniu */
+    color: #ffffff; /* Zmiana koloru tekstu po najechaniu */
+    text-decoration: none; /* Usuń podkreślenie */
+}
+
+
+/* Styl dla kontenera czatu w trybie ciemnym */
+body.dark-mode #chat-window {
+    background-color: #1f1f1f; /* Ciemniejsze tło */
+    border: 1px solid #333; /* Ciemniejsza ramka */
+    color: #e0e0e0; /* Jasny tekst */
+}
+
+/* Styl wiadomości w trybie ciemnym */
+body.dark-mode .message {
+    color: #ffffff; /* Jasny kolor tekstu */
+}
+
+body.dark-mode .message.user {
+    background-color: #007bff; /* Kolor dla wiadomości użytkownika */
+}
+
+body.dark-mode .message.admin {
+    background-color: #dc3545; /* Kolor dla wiadomości admina */
+}
+
+body.dark-mode .message-time {
+    color: #888888; /* Kolor dla czasu wiadomości */
+}
+
+/* Styl dla okna wprowadzania wiadomości w trybie ciemnym */
+body.dark-mode textarea.form-control {
+    background-color: #2b2b2b; /* Ciemniejsze tło dla pola tekstowego */
+    color: #e0e0e0; /* Jasny tekst */
+    border: 1px solid #444444; /* Ciemna ramka */
+}
+
+body.dark-mode textarea.form-control::placeholder {
+    color: #888888; /* Kolor placeholdera */
+}
+
+/* Styl dla przycisku wysyłania wiadomości w trybie ciemnym */
+body.dark-mode .btn-primary {
+    background-color: #333; /* Ciemniejsze tło dla przycisku */
+    color: #e0e0e0; /* Jasny tekst */
+    border: 1px solid #444; /* Ciemniejsza ramka */
+}
+
+body.dark-mode .btn-primary:hover {
+    background-color: #555; /* Jaśniejsze tło po najechaniu */
+    color: #ffffff; /* Jaśniejszy tekst po najechaniu */
+}
+
+/* Ogólne style dla strzałki */
+.back-arrow {
+    background-color: transparent; /* Usuń tło */
+    border: none; /* Usuń obramowanie */
+    color: black; /* Domyślny kolor strzałki */
+    font-size: 24px; /* Ustaw rozmiar strzałki */
+    cursor: pointer; /* Ustawienie kursora jako wskaźnik */
+    text-decoration: none; /* Usuń podkreślenie linka */
+}
+
+/* Styl strzałki w trybie ciemnym */
+body.dark-mode .back-arrow i {
+    color: white; /* Zmień kolor strzałki na biały */
+}
+
+.back-arrow i {
+    color: black; /* Ustaw kolor strzałki na czarny */
+
+}
+
+/* Styl na hover */
+.back-arrow:hover i {
+    color: #007bff; /* Zmień kolor na niebieski po najechaniu */
+}
+
+/* Usuń domyślny wygląd przycisku */
+.back-arrow:focus {
+    outline: none;
+    box-shadow: none;
 }

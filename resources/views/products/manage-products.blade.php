@@ -15,6 +15,13 @@
             <a href="{{ route('chat.index') }}">Chat</a>
         </nav>
         <div class="navbar-icons">
+            <div class="theme-switch">
+                <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                <label for="theme-toggle" class="theme-toggle-label">
+                    <span class="theme-icon theme-sun"><i class="fas fa-sun"></i></span>
+                    <span class="theme-icon theme-moon"><i class="fas fa-moon"></i></span>
+                </label>
+            </div>
             @if(auth()->check())
             <a href="{{ route('account.edit') }}"><i class="fa fa-user"></i></a>
             @endif
@@ -33,9 +40,10 @@
     <div class="container-admin manage-products-container">
         <div class="card-admin">
             <div class="card-header">
-                <a href="{{ route('admin.dashboard') }}" class="btn btn-link text-decoration-none">
-                    <i class="fas fa-arrow-left" style="font-size: 24px; color: black;"></i>
+                <a href="{{ route('admin.dashboard') }}" class="back-arrow" style="margin-right:auto;">
+                    <i class="fas fa-arrow-left"></i>
                 </a>
+
                 <h1>Manage Products</h1>
                 <button id="openModalBtn" class="btn btn-success">Add Product</button>
                 <input type="text" id="search" placeholder="Search Products" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
@@ -282,6 +290,8 @@
         font-weight: bold;
     }
 </style>
+
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -572,6 +582,23 @@
                     console.error('Error deleting attachment:', error);
                 });
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggleInput = document.getElementById('theme-toggle');
+
+            // Sprawdź preferencje zapisane w localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+            themeToggleInput.checked = savedTheme === 'dark';
+
+            // Funkcja przełączania motywu
+            themeToggleInput.addEventListener('change', () => {
+                const isDarkMode = themeToggleInput.checked;
+                document.body.classList.toggle('dark-mode', isDarkMode);
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            });
+        });
+
 
         $('#viewProductForm').submit(function(event) {
             event.preventDefault();
