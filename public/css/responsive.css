@@ -1,0 +1,147 @@
+/* Standard navbar for larger screens */
+.navbar-toggler {
+    display: none;
+}
+
+/* Responsywność dla ekranów do 768px (tablety i mniejsze urządzenia) */
+@media (max-width: 768px) {
+    /* Ukryj linki w navbarze na mniejszych ekranach */
+    .navbar-links {
+        display: none;
+    }
+
+    /* Pokaż hamburger menu */
+    .navbar-toggler {
+        display: block;
+    }
+
+    /* Ukryj część ikon w navbarze, np. konto i wylogowanie */
+    .navbar-icons .account-icon,
+    .navbar-icons .logout-icon,
+    .navbar-icons .theme-switch {
+        display: none;
+    }
+
+    /* Dostosowanie ikon */
+    .navbar-icons {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .navbar-icons a {
+        margin-left: 15px;
+    }
+
+    /* Stylizacja sidebaru dla mniejszych ekranów */
+    .sidebar {
+        position: fixed;
+        right: -100%;
+        top: 0;
+        width: 150px;
+        height: 100%;
+        background-color: #fff;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+        transition: right 0.5s ease;
+        z-index: 9999;
+        padding: 20px;
+        display: block;
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    .close-sidebar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    .theme-switch-sidebar {
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .sidebar-nav {
+        margin-top: 80px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-nav a {
+        padding: 10px 0;
+        font-size: 18px;
+        text-decoration: none;
+        color: #333;
+    }
+
+    /* Ciemny motyw dla sidebaru */
+    .dark-mode .sidebar {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .dark-mode .sidebar-nav a {
+        color: #fff;
+    }
+
+    /* Dostosowanie rozmiarów czcionek dla widoku welcome */
+    .welcome-container h1 {
+        font-size: 24px;
+    }
+
+    .welcome-container p {
+        font-size: 16px;
+    }
+}
+
+/* Responsywność dla ekranów do 480px (smartfony) */
+@media (max-width: 480px) {
+    /* Dostosowanie rozmiarów czcionek dla mniejszych ekranów */
+    .welcome-container h1 {
+        font-size: 18px;
+    }
+
+    .welcome-container p {
+        font-size: 14px;
+    }
+
+    /* Sidebar - dostosowanie szerokości dla bardzo małych ekranów */
+    .sidebar {
+        width: 120px;
+        padding: 10px;
+    }
+
+    .sidebar-nav a {
+        font-size: 16px;
+        padding: 8px 0;
+    }
+
+    /* Ikony w navbarze */
+    .navbar-icons a {
+        margin-left: 10px;
+        font-size: 14px;
+    }
+
+    .navbar-toggler img {
+        height: 20px;
+    }
+
+    /* Dostosowanie rozmiarów kart, przycisków itd. */
+    .card {
+        padding: 10px;
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
