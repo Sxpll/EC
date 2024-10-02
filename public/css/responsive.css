@@ -1,28 +1,26 @@
-/* Standard navbar for larger screens */
+/* Ukrywanie togglera na większych ekranach */
 .navbar-toggler {
     display: none;
 }
 
-/* Responsywność dla ekranów do 768px (tablety i mniejsze urządzenia) */
 @media (max-width: 768px) {
-    /* Ukryj linki w navbarze na mniejszych ekranach */
+    /* Ukrywanie linków w navbarze, pokazywanie togglera i ikonek */
     .navbar-links {
         display: none;
     }
 
-    /* Pokaż hamburger menu */
     .navbar-toggler {
         display: block;
     }
 
-    /* Ukryj część ikon w navbarze, np. konto i wylogowanie */
+    /* Ikony konta, wylogowania i przełącznika trybu ukryte w wersji mobilnej */
     .navbar-icons .account-icon,
     .navbar-icons .logout-icon,
     .navbar-icons .theme-switch {
         display: none;
     }
 
-    /* Dostosowanie ikon */
+    /* Dostosowanie wyświetlania ikonek */
     .navbar-icons {
         display: flex;
         align-items: center;
@@ -33,7 +31,7 @@
         margin-left: 15px;
     }
 
-    /* Stylizacja sidebaru dla mniejszych ekranów */
+    /* Stylowanie sidebaru dla urządzeń mobilnych */
     .sidebar {
         position: fixed;
         right: -100%;
@@ -48,10 +46,12 @@
         display: block;
     }
 
+    /* Sidebar po otwarciu */
     .sidebar.open {
         right: 0;
     }
 
+    /* Przycisk zamknięcia sidebaru */
     .close-sidebar {
         position: absolute;
         top: 15px;
@@ -62,105 +62,358 @@
         border: none;
     }
 
-    .theme-switch-sidebar {
-        position: absolute;
-        top: 15px;
-        left: 20px;
+    /* Produkty na całą szerokość z marginesami */
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin: 0;
+        padding: 0 15px;
+    }
+
+    /* Wycentrowanie przycisku „Pokaż więcej” */
+    .pagination-wrapper {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    /* Przyciski „Filtruj” i „Sortuj” przypięte do góry ekranu */
+    .sticky-filter {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        background-color: white;
+        padding: 10px;
         display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #ccc;
+        margin-top: 0;
+    }
+
+    .sticky-filter .btn {
+        flex: 1;
+        margin: 0 5px;
+    }
+
+    /* Ukrywanie wyszukiwania na mniejszych ekranach */
+    .search-container {
+        display: none;
+    }
+
+    /* Modal na cały ekran po kliknięciu „Filtruj” */
+    #filterModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        display: none;
+    }
+
+    #filterModal.active {
+        display: flex;
+        justify-content: center;
         align-items: center;
     }
 
-    .sidebar-nav {
-        margin-top: 80px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sidebar-nav a {
-        padding: 10px 0;
-        font-size: 18px;
-        text-decoration: none;
-        color: #333;
-    }
-
-    /* Ciemny motyw dla sidebaru */
-    .dark-mode .sidebar {
-        background-color: #333;
-        color: #fff;
-    }
-
-    .dark-mode .sidebar-nav a {
-        color: #fff;
-    }
-
-    /* Dostosowanie rozmiarów czcionek dla widoku welcome */
-    .welcome-container h1 {
-        font-size: 24px;
-    }
-
-    .welcome-container p {
-        font-size: 16px;
-    }
-
-    .footer-bar {
-        font-size: 12px;
-        padding: 8px 16px;
-    }
-
-    .footer-bar-content {
-        flex-direction: column; /* Ustaw kolumny dla lepszej czytelności na małych ekranach */
-        align-items: center;
-    }
-
-    .footer-bar a {
-        margin: 5px 0;
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
     }
 }
 
-/* Responsywność dla ekranów do 480px (smartfony) */
 @media (max-width: 480px) {
-    /* Dostosowanie rozmiarów czcionek dla mniejszych ekranów */
-    .welcome-container h1 {
-        font-size: 18px;
+    .product-grid {
+        grid-template-columns: 1fr;
     }
 
-    .welcome-container p {
-        font-size: 14px;
-    }
-
-    /* Sidebar - dostosowanie szerokości dla bardzo małych ekranów */
-    .sidebar {
-        width: 120px;
-        padding: 10px;
-    }
-
-    .sidebar-nav a {
-        font-size: 16px;
-        padding: 8px 0;
-    }
-
-    /* Ikony w navbarze */
-    .navbar-icons a {
-        margin-left: 10px;
-        font-size: 14px;
-    }
-
-    .navbar-toggler img {
-        height: 20px;
-    }
-
-    /* Dostosowanie rozmiarów kart, przycisków itd. */
-    .card {
-        padding: 10px;
+    .product-card {
+        max-width: 100%;
     }
 
     .btn {
         font-size: 14px;
-        padding: 8px 16px;
+    }
+}
+
+/* Siatka produktów dla większych ekranów */
+@media (min-width: 1200px) {
+    .product-grid {
+        grid-template-columns: repeat(5, 1fr);
     }
 
-    .footer-bar {
-        font-size: 10px;
-        padding: 5px 10px;
+    .main-content {
+        margin-left: 240px; /* Zmniejszanie marginesu po lewej stronie */
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin: 80px 0 0 0;
+        padding: 5;
+        width: 100%;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .sticky-filter {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        background-color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .sticky-filter .btn {
+        flex: 1;
+        margin: 0 5px;
+    }
+
+    .filter-sort {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 15px;
+        padding: 0;
+    }
+
+    .filter-sort .btn {
+        flex: 1;
+        margin: 0 5px;
+    }
+
+    .custom-sidebar {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .filtrujprzycisk {
+        display: none;
+    }
+}
+
+/* Sidebar z kategoriami - widoczny tylko na dużych ekranach */
+@media (min-width: 768px) {
+    .custom-sidebar {
+        display: block;
+    }
+    .filter-sort,
+    .filter-select {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .custom-sidebar {
+        display: none;
+    }
+}
+
+/* Sidebar hamburger menu - widoczny tylko na mniejszych ekranach */
+@media (max-width: 767px) {
+    .sidebar {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 250px;
+        height: 100%;
+        background-color: white;
+        z-index: 1000;
+        transition: right 0.3s ease;
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    /* Przycisk zamykania */
+    .close-sidebar {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+}
+
+@media (min-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+}
+
+/* Ukrywanie togglera na większych ekranach */
+.navbar-toggler {
+    display: none;
+}
+
+/* Stylowanie sidebarów i zachowanie dla dużych i małych ekranów */
+@media (max-width: 768px) {
+    /* Hamburger menu dla małych ekranów */
+    .navbar-toggler {
+        display: block;
+    }
+
+    /* Sidebar dla małych ekranów */
+    .sidebar {
+        position: fixed;
+        right: -100%;
+        top: 0;
+        width: 250px;
+        height: 100%;
+        background-color: white;
+        z-index: 9999;
+        transition: right 0.3s ease;
+        padding: 20px;
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    .close-sidebar {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* Przyciski „Filtruj” i „Sortuj” przypięte do góry ekranu obok siebie */
+    .sticky-filter {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        background-color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .sticky-filter .btn {
+        flex: 1;
+        margin: 0 5px;
+    }
+
+    /* Usunięcie sortowania na górze */
+    .filter-sort {
+        display: none;
+    }
+
+    /* Dodanie sortowania obok przycisku „Filtruj” */
+    .sort-container {
+        display: block;
+        margin-left: 5px;
+        flex: 1;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+
+    /* Produkty na całą szerokość z marginesami */
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin: 0;
+        padding: 0 15px;
+    }
+
+    /* Ukrywanie wyszukiwania na mniejszych ekranach */
+    .search-container {
+        display: none;
+    }
+
+    /* Ukrywanie sidebaru kategorii na małych ekranach */
+    .custom-sidebar {
+        display: none;
+    }
+
+    /* Modal na cały ekran po kliknięciu „Filtruj” */
+    #filterModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        display: none;
+    }
+
+    #filterModal.active {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-card {
+        max-width: 100%;
+    }
+
+    .btn {
+        font-size: 14px;
+    }
+}
+
+/* Siatka produktów dla większych ekranów */
+@media (min-width: 1200px) {
+    .product-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .main-content {
+        margin-left: 240px; /* Zmniejszanie marginesu po lewej stronie */
+    }
+}
+
+@media (min-width: 768px) {
+    .sticky-filter {
+        display: none;
+    }
+
+    .custom-sidebar {
+        display: block;
+    }
+
+    /* Ukrywanie sortowania w górnej części na dużych ekranach */
+    .filter-sort {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
     }
 }

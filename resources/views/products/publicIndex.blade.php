@@ -2,28 +2,48 @@
 
 @section('content')
 <div class="main-container">
-    <!-- Sidebar z kategoriami -->
-    <div class="custom-sidebar">
+    <!-- Sidebar z kategoriami - widoczny na większych ekranach -->
+    <div class="custom-sidebar d-none d-md-block">
         <div class="floating-sidebar shadow">
-            <h3>Kategorie</h3>
-            <ul class="category-tree">
-                @foreach ($categories as $category)
-                @include('partials.category-node', ['category' => $category])
-                @endforeach
-            </ul>
+            <h3 class="sidebar-header">Kategorie</h3>
+            <div class="category-wrapper">
+                <ul class="category-tree">
+                    @foreach ($categories as $category)
+                    @include('partials.category-node', ['category' => $category])
+                    @endforeach
+                </ul>
+            </div>
         </div>
     </div>
 
     <!-- Główna sekcja z produktami -->
     <div class="main-content">
-        <!-- Wyszukiwarka i sortowanie -->
-        <div class="filter-sort d-flex justify-content-between align-items-center">
-            <form action="{{ route('products.publicIndex') }}" method="GET" class="search-form d-flex">
-                <input type="text" name="search" class="search-input" placeholder="Wyszukaj produkty..." value="{{ request()->input('search') }}">
-                <button class="btn btn-primary ml-2">Szukaj</button>
-            </form>
-            <!-- Sortowanie -->
-            <form action="{{ route('products.publicIndex') }}" method="GET" class="d-flex">
+        <!-- Wyszukiwarka i sortowanie na większych ekranach -->
+        <div class="filter-sort d-none d-md-flex justify-content-between align-items-center flex-wrap">
+            <div class="search-container flex-grow-1 mb-2">
+                <form action="{{ route('products.publicIndex') }}" method="GET" class="search-form d-flex align-items-center">
+                    <input type="text" name="search" class="search-input" placeholder="Wyszukaj produkty..." value="{{ request()->input('search') }}">
+                    <button class="btn btn-primary ml-2">Szukaj</button>
+                </form>
+            </div>
+            <div class="sort-container mb-2">
+                <form action="{{ route('products.publicIndex') }}" method="GET">
+                    <select class="filter-select" name="sort_by" onchange="this.form.submit()">
+                        <option value="">Sortuj według</option>
+                        <option value="name_asc" {{ request()->input('sort_by') == 'name_asc' ? 'selected' : '' }}>Nazwa (A-Z)</option>
+                        <option value="name_desc" {{ request()->input('sort_by') == 'name_desc' ? 'selected' : '' }}>Nazwa (Z-A)</option>
+                        <option value="price_asc" {{ request()->input('sort_by') == 'price_asc' ? 'selected' : '' }}>Cena (od najniższej)</option>
+                        <option value="price_desc" {{ request()->input('sort_by') == 'price_desc' ? 'selected' : '' }}>Cena (od najwyższej)</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Przyciski Filtruj i Sortuj na mniejszych ekranach -->
+        <div class="d-flex justify-content-between d-md-none mb-2">
+            <button id="openFilterModal" class="btn btn-primary filtrujprzycisk">Filtruj</button>
+            <form action="{{ route('products.publicIndex') }}" method="GET" class="sort-container">
+                <!-- Sortowanie na małych ekranach -->
                 <select class="filter-select" name="sort_by" onchange="this.form.submit()">
                     <option value="">Sortuj według</option>
                     <option value="name_asc" {{ request()->input('sort_by') == 'name_asc' ? 'selected' : '' }}>Nazwa (A-Z)</option>
@@ -35,9 +55,9 @@
         </div>
 
         <!-- Grid produktów -->
-        <div class="product-grid row" id="products-list">
+        <div class="product-grid" id="products-list">
             @foreach($products as $product)
-            <div class="product-card col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
+            <div class="product-card">
                 <div class="card">
                     @if($product->images->count())
                     <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}">
@@ -76,57 +96,77 @@
         @endif
     </div>
 </div>
+
+<!-- Modal Filtrów -->
+<div id="filterModal" class="modal-category">
+    <div class="modal-category-content">
+        <span id="closeFilterModal" class="close-category-modal">&times;</span>
+        <h2>Kategorie</h2>
+        <ul class="category-tree">
+            @foreach ($categories as $category)
+            <li>
+                <a href="{{ route('products.publicIndex', ['category_id' => $category->id]) }}">
+                    {{ $category->name }}
+                </a>
+                @if ($category->children->count())
+                <ul>
+                    @foreach ($category->children as $child)
+                    <li>
+                        <a href="{{ route('products.publicIndex', ['category_id' => $child->id]) }}">
+                            {{ $child->name }}
+                        </a>
+                    </li>
+                    @endforeach
+                </ul>
+                @endif
+            </li>
+            @endforeach
+        </ul>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+    // Obsługa otwierania i zamykania modala
+    document.getElementById('openFilterModal').addEventListener('click', function() {
+        document.getElementById('filterModal').style.display = 'block';
+    });
+
+    document.getElementById('closeFilterModal').addEventListener('click', function() {
+        document.getElementById('filterModal').style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target == document.getElementById('filterModal')) {
+            document.getElementById('filterModal').style.display = 'none';
+        }
+    });
+
+    // Obsługa przycisku "Pokaż więcej"
     let page = 2;
-
     document.getElementById('show-more-btn').addEventListener('click', function() {
-        // Konstruowanie dynamicznego URL z kategorią i sortowaniem
         let url = `/products00?page=${page}`;
-
-        // Sprawdzamy, czy istnieje wartość dla category_id
         let categoryId = "{{ request()->input('category_id') }}";
         if (categoryId) {
             url += `&category_id=${categoryId}`;
         }
-
-        // Sprawdzamy, czy istnieje wartość dla sort_by
         let sortBy = "{{ request()->input('sort_by') }}";
         if (sortBy) {
             url += `&sort_by=${sortBy}`;
         }
-
-        // Wysyłanie zapytania AJAX
         fetch(url, {
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest' // Informuje serwer, że to zapytanie AJAX
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Błąd sieci');
-                }
-                return response.json(); // Oczekuj odpowiedzi JSON
-            })
+            .then(response => response.json())
             .then(data => {
-                // Sprawdzenie, czy zwrócone dane zawierają html i hasMore
-                if (!data.html || typeof data.hasMore === 'undefined') {
-                    throw new Error('Błąd: Nieprawidłowa struktura danych z serwera');
-                }
-
-                // Dodawanie nowych produktów
                 document.getElementById('products-list').innerHTML += data.html;
-                page++; // Zwiększ numer strony
-
-                // Ukryj przycisk, jeśli nie ma więcej produktów
+                page++;
                 if (!data.hasMore) {
                     document.getElementById('show-more-btn').style.display = 'none';
                 }
-            })
-            .catch(error => {
-                console.error('Błąd podczas przetwarzania:', error); // Obsłuż błąd
             });
     });
 </script>
