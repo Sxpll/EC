@@ -101,6 +101,20 @@
     .welcome-container p {
         font-size: 16px;
     }
+
+    .footer-bar {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+
+    .footer-bar-content {
+        flex-direction: column; /* Ustaw kolumny dla lepszej czytelności na małych ekranach */
+        align-items: center;
+    }
+
+    .footer-bar a {
+        margin: 5px 0;
+    }
 }
 
 /* Responsywność dla ekranów do 480px (smartfony) */
@@ -143,5 +157,10 @@
     .btn {
         font-size: 14px;
         padding: 8px 16px;
+    }
+
+    .footer-bar {
+        font-size: 10px;
+        padding: 5px 10px;
     }
 }

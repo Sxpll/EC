@@ -38,7 +38,7 @@
 
                 <div class="navbar-icons">
                     <!-- Theme Switch for logged-in users -->
-                    @if(auth()->check())
+
                     <div class="theme-switch">
                         <input type="checkbox" id="theme-toggle-navbar" class="theme-toggle-input">
                         <label for="theme-toggle-navbar" class="theme-toggle-label">
@@ -46,11 +46,11 @@
                             <span class="theme-icon theme-moon"><i class="fas fa-moon"></i></span>
                         </label>
                     </div>
-                    @endif
 
-                    @if(auth()->check())
+
+
                     <a href="{{ route('account.edit') }}" class="account-icon"><i class="fa fa-user"></i></a>
-                    @endif
+
                     <a href="#"><i class="fa fa-shopping-cart"></i></a>
                     @if(auth()->check() && auth()->user()->role === 'admin')
                     <a href="#" id="notificationBell"><i class="fa fa-bell"></i><span id="notificationCount" class="notification-count" style="display: none;"></span></a>
