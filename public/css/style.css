@@ -1295,6 +1295,7 @@ header {
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
+    z-index: 99990;
 }
 
 /* Zawartość sidebaru */
@@ -1401,6 +1402,7 @@ header {
     bottom: 0;
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
 }
 
 .main-content {
@@ -2324,4 +2326,79 @@ footer.footer-bar a:hover {
 
 .dark-mode .sidebar-nav a:hover {
     background-color: #555; /* Dostosuj kolor tła przy najechaniu w trybie ciemnym */
+}
+
+/* Stylizacja kategorii i podkategorii */
+.category-tree,
+.subcategory-tree {
+    list-style: none; /* Usunięcie kropek */
+    padding-left: 0; /* Usunięcie domyślnego wcięcia */
+    margin-left: 0; /* Usunięcie domyślnego marginesu */
+}
+
+.category-item {
+    margin-bottom: 10px;
+    padding-left: 10px; /* Dodaj lekkie wcięcie dla wszystkich elementów */
+    display: block;
+}
+
+.subcategory-tree {
+    display: none;
+    padding-left: 20px; /* Większe wcięcie dla podkategorii */
+}
+
+.category-item.open > .subcategory-tree {
+    display: block;
+}
+
+.toggle-arrow {
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.no-arrow {
+    visibility: hidden;
+}
+
+.sticky-filter {
+    position: fixed; /* Zamiast sticky */
+    top: 0;
+    z-index: 9999;
+    background-color: white;
+    padding: 5px; /* Zmniejszony padding */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100vw; /* Pełna szerokość okna przeglądarki */
+    left: 0; /* Ustawienie pozycji od lewej */
+    right: 0; /* Ustawienie pozycji od prawej */
+    margin: 0; /* Usunięcie marginesów */
+    box-sizing: border-box; /* Upewnienie się, że padding nie wpływa na szerokość */
+}
+
+.sticky-filter .btn {
+    flex: 1;
+    margin: 0 5px;
+    font-size: 14px; /* Zmniejszenie rozmiaru czcionki */
+    padding: 5px; /* Zmniejszenie paddingu */
+    width: 100%; /* Szerokość na całą dostępną przestrzeń */
+}
+
+.sort-container {
+    flex: 1;
+    margin-left: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 5px; /* Zmniejszenie paddingu selecta */
+    font-size: 14px; /* Zmniejszenie rozmiaru czcionki */
+    margin-left: 5px;
+}
+
+.main-content {
+    margin-top: 0;
+    padding-top: 0;
 }

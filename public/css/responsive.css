@@ -41,7 +41,7 @@
         background-color: #fff;
         box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
         transition: right 0.5s ease;
-        z-index: 9999;
+        z-index: 999999;
         padding: 20px;
         display: block;
     }
@@ -68,6 +68,7 @@
         gap: 15px;
         margin: 0;
         padding: 0 15px;
+        margin-top: 40px;
     }
 
     /* Wycentrowanie przycisku „Pokaż więcej” */
@@ -85,7 +86,7 @@
         padding: 10px;
         display: flex;
         justify-content: space-between;
-        border-bottom: 1px solid #ccc;
+
         margin-top: 0;
     }
 
@@ -154,31 +155,15 @@
 @media (max-width: 768px) {
     .main-content {
         margin: 80px 0 0 0;
-        padding: 5;
+
         width: 100%;
     }
 
     .product-grid {
         grid-template-columns: 1fr;
         gap: 15px;
-        margin: 0;
+
         padding: 0;
-    }
-
-    .sticky-filter {
-        position: sticky;
-        top: 0;
-        z-index: 9999;
-        background-color: white;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        border-bottom: 1px solid #ccc;
-    }
-
-    .sticky-filter .btn {
-        flex: 1;
-        margin: 0 5px;
     }
 
     .filter-sort {
@@ -293,23 +278,6 @@
         cursor: pointer;
     }
 
-    /* Przyciski „Filtruj” i „Sortuj” przypięte do góry ekranu obok siebie */
-    .sticky-filter {
-        position: sticky;
-        top: 0;
-        z-index: 9999;
-        background-color: white;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        border-bottom: 1px solid #ccc;
-    }
-
-    .sticky-filter .btn {
-        flex: 1;
-        margin: 0 5px;
-    }
-
     /* Usunięcie sortowania na górze */
     .filter-sort {
         display: none;
@@ -322,25 +290,12 @@
         flex: 1;
     }
 
-    .filter-select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        font-size: 16px;
-    }
-
     /* Produkty na całą szerokość z marginesami */
     .product-grid {
         grid-template-columns: 1fr;
         gap: 15px;
-        margin: 0;
-        padding: 0 15px;
-    }
 
-    /* Ukrywanie wyszukiwania na mniejszych ekranach */
-    .search-container {
-        display: none;
+        padding: 0 15px;
     }
 
     /* Ukrywanie sidebaru kategorii na małych ekranach */
@@ -415,5 +370,181 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 15px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .filter-sort,
+    .search-container {
+        display: flex;
+    }
+}
+
+/* Navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Sticky filter na pełną szerokość bez odstępu od góry */
+@media (max-width: 768px) {
+    .sticky-filter {
+        position: fixed; /* Fixed zamiast sticky */
+        top: 60px; /* Upewnijmy się, że jest zaraz pod navbarem */
+        left: 0; /* Bez przesunięcia od lewej */
+        right: 0; /* Bez przesunięcia od prawej */
+        z-index: 9999;
+        background-color: white;
+        margin: 0; /* Usuń marginesy */
+        padding: 5px;
+        width: 100vw; /* Szerokość na całe okno przeglądarki */
+        display: flex;
+        justify-content: space-between;
+        box-sizing: border-box;
+        align-items: center; /* Dostosowanie wyrównania w pionie */
+    }
+
+    .sticky-filter .btn {
+        flex: 1;
+        margin: 0 5px;
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    .sort-container {
+        flex: 1;
+        margin-left: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 5px;
+        font-size: 14px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .main-content {
+        margin-top: 110px; /* Dostosowanie margin-top, aby nie nakładało się na sticky filter */
+    }
+}
+
+/* Sticky wyszukiwarka i sortowanie dla większych ekranów */
+@media (min-width: 768px) {
+    .filter-sort-container {
+        position: sticky;
+        top: 60px; /* Przesunięcie poniżej navbaru */
+        z-index: 1000;
+        background-color: white;
+        padding: 15px 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .search-container {
+        flex-grow: 1;
+        margin-right: 20px;
+    }
+
+    .sort-container {
+        min-width: 200px;
+    }
+
+    .search-input {
+        flex-grow: 1;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .search-form button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .search-form button:hover {
+        background-color: #0056b3;
+    }
+
+    .filter-select {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+}
+
+/* Poprawa zachowania select */
+select {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Upewnienie się, że select nie wychodzi poza ekran */
+@media (max-width: 768px) {
+    select {
+        width: 100vw; /* Zapewnia pełną szerokość */
+        max-width: 100%;
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    /* Poprawienie stylów dla opcji, aby nie wychodziły poza ekran */
+    select option {
+        white-space: nowrap; /* Zapobiega łamaniu tekstu */
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+}
+
+/* Sidebar hamburger menu - widoczny tylko na mniejszych ekranach */
+@media (max-width: 767px) {
+    .sidebar-custom {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 250px;
+        height: 100%;
+        background-color: white;
+        z-index: 1050; /* Zwiększ z-index, aby był nad innymi elementami */
+        transition: right 0.3s ease;
+    }
+
+    .sidebar.open {
+        right: 0; /* Otwiera sidebar */
+    }
+
+    /* Przycisk zamykania */
+    .close-sidebar {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* Upewnij się, że navbar ma odpowiedni z-index, aby był poniżej sidebaru */
+    .navbar {
+        z-index: 1000;
     }
 }
