@@ -14,20 +14,13 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link href="{{ asset('css/responsive.css') }}" rel="stylesheet"> <!-- Dodane dla responsywności -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- jQuery UI -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 </head>
 
 <body>
     <div id="app">
-
         <!-- Navbar -->
         <header>
             <div class="navbar-container">
@@ -42,35 +35,67 @@
                     @endif
                     <a href="{{ route('chat.index') }}">Chat</a>
                 </nav>
+
                 <div class="navbar-icons">
+                    <!-- Theme Switch for logged-in users -->
+
                     <div class="theme-switch">
-                        <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
-                        <label for="theme-toggle" class="theme-toggle-label">
+                        <input type="checkbox" id="theme-toggle-navbar" class="theme-toggle-input">
+                        <label for="theme-toggle-navbar" class="theme-toggle-label">
                             <span class="theme-icon theme-sun"><i class="fas fa-sun"></i></span>
                             <span class="theme-icon theme-moon"><i class="fas fa-moon"></i></span>
                         </label>
                     </div>
 
-                    <!-- Ikonka edycji konta widoczna tylko dla zalogowanego użytkownika -->
-                    @if(auth()->check())
-                    <a href="{{ route('account.edit') }}"><i class="fa fa-user"></i></a>
-                    @endif
 
-                    <!-- Ikonka koszyka, widoczna zawsze -->
-                    <a><i class="fa fa-shopping-cart"></i></a>
 
-                    <!-- Ikonka dzwonka widoczna tylko dla zalogowanego admina -->
+                    <a href="{{ route('account.edit') }}" class="account-icon"><i class="fa fa-user"></i></a>
+
+                    <a href="#"><i class="fa fa-shopping-cart"></i></a>
                     @if(auth()->check() && auth()->user()->role === 'admin')
-                    <a id="notificationBell" href="#"><i class="fa fa-bell"></i><span id="notificationCount" class="notification-count" style="display: none;"></span></a>
+                    <a href="#" id="notificationBell"><i class="fa fa-bell"></i><span id="notificationCount" class="notification-count" style="display: none;"></span></a>
                     @endif
-
-                    <!-- Ikonka wylogowania widoczna tylko dla zalogowanego użytkownika -->
                     @if(auth()->check())
-                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fa fa-sign-out-alt"></i></a>
+                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-icon"><i class="fa fa-sign-out-alt"></i></a>
                     @endif
+                    <button class="navbar-toggler" type="button" id="navbar-toggler">
+                        <img src="{{ asset('img/hamburger-icon.png') }}" alt="Menu" style="height: 24px;">
+                    </button>
                 </div>
             </div>
         </header>
+
+        <!-- Sidebar Menu -->
+        <div id="sidebar" class="sidebar">
+            <div class="theme-switch">
+                <input type="checkbox" id="theme-toggle-sidebar" class="theme-toggle-input">
+                <label for="theme-toggle-sidebar" class="theme-toggle-label">
+                    <span class="theme-icon theme-sun"><i class="fas fa-sun"></i></span>
+                    <span class="theme-icon theme-moon"><i class="fas fa-moon"></i></span>
+                </label>
+            </div>
+
+            <button id="close-sidebar" class="close-sidebar">&times;</button>
+            <nav class="sidebar-nav">
+                <a href="{{ url('/home') }}">Home</a>
+                <a href="{{ route('products.publicIndex') }}">Products</a>
+                @if(auth()->check() && auth()->user()->role === 'admin')
+                <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
+                @endif
+                <a href="{{ route('chat.index') }}">Chat</a>
+
+                @if(auth()->check())
+                <a href="{{ route('account.edit') }}">My Account</a>
+                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                @endif
+            </nav>
+        </div>
+
+        <!-- Notifications Dropdown -->
+        <div id="notificationsDropdown" class="notifications-dropdown">
+            <h6 class="dropdown-header">Notifications</h6>
+            <div id="notificationList" class="notification-list"></div>
+        </div>
 
         <main class="content-wrapper">
             @yield('content')
@@ -87,110 +112,100 @@
         </footer>
     </div>
 
-    <!-- Notifications Dropdown -->
-    <div id="notificationsDropdown" class="notifications-dropdown">
-        <h6 class="dropdown-header">Notifications</h6>
-        <div id="notificationList" class="notification-list"></div>
-    </div>
-
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nestable2@1.6.0/dist/jquery.nestable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
     <script>
+        // Theme switch logic
         document.addEventListener('DOMContentLoaded', function() {
-            const themeToggleInput = document.getElementById('theme-toggle');
+            const themeToggleNavbar = document.getElementById('theme-toggle-navbar');
+            const themeToggleSidebar = document.getElementById('theme-toggle-sidebar');
 
-            // Sprawdź preferencje zapisane w localStorage
+            // Check saved theme in localStorage
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.body.classList.toggle('dark-mode', savedTheme === 'dark');
-            themeToggleInput.checked = savedTheme === 'dark';
+            themeToggleNavbar.checked = savedTheme === 'dark';
+            themeToggleSidebar.checked = savedTheme === 'dark';
 
-            // Funkcja przełączania motywu
-            themeToggleInput.addEventListener('change', () => {
-                const isDarkMode = themeToggleInput.checked;
+            // Toggle theme on switch change for navbar
+            themeToggleNavbar.addEventListener('change', () => {
+                const isDarkMode = themeToggleNavbar.checked;
                 document.body.classList.toggle('dark-mode', isDarkMode);
                 localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                themeToggleSidebar.checked = isDarkMode; // Synchronize sidebar switch
             });
+
+            // Toggle theme on switch change for sidebar
+            themeToggleSidebar.addEventListener('change', () => {
+                const isDarkMode = themeToggleSidebar.checked;
+                document.body.classList.toggle('dark-mode', isDarkMode);
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                themeToggleNavbar.checked = isDarkMode; // Synchronize navbar switch
+            });
+        });
+
+        // Hamburger and sidebar functionality
+        document.getElementById('navbar-toggler').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.add('open');
+        });
+
+        document.getElementById('close-sidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+        });
+
+        // Notifications functionality
+        document.getElementById('notificationBell').addEventListener('click', function() {
+            const notificationsDropdown = document.getElementById('notificationsDropdown');
+            const isDisplayed = notificationsDropdown.style.display === 'block';
+            notificationsDropdown.style.display = isDisplayed ? 'none' : 'block';
+        });
+
+        // Fetch notifications periodically
+        function fetchNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            const notificationCount = document.getElementById('notificationCount');
+
+            if (!notificationList) return;
+
+            axios.get('/notifications')
+                .then(response => {
+                    const notifications = response.data;
+                    notificationList.innerHTML = '';
+
+                    if (notifications.length > 0) {
+                        notificationCount.style.display = 'inline-block';
+                        notificationCount.innerText = notifications.length;
+                        notifications.forEach(notification => {
+                            const item = document.createElement('div');
+                            item.classList.add('notification-item');
+                            item.innerText = notification.message;
+                            item.addEventListener('click', function() {
+                                window.openChatWindow(notification.chat_id);
+                            });
+                            notificationList.appendChild(item);
+                        });
+                    } else {
+                        notificationCount.style.display = 'none';
+                        notificationList.innerHTML = '<div class="text-center">No new notifications</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching notifications:', error);
+                });
+        }
+
+        fetchNotifications();
+        setInterval(fetchNotifications, 5000);
+
+        // Close notifications dropdown on outside click
+        window.addEventListener('click', function(event) {
+            const notificationsDropdown = document.getElementById('notificationsDropdown');
+            const notificationBell = document.getElementById('notificationBell');
+            if (notificationsDropdown && !notificationsDropdown.contains(event.target) && notificationBell && !notificationBell.contains(event.target)) {
+                notificationsDropdown.style.display = 'none';
+            }
         });
     </script>
 
     @yield('scripts')
-
-    @if(auth()->check() && auth()->user()->role === 'admin')
-    <script>
-        var notificationBannerShown = false;
-
-        window.openChatWindow = function(chatId) {
-            window.location.href = `/chat?openChat=${chatId}`;
-        };
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const notificationBell = document.getElementById('notificationBell');
-            const notificationsDropdown = document.getElementById('notificationsDropdown');
-            const notificationList = document.getElementById('notificationList');
-            const notificationCount = document.getElementById('notificationCount');
-
-            if (notificationBell && notificationsDropdown) {
-                notificationBell.addEventListener('click', function() {
-                    const isDisplayed = notificationsDropdown.style.display === 'block';
-                    notificationsDropdown.style.display = isDisplayed ? 'none' : 'block';
-                });
-            }
-
-            function fetchNotifications() {
-                if (!notificationList) return;
-
-                axios.get('/notifications')
-                    .then(response => {
-                        const notifications = response.data;
-                        notificationList.innerHTML = '';
-
-                        if (notifications.length > 0) {
-                            if (notificationCount) {
-                                notificationCount.style.display = 'inline-block';
-                                notificationCount.innerText = notifications.length;
-                            }
-                            notifications.forEach(notification => {
-                                const item = document.createElement('div');
-                                item.classList.add('notification-item');
-                                item.innerText = notification.message;
-                                item.addEventListener('click', function() {
-                                    window.openChatWindow(notification.chat_id);
-                                });
-                                notificationList.appendChild(item);
-                            });
-                        } else {
-                            if (notificationCount) notificationCount.style.display = 'none';
-                            notificationList.innerHTML = '<div class="text-center">No new notifications</div>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching notifications:', error);
-                    });
-            }
-
-            fetchNotifications();
-            setInterval(fetchNotifications, 5000);
-
-            window.addEventListener('click', function(event) {
-                if (notificationsDropdown && !notificationsDropdown.contains(event.target) && notificationBell && !notificationBell.contains(event.target)) {
-                    notificationsDropdown.style.display = 'none';
-                }
-            });
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const openChat = urlParams.get('openChat');
-            if (openChat) {
-                window.openChatWindow(openChat);
-            }
-        });
-    </script>
-    @endif
 
     <!-- Logout Form -->
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">

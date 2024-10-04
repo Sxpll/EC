@@ -1,0 +1,677 @@
+/* Ukrywanie togglera na większych ekranach */
+.navbar-toggler {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    /* Ukrywanie linków w navbarze, pokazywanie togglera i ikonek */
+    .navbar-links {
+        display: none;
+    }
+
+    .navbar-toggler {
+        display: block;
+    }
+
+    /* Ikony konta, wylogowania i przełącznika trybu ukryte w wersji mobilnej */
+    .navbar-icons .account-icon,
+    .navbar-icons .logout-icon,
+    .navbar-icons .theme-switch {
+        display: none;
+    }
+
+    /* Dostosowanie wyświetlania ikonek */
+    .navbar-icons {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .navbar-icons a {
+        margin-left: 15px;
+    }
+
+    /* Stylowanie sidebaru dla urządzeń mobilnych */
+    .sidebar {
+        position: fixed;
+        right: -100%;
+        top: 0;
+        width: 150px;
+        height: 100%;
+        background-color: #fff;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+        transition: right 0.5s ease;
+        z-index: 999999;
+        padding: 20px;
+        display: block;
+    }
+
+    /* Sidebar po otwarciu */
+    .sidebar.open {
+        right: 0;
+    }
+
+    /* Przycisk zamknięcia sidebaru */
+    .close-sidebar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    /* Produkty na całą szerokość z marginesami */
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin: 0;
+        padding: 0 15px;
+        margin-top: 40px;
+    }
+
+    /* Wycentrowanie przycisku „Pokaż więcej” */
+    .pagination-wrapper {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    /* Przyciski „Filtruj” i „Sortuj” przypięte do góry ekranu */
+    .sticky-filter {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        background-color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+
+        margin-top: 0;
+    }
+
+    .sticky-filter .btn {
+        flex: 1;
+        margin: 0 5px;
+    }
+
+    /* Ukrywanie wyszukiwania na mniejszych ekranach */
+    .search-container {
+        display: none;
+    }
+
+    /* Modal na cały ekran po kliknięciu „Filtruj” */
+    #filterModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        display: none;
+    }
+
+    #filterModal.active {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-card {
+        max-width: 100%;
+    }
+
+    .btn {
+        font-size: 14px;
+    }
+}
+
+/* Siatka produktów dla większych ekranów */
+@media (min-width: 1200px) {
+    .product-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .main-content {
+        margin-left: 240px; /* Zmniejszanie marginesu po lewej stronie */
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin: 80px 0 0 0;
+
+        width: 100%;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+
+        padding: 0;
+    }
+
+    .filter-sort {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 15px;
+        padding: 0;
+    }
+
+    .filter-sort .btn {
+        flex: 1;
+        margin: 0 5px;
+    }
+
+    .custom-sidebar {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .filtrujprzycisk {
+        display: none;
+    }
+}
+
+/* Sidebar z kategoriami - widoczny tylko na dużych ekranach */
+@media (min-width: 768px) {
+    .custom-sidebar {
+        display: block;
+    }
+    .filter-sort,
+    .filter-select {
+        display: flex;
+    }
+}
+
+@media (max-width: 767px) {
+    .custom-sidebar {
+        display: none;
+    }
+}
+
+/* Sidebar hamburger menu - widoczny tylko na mniejszych ekranach */
+@media (max-width: 767px) {
+    .sidebar {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 250px;
+        height: 100%;
+        background-color: white;
+        z-index: 1000;
+        transition: right 0.3s ease;
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    /* Przycisk zamykania */
+    .close-sidebar {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+}
+
+@media (min-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+}
+
+/* Ukrywanie togglera na większych ekranach */
+.navbar-toggler {
+    display: none;
+}
+
+/* Stylowanie sidebarów i zachowanie dla dużych i małych ekranów */
+@media (max-width: 768px) {
+    /* Hamburger menu dla małych ekranów */
+    .navbar-toggler {
+        display: block;
+    }
+
+    /* Sidebar dla małych ekranów */
+    .sidebar {
+        position: fixed;
+        right: -100%;
+        top: 0;
+        width: 250px;
+        height: 100%;
+        background-color: white;
+        z-index: 9999;
+        transition: right 0.3s ease;
+        padding: 20px;
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    .close-sidebar {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* Usunięcie sortowania na górze */
+    .filter-sort {
+        display: none;
+    }
+
+    /* Dodanie sortowania obok przycisku „Filtruj” */
+    .sort-container {
+        display: block;
+        margin-left: 5px;
+        flex: 1;
+    }
+
+    /* Produkty na całą szerokość z marginesami */
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+
+        padding: 0 15px;
+    }
+
+    /* Ukrywanie sidebaru kategorii na małych ekranach */
+    .custom-sidebar {
+        display: none;
+    }
+
+    /* Modal na cały ekran po kliknięciu „Filtruj” */
+    #filterModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        display: none;
+    }
+
+    #filterModal.active {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-card {
+        max-width: 100%;
+    }
+
+    .btn {
+        font-size: 14px;
+    }
+}
+
+/* Siatka produktów dla większych ekranów */
+@media (min-width: 1200px) {
+    .product-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .main-content {
+        margin-left: 240px; /* Zmniejszanie marginesu po lewej stronie */
+    }
+}
+
+@media (min-width: 768px) {
+    .sticky-filter {
+        display: none;
+    }
+
+    .custom-sidebar {
+        display: block;
+    }
+
+    /* Ukrywanie sortowania w górnej części na dużych ekranach */
+    .filter-sort {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .filter-sort,
+    .search-container {
+        display: flex;
+    }
+}
+
+/* Navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Sticky filter na pełną szerokość bez odstępu od góry */
+@media (max-width: 768px) {
+    .sticky-filter {
+        position: fixed; /* Fixed zamiast sticky */
+        top: 60px; /* Upewnijmy się, że jest zaraz pod navbarem */
+        left: 0; /* Bez przesunięcia od lewej */
+        right: 0; /* Bez przesunięcia od prawej */
+        z-index: 9999;
+        background-color: white;
+        margin: 0; /* Usuń marginesy */
+        padding: 5px;
+        width: 100vw; /* Szerokość na całe okno przeglądarki */
+        display: flex;
+        justify-content: space-between;
+        box-sizing: border-box;
+        align-items: center; /* Dostosowanie wyrównania w pionie */
+    }
+
+    .sticky-filter .btn {
+        flex: 1;
+        margin: 0 5px;
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    .sort-container {
+        flex: 1;
+        margin-left: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 5px;
+        font-size: 14px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .main-content {
+        margin-top: 110px; /* Dostosowanie margin-top, aby nie nakładało się na sticky filter */
+    }
+}
+
+/* Sticky wyszukiwarka i sortowanie dla większych ekranów */
+@media (min-width: 768px) {
+    .filter-sort-container {
+        position: sticky;
+        top: 60px; /* Przesunięcie poniżej navbaru */
+        z-index: 1000;
+        background-color: white;
+        padding: 15px 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .search-container {
+        flex-grow: 1;
+        margin-right: 20px;
+    }
+
+    .sort-container {
+        min-width: 200px;
+    }
+
+    .search-input {
+        flex-grow: 1;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .search-form button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .search-form button:hover {
+        background-color: #0056b3;
+    }
+
+    .filter-select {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+}
+
+/* Poprawa zachowania select */
+select {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Upewnienie się, że select nie wychodzi poza ekran */
+@media (max-width: 768px) {
+    select {
+        width: 100vw; /* Zapewnia pełną szerokość */
+        max-width: 100%;
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    /* Poprawienie stylów dla opcji, aby nie wychodziły poza ekran */
+    select option {
+        white-space: nowrap; /* Zapobiega łamaniu tekstu */
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+}
+
+/* Sidebar hamburger menu - widoczny tylko na mniejszych ekranach */
+@media (max-width: 767px) {
+    .sidebar-custom {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 250px;
+        height: 100%;
+        background-color: white;
+        z-index: 1050; /* Zwiększ z-index, aby był nad innymi elementami */
+        transition: right 0.3s ease;
+    }
+
+    .sidebar.open {
+        right: 0; /* Otwiera sidebar */
+    }
+
+    /* Przycisk zamykania */
+    .close-sidebar {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* Upewnij się, że navbar ma odpowiedni z-index, aby był poniżej sidebaru */
+    .navbar {
+        z-index: 1000;
+    }
+}
+
+/* Responsywność dla modalnego okna i zakładek */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        /* Szerokość dla małych ekranów */
+    }
+
+    .sticky-filter{
+        z-index: 1;
+    }
+
+    .tab-link {
+        font-size: 14px;
+        /* Zmniejszenie rozmiaru czcionki */
+    }
+
+    .tab-content {
+        padding: 10px;
+        /* Zmniejszenie paddingu */
+    }
+
+    .gallery-item {
+        width: 100px;
+        /* Zmniejszenie rozmiaru obrazów */
+        height: 100px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        width: 100%;
+    }
+
+    .table th,
+    .table td {
+        font-size: 12px;
+    }
+
+    .btn-view {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        padding: 5px 10px;
+    }
+
+    .table-responsive .table td {
+        word-wrap: break-word;
+        white-space: normal;
+    }
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.back-arrow {
+    margin: 0 auto 20px auto; /* wyśrodkowanie strzałki */
+    font-size: 18px;
+}
+
+.card {
+    width: 100%;
+    max-width: 600px; /* maksymalna szerokość karty */
+    margin: 0 auto;
+}
+
+#scrollable-category-tree {
+    width: 100%;
+    max-width: 600px; /* szerokość kontenera drzewa kategorii */
+}
+
+.btn {
+    width: 100%;
+    max-width: 300px;
+    margin: 10px 0;
+}
+
+/* Dostosowanie układu do małych ekranów */
+@media (max-width: 576px) {
+    .container {
+        padding: 10px;
+    }
+
+    .back-arrow {
+        font-size: 16px;
+        justify-content: center;
+        justify-items: center;
+    }
+
+    .card {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    #scrollable-category-tree {
+        max-height: 400px; /* zmniejszenie wysokości kontenera */
+    }
+}
+
+/* Zaktualizowane style dla wyszukiwania i sortowania */
+@media (min-width: 768px) {
+    .filter-sort,
+    .search-container,
+    .sort-container {
+        display: flex !important;
+        margin-top: 100px;
+    }
+
+    .sticky-filter {
+        display: none !important;
+    }
+}

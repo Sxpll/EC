@@ -1,14 +1,13 @@
-/* Ogólne style dla jasnego motywu */
 body {
-    font-family: 'Nunito', sans-serif;
-    background-color: #ffffff; /* Jasne tło */
-    color: #333333; /* Ciemny tekst */
+    font-family: "Nunito", sans-serif;
+    background-color: #ffffff;
+    color: #333333;
     margin: 0;
     padding: 0;
     min-height: 100vh;
     overflow-x: hidden;
-    overflow-y: auto;
     box-sizing: border-box;
+    height: 100%;
 }
 
 .banner {
@@ -19,14 +18,14 @@ body {
     justify-content: center;
     background-color: #f9f9f9;
     padding: 100px 0;
-    margin-top: 100px; /* Dostosowane dla pozycji pod navbarem */
+    margin-top: 100px;
     text-align: center;
 }
 
 .banner h1 {
     font-size: 36px;
     margin: 0;
-    color: #007bff; /* Niebieski kolor */
+    color: #007bff;
 }
 
 .banner p {
@@ -58,31 +57,24 @@ body {
     padding: 20px;
     box-sizing: border-box;
     margin-top: 60px;
-    overflow-x: hidden; /* Avoid horizontal overflow */
+    overflow-x: hidden;
 }
 
 .container-admin-dashboard {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 160px);
-    width: 100%;
+    min-height: calc(100vh - 60px);
+
     padding: 20px;
     box-sizing: border-box;
     margin-top: 80px;
 }
 
+.login-card,
+.manage-users-card,
 .card-admin-dashboard {
-    margin-top: 100px; /* Przesunięcie zawartości w dół, aby nie nachodziła na navbar */
-    width: 80%;
-    max-width: 1200px;
-    margin: 20px 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: #ffffff; /* Jasne tło */
-}
-
-.login-card, .manage-users-card, .card-admin-dashboard {
-    background-color: #f8f9fa; /* Jasne tło */
+    background-color: #f8f9fa;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
@@ -107,7 +99,7 @@ body {
 }
 
 .card-admin {
-    background-color: #f8f9fa; /* Jasne tło */
+    background-color: #f8f9fa;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
@@ -117,26 +109,11 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden; /* Brak poziomego przewijania */
-}
-
-.manage-users-container .card-admin {
-    max-width: 1400px;
-    width: 120%;
-}
-
-.content-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: calc(100vh - 120px); /* Uwzględnij header i footer */
-    box-sizing: border-box;
-
+    overflow-x: hidden;
 }
 
 .card-header {
     text-align: center;
-
 }
 
 .card-header h1 {
@@ -170,7 +147,9 @@ body {
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-.btn-primary, .btn-success, .btn-danger, .btn-view {
+.btn-primary,
+.btn-success,
+.btn-view {
     background-color: #007bff;
     border: none;
     padding: 10px;
@@ -188,33 +167,24 @@ body {
     text-decoration: none;
 }
 
-.btn-primary:hover, .btn-success:hover, .btn-danger:hover {
+.btn-primary:hover,
+.btn-success:hover,
+.btn-danger:hover {
     background-color: #0056b3;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    color: #ffffff;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 5px;
 }
 
 .btn-danger:hover {
     background-color: #c82333;
 }
 
-.alert-success, .alert-danger {
+.alert-success,
+.alert-danger {
     padding: 15px;
     margin-bottom: 20px;
     border: 1px solid transparent;
     border-radius: 4px;
     text-align: center;
-    background-color: #f8f9fa; /* Jasne tło */
+    background-color: #f8f9fa;
 }
 
 .alert-success {
@@ -243,21 +213,21 @@ body {
 
 .table {
     width: 100%;
-    background-color: #ffffff; /* Białe tło */
+    background-color: #ffffff;
     border-radius: 10px;
     color: #333333;
     margin-top: 20px;
     table-layout: auto;
 }
 
-.table th, .table td {
+.table th,
+.table td {
     padding: 15px;
     text-align: center;
     border-top: 1px solid #dddddd;
     vertical-align: middle;
-    word-wrap: break-word; /* Zapewnienie zawijania tekstu */
+    word-wrap: break-word;
 }
-
 .table th {
     background-color: #f0f0f0;
     color: #333333;
@@ -287,7 +257,7 @@ body {
 }
 
 .modal-content {
-    background-color: #ffffff; /* Białe tło */
+    background-color: #ffffff;
     margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
@@ -297,7 +267,8 @@ body {
     z-index: 1051;
 }
 
-.modal-content .form-control, .modal-content select {
+.modal-content .form-control,
+.modal-content select {
     width: 100%;
     border: 1px solid #cccccc;
     border-radius: 5px;
@@ -307,7 +278,8 @@ body {
     padding: 10px;
 }
 
-.modal-content .form-control:focus, .modal-content select:focus {
+.modal-content .form-control:focus,
+.modal-content select:focus {
     outline: none;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
@@ -328,34 +300,6 @@ body {
     cursor: pointer;
 }
 
-@media (max-width: 768px) {
-    .card-admin, .card-admin-dashboard {
-        padding: 10px;
-    }
-
-    .form-control {
-        width: 100%;
-    }
-
-    .btn-primary, .btn-success, .btn-danger {
-        width: 100%;
-        max-width: none;
-        margin-top: 10px;
-    }
-
-    .navbar-brand img {
-        height: 30px;
-    }
-
-    .table-responsive {
-        max-height: 300px;
-    }
-
-    .modal-content {
-        width: 90%;
-    }
-}
-
 .col-md-6 a {
     width: 90%;
     text-wrap: nowrap;
@@ -363,13 +307,23 @@ body {
 
 .welcome-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    width: 100%;
-    padding: 20px;
-    box-sizing: border-box;
+    min-height: calc(100vh - 100px);
     text-align: center;
+}
+
+.welcome-container h1 {
+    font-size: 36px;
+    margin: 0;
+    color: #007bff;
+}
+
+.welcome-container p {
+    font-size: 18px;
+    color: #333333;
+    margin: 10px 0 20px;
 }
 
 .custom-link {
@@ -426,15 +380,14 @@ body {
 }
 
 .container {
-    max-width: 800px; /* Zwiększenie szerokości dla listy czatów admina */
+    max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
-    box-sizing: border-box;
 }
 
 .list-group-item {
-    width: 100%; /* Ustaw szerokość na 100%, aby elementy były w pełni widoczne */
-    background-color: #ffffff; /* Jasne tło */
+    width: 100%;
+    background-color: #ffffff;
     color: #333333;
     border: 1px solid #cccccc;
     border-radius: 5px;
@@ -499,32 +452,10 @@ textarea.form-control {
 }
 
 .elo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.new-chat-button {
-    display: flex;
-    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
     text-align: center;
-    background-color: #007bff;
-    border: none;
-    padding: 10px;
-    width: 100%;
-    max-width: 100px;
-    border-radius: 5px;
-    color: #ffffff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 5px;
-    text-align: center;
-    margin-left: 40px;
-}
-
-.new-chat-button:hover {
-    background-color: #0056b3;
+    margin-bottom: 20px;
 }
 
 .btn-primary.mt-2 {
@@ -576,13 +507,13 @@ textarea.form-control {
 }
 
 #chatList {
-    max-height: 60vh; /* Możesz dostosować wysokość według potrzeb */
+    max-height: 60vh;
     overflow-y: auto;
-    padding-right: 15px; /* Dodatkowy odstęp, aby zapobiec ukryciu zawartości pod paskiem przewijania */
+    padding-right: 15px;
 }
 
 .d-flex.align-items-center {
-    margin-left: auto; /* Przesunięcie na prawo */
+    margin-left: auto;
 }
 
 .list-group {
@@ -590,7 +521,7 @@ textarea.form-control {
     overflow-y: auto;
 }
 
-.costest{
+.costest {
     display: flex;
     justify-content: space-between;
 }
@@ -636,21 +567,21 @@ textarea.form-control {
     top: 60px;
     right: 20px;
     width: 350px;
-    background-color:#333; /* Ciemniejsze tło */
+    background-color: #333;
     border-radius: 10px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     z-index: 2000;
     overflow-y: auto;
     max-height: 400px;
-    backdrop-filter: blur(10px); /* Efekt rozmycia */
-    color: white; /* Biały tekst */
+    backdrop-filter: blur(10px);
+    color: white;
 }
 
 /* Puste powiadomienia */
 .notifications-dropdown.empty {
-    background-color: rgba(255, 255, 255, 0.1); /* Jasne, przezroczyste tło */
-    color: rgba(255, 255, 255, 0.6); /* Przezroczysty tekst */
-    backdrop-filter: blur(10px); /* Efekt rozmycia tła */
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
 }
 
 .notification-list {
@@ -669,14 +600,14 @@ textarea.form-control {
 }
 
 .notification-item:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Podświetlenie na hover */
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .notification-empty {
     padding: 15px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.6); /* Przezroczysty tekst */
-    backdrop-filter: blur(5px); /* Delikatne rozmycie */
+    color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(5px);
 }
 
 /* Styl dla dynamicznego banera powiadomień */
@@ -693,7 +624,7 @@ textarea.form-control {
     opacity: 0;
     transition: opacity 0.5s ease, transform 0.5s ease;
     z-index: 2000;
-    backdrop-filter: blur(10px); /* Efekt rozmycia */
+    backdrop-filter: blur(10px);
 }
 
 .show-dropdown {
@@ -714,17 +645,6 @@ textarea.form-control {
     display: flex;
     left: 0;
     transform: translateX(40px);
-}
-
-/* Stylizacja obrazków w galerii */
-#productImages img {
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-#productImages img:hover {
-    opacity: 0.7;
 }
 
 /* Stylizacja kontenera galerii */
@@ -794,14 +714,6 @@ textarea.form-control {
     border-radius: 10px;
 }
 
-#imagePreviewModal img {
-    margin: auto;
-    display: block;
-    max-width: 100%;
-    max-height: 100%;
-}
-
-/* Przyciski zamykania modala */
 .close-custom {
     position: absolute;
     top: 10px;
@@ -811,7 +723,8 @@ textarea.form-control {
     cursor: pointer;
 }
 
-.close-custom:hover, .close-custom:focus {
+.close-custom:hover,
+.close-custom:focus {
     color: #bbb;
     text-decoration: none;
     cursor: pointer;
@@ -896,24 +809,6 @@ textarea.form-control {
     text-decoration: none;
 }
 
-.btn-danger1 {
-    background-color: #dc3545;
-    border: none;
-    padding: 10px;
-    width: 105px;
-    max-width: 105px;
-    height: 42px;
-    border-radius: 5px;
-    color: #ffffff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 5px;
-    text-align: center;
-    display: inline-block;
-    text-wrap: wrap;
-}
-
 .btn-back {
     padding: 10px 20px;
     font-size: 16px;
@@ -950,49 +845,33 @@ textarea.form-control {
     background-color: transparent;
 }
 
-
-
-.chat-container {
-    background-color: #f9f9f9;
+.chat-item {
     padding: 20px;
-    border-radius: 10px;
-    max-width: 800px;
-    margin: 0 auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    overflow-x: hidden;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
 }
 
-.chat-item {
-    background-color: #ffffff;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    color: #333333;
+.chat-item:hover {
+    background-color: #e9ecef;
+}
+
+.chat-link {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.chat-item:hover {
-    background-color: #f0f0f0;
-}
-
-.chat-link {
-    color: #007bff;
-    text-decoration: none;
-    display: block;
-    width: 100%;
-}
-
 .chat-title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
 }
 
 .chat-time {
-    font-size: 12px;
-    color: #777777;
+    font-size: 14px;
+    color: #6c757d;
 }
 
 .new-chat-button {
@@ -1001,6 +880,7 @@ textarea.form-control {
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
+    border: none;
 }
 
 .new-chat-button:hover {
@@ -1029,7 +909,6 @@ h1.elo {
     justify-content: space-evenly;
 }
 
-/* Ogólna stylizacja paska przewijania */
 ::-webkit-scrollbar {
     width: 8px;
     background-color: #f0f0f0;
@@ -1044,7 +923,6 @@ h1.elo {
     background-color: #0056b3;
 }
 
-/* Stylizacja paska przewijania w czacie */
 .chat-container::-webkit-scrollbar,
 .chat-item::-webkit-scrollbar,
 #chat-window::-webkit-scrollbar {
@@ -1157,36 +1035,31 @@ h1.elo {
     color: rgba(0, 0, 0, 0.5);
 }
 
-/* Footer */
-.footer-bar {
+footer.footer-bar {
     background-color: #000;
     color: #ffffff;
-    font-size: 14px;
-    position: fixed;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: auto; /* Umieszcza stopkę na dole strony */
     width: 100%;
-    bottom: 0;
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    padding: 5px 20px;
 }
 
-.footer-bar .footer-bar-content {
+footer.footer-bar-content {
     display: flex;
+    justify-content: center;
     gap: 20px;
 }
 
-.footer-bar a {
+footer.footer-bar a {
     color: #ffffff;
     text-decoration: none;
-    margin-left: 20px;
+    font-size: 14px;
 }
 
-.footer-bar a:hover {
+footer.footer-bar a:hover {
     color: #007bff;
 }
 
-/* Navbar and Header */
 header {
     background-color: #ffffff;
     padding: 10px 20px;
@@ -1198,7 +1071,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 40px; /* Powiększ wysokość navbaru */
+    height: 40px;
 }
 
 .navbar-container {
@@ -1208,14 +1081,12 @@ header {
     width: 100%;
 }
 
-/* Logo w navbarze */
 .navbar-brand img {
-    max-height: 40px; /* Dopasuj wysokość logo */
+    max-height: 40px;
     width: auto;
     display: inline-block;
 }
 
-/* Linki w navbarze */
 .navbar-links {
     display: flex;
     justify-content: center;
@@ -1237,12 +1108,10 @@ header {
     color: #ffffff;
 }
 
-/* Ikony w navbarze */
 .navbar-icons {
     display: flex;
     gap: 15px;
 }
-
 
 .navbar-icons a {
     color: #333333;
@@ -1253,7 +1122,6 @@ header {
     color: #007bff;
 }
 
-Stylizacje kontenera produktów
 .container-products {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1275,7 +1143,6 @@ Stylizacje kontenera produktów
     align-items: center;
     height: calc(100vh - 60px);
     box-sizing: border-box;
-
 }
 
 .container-center {
@@ -1289,80 +1156,66 @@ Stylizacje kontenera produktów
     padding: 20px;
 }
 
-.login-card {
-    max-width: 500px;
-    width: 100%;
-    background-color: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    text-align: center;
-}
-
-/* .card-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow-x: hidden;
-} */
-
 #History {
-    max-height: 500px; /* Zwiększ maksymalną wysokość zakładki historii na 600px */
-    overflow-y: auto; /* Dodaj pionowy pasek przewijania, jeśli zawartość przekroczy rozmiar */
-    padding-right: 10px; /* Dodaj odstęp od prawej, aby pasek przewijania nie nachodził na tekst */
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
 }
 
 #historyTable {
-    width: 100%; /* Dopasowanie szerokości tabeli do zakładki */
-    table-layout: fixed; /* Stałe szerokości kolumn */
+    width: 100%;
+    table-layout: fixed;
 }
 
-#historyTable th, #historyTable td {
-    word-wrap: break-word; /* Zapewnienie zawijania tekstu w komórkach */
-    white-space: normal; /* Zmiana sposobu wyświetlania białych znaków, by umożliwić zawijanie */
+#historyTable th,
+#historyTable td {
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 .sima i {
-    color: #000; /* Czarny kolor */
+    color: #000;
 }
 
 .sima i:hover {
-    color: #333; /* Ciemniejszy kolor na hover */
+    color: #333;
 }
 
 .chat-container {
-    max-width: 100%;
-    box-sizing: border-box;
-    overflow-y: auto; /* Zapewnia przewijanie pionowe */
-    overflow-x: hidden; /* Blokuje przewijanie poziome */
-    margin: 0 auto; /* Centrowanie kontenera */
-    max-height: 70vh; /* Ustal maksymalną wysokość dla listy czatów */
+    background-color: #f8f9fa; /* Kolor tła dla lepszej widoczności */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtelny cień */
+    max-height: 70vh; /* Maksymalna wysokość kontenera */
+    overflow-y: auto; /* Scrollowanie w pionie, jeśli potrzeba */
+}
+
+.chat-container ul.list-group {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow: hidden;
+    height: 100%;
 }
 
 .list-group {
-    display: block; /* Każdy element listy wyświetlany w nowej linii */
+    display: block;
     padding: 0;
     margin: 0;
 }
 
 .list-group-item {
-    display: block; /* Zapewnia wyświetlenie każdego elementu listy czatów w nowej linii */
-    width: 100%;
-    text-align: left;
-    padding: 10px;
-    margin-bottom: 10px;
+    background-color: white;
     border: 1px solid #ddd;
+    padding: 17px;
+    margin-bottom: 10px;
+    width: 300px;
     border-radius: 5px;
-}
-
-.new-chat-button, .chat-title {
-    margin: 0 auto; /* Wycentruje tytuł i przycisk */
-    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chat-time {
-    display: block; /* Umożliwia wyświetlanie czasu w nowej linii */
+    display: block;
     color: #777;
     margin-top: 5px;
 }
@@ -1380,27 +1233,28 @@ Stylizacje kontenera produktów
 
 .table {
     width: 100%;
-    table-layout: fixed; /* Ustawienie stałej szerokości kolumn */
-    word-wrap: break-word; /* Zawijanie tekstu w komórkach */
+    table-layout: fixed;
+    word-wrap: break-word;
 }
 
-.table th, .table td {
+.table th,
+.table td {
     padding: 15px;
     text-align: center;
     border-top: 1px solid #dddddd;
     vertical-align: middle;
     word-wrap: break-word;
     overflow: hidden;
-    white-space: nowrap; /* Zawijanie w jednej linii */
-    text-overflow: ellipsis; /* Dodanie kropek dla długiego tekstu */
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .table th {
     position: sticky;
     top: 0;
-    z-index: 2; /* Zwiększ indeks, aby nagłówki były nad zawartością */
-    background-color: #f0f0f0; /* Tło nagłówka */
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1); /* Drobny cień, by nagłówek był bardziej widoczny */
+    z-index: 2;
+    background-color: #f0f0f0;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
 }
 
 .table td {
@@ -1409,15 +1263,17 @@ Stylizacje kontenera produktów
 }
 
 .table td:nth-child(1) {
-    width: 15%; /* Dostosuj szerokość pierwszej kolumny */
+    width: 15%;
 }
 
 .table td:nth-child(2) {
-    width: 25%; /* Dostosuj szerokość drugiej kolumny */
+    width: 25%;
 }
 
-.table td:nth-child(3), .table td:nth-child(4), .table td:nth-child(5) {
-    width: 20%; /* Dostosuj szerokości pozostałych kolumn */
+.table td:nth-child(3),
+.table td:nth-child(4),
+.table td:nth-child(5) {
+    width: 20%;
 }
 
 .text-danger {
@@ -1429,10 +1285,9 @@ Stylizacje kontenera produktów
     color: red !important;
 }
 
-
 .custom-sidebar {
     position: fixed;
-    top: 60px; /* Dopasowanie do navbaru */
+    top: 60px;
     left: 0;
     bottom: 0;
     width: 220px;
@@ -1440,6 +1295,7 @@ Stylizacje kontenera produktów
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
+    z-index: 99990;
 }
 
 /* Zawartość sidebaru */
@@ -1453,33 +1309,10 @@ Stylizacje kontenera produktów
 /* Główna sekcja */
 /* Główna sekcja */
 .main-content {
-    margin-left: 240px; /* Zostawia miejsce na sidebar */
+    margin-left: 240px;
     padding: 20px;
-    padding-top: 60px; /* Odstęp od navbaru */
-}
 
-
-
-
-/* Stylizacja karty produktu */
-.product-card {
-    width: 300px; /* Stała szerokość dla produktu */
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    height: auto; /* Karty dostosowują wysokość */
-}
-
-.product-card img {
-    width: 100%; /* Dopasowanie obrazu do szerokości karty */
-    height: 200px; /* Stała wysokość obrazka */
-    object-fit: cover; /* Zapobiega zniekształceniu obrazka */
-    border-radius: 8px 8px 0 0;
+    overflow: auto;
 }
 
 /* Stylizacja przycisku "Do koszyka" */
@@ -1496,14 +1329,6 @@ Stylizacje kontenera produktów
 
 .product-card .btn:hover {
     background-color: #0056b3;
-}
-
-/* Stylizacja paginacji */
-.pagination-wrapper {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .pagination {
@@ -1557,35 +1382,16 @@ Stylizacje kontenera produktów
     color: white;
 }
 
-/* Ogólne style */
 .main-container {
     display: flex;
-    flex-direction: row; /* Zapewnia układ sidebar obok głównej zawartości */
-    width: 100%; /* Kontener zajmuje całą szerokość strony */
-    min-height: calc(100vh - 60px); /* Pełna wysokość widoku minus wysokość nagłówka */
-    padding-right: 20px; /* Dostosuj odstępy od prawej */
-    box-sizing: border-box;
-    overflow-y: auto; /* Aby włączyć przewijanie w pionie */
-    overflow-x: hidden; /* Ukrywa przewijanie poziome */
-}
-
-.main-container {
-    display: flex;
-    min-height: calc(100vh - 40px);
     max-height: calc(100vh + 40px);
-    padding-top: 60px; /* Dostosowanie do navbara */
+    width: 100%;
+    min-height: 100vh;
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
-.main-container {
-    display: flex;
-    width: 100%; /* Sprawia, że kontener zajmuje pełną szerokość */
-    min-height: 100vh; /* Sprawia, że kontener zajmuje co najmniej pełną wysokość widoku */
-    box-sizing: border-box;
-    margin: 0; /* Usuwa marginesy */
-    padding: 0; /* Usuwa padding */
-    overflow: hidden; /* Usuwa ewentualny nadmiar przewijania */
-}
-
 
 .custom-sidebar {
     width: 220px;
@@ -1596,26 +1402,14 @@ Stylizacje kontenera produktów
     bottom: 0;
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
 }
 
 .main-content {
     flex-grow: 1;
-    margin-left: 240px; /* Dostosowanie do sidebaru */
+    margin-left: 240px;
 
     overflow-y: auto;
-}
-
-
-
-.product-card {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 }
 
 .product-image {
@@ -1648,9 +1442,11 @@ Stylizacje kontenera produktów
 }
 
 .pagination-wrapper {
-    margin-top: 20px;
+    margin-top: 10px;
     display: flex;
     justify-content: center;
+    align-items: center;
+    margin-bottom: 70px;
 }
 
 footer {
@@ -1667,10 +1463,7 @@ ul.pagination svg {
     display: none;
 }
 
-
-
-
-.custom-sidebar {
+.chat- .custom-sidebar {
     width: 220px;
     background-color: #f8f9fa;
     padding: 20px;
@@ -1681,39 +1474,35 @@ ul.pagination svg {
     flex-grow: 1;
     box-sizing: border-box;
     margin-top: 60px;
-
-
 }
-
-
 
 .search-form {
     display: flex;
+    flex-direction: row;
     gap: 10px;
-    margin-left: 300px;
+    width: 100%;
 }
-
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 produkty w rzędzie */
-    gap: 50px; /* Odstęp między produktami */
-    padding: 20px; /* Ustawienie paddingu wewnątrz kontenera */
-    box-sizing: border-box; /* Upewnij się, że padding jest wliczany w szerokość */
-
-
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
 }
 
-.card-footer{
+.card-footer {
     display: inline;
     justify-content: right;
     margin-left: 70px;
 }
 .product-card {
-    background-color: #fff;
+    background-color: white;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .product-card img {
@@ -1726,21 +1515,9 @@ ul.pagination svg {
     margin-top: 10px;
 }
 
-.pagination-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-
 .pagination-info {
     text-align: center;
     margin-top: 10px;
-}
-
-.pagination-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
 }
 
 .pagination {
@@ -1783,58 +1560,42 @@ ul.pagination svg {
 
 .filter-sort {
     display: flex;
-    justify-content: space-between; /* Równomierne rozłożenie elementów */
-    align-items: center; /* Wyrównanie elementów w pionie */
-    padding: 10px 30px; /* Odstęp wewnętrzny */
-    background-color: #f8f9fa; /* Jasne tło dla kontrastu */
-    border-radius: 8px; /* Zaokrąglone rogi */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Delikatny cień */
-    margin-bottom: 20px; /* Odstęp od następnych elementów */
-    margin-top: 20px;
-
-}
-.filter-sort {
-    display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 30px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 20px;
     margin-top: 20px;
-    max-width: calc(100% - 100px); /* Maksymalna szerokość uwzględnia odstępy */
-    margin-left: auto; /* Automatyczne marginesy wyśrodkowujące */
-    margin-right: auto; /* Automatyczne marginesy wyśrodkowujące */
 }
-
-
-.search-form {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Odstęp między polem tekstowym a przyciskiem */
+.search-input {
+    flex-grow: 1;
 }
 
 .search-form input {
-    width: 300px; /* Szerokość pola wyszukiwania */
+    width: 300px;
     padding: 10px;
     border-radius: 5px;
-    border: 1px solid #ddd; /* Delikatna ramka */
+    border: 1px solid #ddd;
     font-size: 16px;
+}
+.search-form input {
+    flex-grow: 1;
 }
 
 .search-form button {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #007bff; /* Kolor niebieski dla przycisku */
+    background-color: #007bff;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
+.search-form button {
+    flex-shrink: 0;
+}
 .search-form button:hover {
-    background-color: #0056b3; /* Ciemniejszy odcień na hover */
+    background-color: #0056b3;
 }
 
 .filter-select {
@@ -1844,112 +1605,8 @@ ul.pagination svg {
     font-size: 16px;
 }
 
-.container-admin-dashboard {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 60px); /* Wysokość 100vh minus header */
-    padding: 20px;
-    box-sizing: border-box;
-    overflow: hidden; /* Usuń możliwość przewijania */
-}
-
-.card-admin-dashboard {
-    width: 80%; /* Zmniejsz szerokość */
-    max-width: 1200px;
-    height: 90vh;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-}
-
-
-
 .row.mt-4 {
-    margin-top: auto; /* Ustaw przyciski na dole */
-}
-
-
-
-
-/* Styl dla przełącznika */
-.theme-switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-}
-
-.theme-toggle-input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.theme-toggle-label {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #333;
-    border-radius: 34px;
-    transition: 0.4s;
-}
-
-.theme-toggle-label:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 4px;
-    bottom: 2px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-}
-
-.theme-toggle-input:checked + .theme-toggle-label {
-    background-color: #007bff;
-}
-
-.theme-toggle-input:checked + .theme-toggle-label:before {
-    transform: translateX(26px);
-}
-
-.theme-icon {
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    top: 4px;
-    transition: 0.3s;
-}
-
-.theme-sun {
-    left: 8px;
-    background-color: #ffdd57;
-    border-radius: 50%;
-}
-
-.theme-moon {
-    right: 8px;
-    background-color: #ffffff;
-    border-radius: 50%;
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-}
-
-/* Ukrycie ikony po zmianie */
-.theme-toggle-input:not(:checked) ~ .theme-toggle-label .theme-moon {
-    opacity: 0;
-}
-
-.theme-toggle-input:checked ~ .theme-toggle-label .theme-sun {
-    opacity: 0;
+    margin-top: auto;
 }
 
 body.dark-mode {
@@ -2025,24 +1682,24 @@ body.dark-mode {
 /* Navbar styles for dark mode */
 body.dark-mode .navbar {
     background-color: #1f1f1f;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Slight shadow for better visibility */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .navbar-links a {
-    color: #e0e0e0; /* Light color for the links */
+    color: #e0e0e0;
 }
 
 body.dark-mode .navbar-links a:hover {
-    background-color: #333333; /* Darker hover state */
+    background-color: #333333;
     color: #ffffff;
 }
 
 body.dark-mode .navbar-icons a {
-    color: #e0e0e0; /* Icons should match the text color */
+    color: #e0e0e0;
 }
 
 body.dark-mode .navbar-icons a:hover {
-    color: #ffffff; /* Brighten on hover */
+    color: #ffffff;
 }
 
 /* Button styles for dark mode */
@@ -2056,23 +1713,23 @@ body.dark-mode .btn:hover {
     color: #ffffff;
 }
 
-/* Input fields for dark mode */
-body.dark-mode input, body.dark-mode select {
+body.dark-mode input,
+body.dark-mode select {
     background-color: #2b2b2b;
     color: #e0e0e0;
     border: 1px solid #444444;
 }
 
 body.dark-mode input::placeholder {
-    color: #888888; /* Lighten the placeholder text */
+    color: #888888;
 }
 
-body.dark-mode input:focus, body.dark-mode select:focus {
+body.dark-mode input:focus,
+body.dark-mode select:focus {
     outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue focus ring */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-/* Product card styles for dark mode */
 body.dark-mode .product-card {
     background-color: #2a2a2a;
     color: #e0e0e0;
@@ -2089,10 +1746,9 @@ body.dark-mode .product-card .btn:hover {
 }
 
 body.dark-mode .product-card img {
-    filter: brightness(0.9); /* Slightly darker images to match dark mode */
+    filter: brightness(0.9);
 }
 
-/* Pagination in dark mode */
 body.dark-mode .pagination .page-link {
     background-color: #333333;
     color: #e0e0e0;
@@ -2103,7 +1759,6 @@ body.dark-mode .pagination .page-link:hover {
     color: #ffffff;
 }
 
-/* Footer styles for dark mode */
 body.dark-mode .footer-bar {
     background-color: #1f1f1f;
     color: #e0e0e0;
@@ -2114,47 +1769,46 @@ body.dark-mode .footer-bar a {
 }
 
 body.dark-mode .footer-bar a:hover {
-    color: #007bff; /* Brighter color on hover */
+    color: #007bff;
 }
 /* Navbar w trybie ciemnym */
 body.dark-mode .navbar {
-    background-color: #1f1f1f; /* Ciemniejsze tło */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Delikatny cień */
+    background-color: #1f1f1f;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .navbar-links a {
-    color: #e0e0e0; /* Jaśniejsze linki */
+    color: #e0e0e0;
 }
 
 body.dark-mode .navbar-links a:hover {
-    background-color: #333333; /* Ciemniejsze tło po najechaniu */
-    color: #ffffff; /* Jaśniejszy tekst po najechaniu */
+    background-color: #333333;
+    color: #ffffff;
 }
 
 body.dark-mode .navbar-icons a {
-    color: #e0e0e0; /* Ikony w kolorze tekstu */
+    color: #e0e0e0;
 }
 
 body.dark-mode .navbar-icons a:hover {
-    color: #ffffff; /* Jaśniejszy kolor po najechaniu */
+    color: #ffffff;
 }
 
 body.dark-mode .navbar-container {
-    background-color: #1f1f1f; /* Tło dla ciemnego motywu */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Mocniejszy cień dla ciemnego motywu */
+    background-color: #1f1f1f;
 }
 body.dark-mode .navbar-container .navbar-links a {
-    color: #e0e0e0; /* Jaśniejsze linki dla ciemnego motywu */
+    color: #e0e0e0;
 }
 body.dark-mode .navbar-container .navbar-links a:hover {
-    background-color: #333333; /* Ciemniejsze tło po najechaniu */
-    color: #ffffff; /* Jaśniejszy tekst po najechaniu */
+    background-color: #333333;
+    color: #ffffff;
 }
 body.dark-mode .navbar-container .navbar-icons a {
-    color: #e0e0e0; /* Ikony w ciemnym motywie */
+    color: #e0e0e0;
 }
 body.dark-mode .navbar-container .navbar-icons a:hover {
-    color: #ffffff; /* Zmiana koloru ikon na jaśniejszy w trybie ciemnym */
+    color: #ffffff;
 }
 
 body.dark-mode header {
@@ -2165,14 +1819,12 @@ body.dark-mode .main-content .filter-sort {
     background-color: #1f1f1f;
 }
 
-
-
-body.dark-mode .login-card  {
+body.dark-mode .login-card {
     background-color: #1f1f1f;
     color: white;
 }
 
-body.dark-mode h1{
+body.dark-mode h1 {
     color: white;
 }
 .theme-switch {
@@ -2182,12 +1834,6 @@ body.dark-mode h1{
     height: 24px;
 }
 
-.theme-toggle-input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
 .theme-toggle-label {
     position: absolute;
     cursor: pointer;
@@ -2195,25 +1841,14 @@ body.dark-mode h1{
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #333;
+    background-color: orange;
     border-radius: 34px;
     transition: 0.4s;
-}
-
-.theme-toggle-label:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 4px;
-    bottom: 2px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
+    border: solid 1px black;
 }
 
 .theme-toggle-input:checked + .theme-toggle-label {
-    background-color: #007bff;
+    background-color: darkblue;
 }
 
 .theme-toggle-input:checked + .theme-toggle-label:before {
@@ -2224,7 +1859,7 @@ body.dark-mode h1{
     position: absolute;
     width: 16px;
     height: 16px;
-    top: 4px;
+    top: 2px;
     transition: 0.3s;
 }
 
@@ -2248,38 +1883,36 @@ body.dark-mode h1{
 }
 
 .category-tree a {
-    color: black; /* Ustawia kolor linków na czarno */
-    text-decoration: none; /* Usuwa podkreślenie */
-    font-weight: bold; /* Ustawia pogrubienie */
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 .category-tree a:hover {
-    color: black; /* Kolor podczas najechania */
+    color: black;
 }
 
 .category-tree a:visited {
-    color: black; /* Kolor dla odwiedzonych linków */
+    color: black;
 }
 
 .category-tree ul {
-    list-style-type: disc; /* Ustawia kropki na wszystkie poziomy listy */
+    list-style-type: disc;
 }
 
 .category-tree ul ul {
-    list-style-type: disc; /* Zapewnia, że nawet zagnieżdżone listy mają kropki */
+    list-style-type: disc;
 }
 
-body.dark-mode .category-tree a{
+body.dark-mode .category-tree a {
     color: white;
 }
 
-/* Ogólne style w trybie ciemnym */
 body.dark-mode {
     background-color: #121212;
     color: #e0e0e0;
 }
 
-/* Nagłówek w trybie ciemnym */
 body.dark-mode header {
     background-color: #1f1f1f;
     color: #e0e0e0;
@@ -2293,7 +1926,19 @@ body.dark-mode .navbar-icons a {
     color: #e0e0e0;
 }
 
-/* Karty w trybie ciemnym */
+body.dark-mode .navbar-toggler img {
+    filter: brightness(0) invert(1); /* Zmienia kolor obrazu na biały */
+}
+.navbar-toggler {
+    background: transparent; /* Przezroczyste tło */
+    border: none;
+}
+
+.navbar-toggler img {
+    height: 24px;
+    filter: none; /* Usuwanie domyślnych filtrów */
+}
+
 body.dark-mode .card-admin,
 body.dark-mode .modal-content,
 body.dark-mode .card-admin-dashboard {
@@ -2302,7 +1947,6 @@ body.dark-mode .card-admin-dashboard {
     border: 1px solid #333;
 }
 
-/* Przyciski w trybie ciemnym */
 body.dark-mode .btn {
     background-color: #333;
     color: #e0e0e0;
@@ -2314,7 +1958,6 @@ body.dark-mode .btn:hover {
     color: #ffffff;
 }
 
-/* Tabela w trybie ciemnym */
 body.dark-mode .table {
     background-color: #1f1f1f;
     color: #e0e0e0;
@@ -2331,7 +1974,6 @@ body.dark-mode .table td {
     color: #e0e0e0;
 }
 
-/* Formularze w trybie ciemnym */
 body.dark-mode input,
 body.dark-mode select,
 body.dark-mode textarea {
@@ -2345,12 +1987,10 @@ body.dark-mode textarea::placeholder {
     color: #888;
 }
 
-/* Ikony w trybie ciemnym */
 body.dark-mode .fa {
     color: #e0e0e0;
 }
 
-/* Przewijanie w trybie ciemnym */
 body.dark-mode ::-webkit-scrollbar {
     width: 8px;
 }
@@ -2364,7 +2004,7 @@ body.dark-mode ::-webkit-scrollbar-thumb {
     display: flex;
     gap: 15px;
     margin-left: auto;
-    padding-right: 40px; /* Zwiększ odstęp od prawej krawędzi */
+    padding-right: 40px;
 }
 
 .tab-link {
@@ -2377,7 +2017,6 @@ body.dark-mode ::-webkit-scrollbar-thumb {
     color: #ffffff;
 }
 
-/* Ciemny motyw */
 body.dark-mode {
     background-color: #121212;
     color: #e0e0e0;
@@ -2393,7 +2032,6 @@ body.dark-mode .tab-link.active {
     color: #ffffff;
 }
 
-/* Zakładki w trybie ciemnym */
 .dark-mode .tab-link {
     background-color: #2b2b2b;
     color: #e0e0e0;
@@ -2411,7 +2049,6 @@ body.dark-mode .tab-link.active {
     color: #ffffff;
 }
 
-/* Stylizacja zakładek */
 .dark-mode .tabs {
     background-color: #1f1f1f;
     display: flex;
@@ -2449,120 +2086,432 @@ body.dark-mode .tab-link.active {
     border: 1px solid #333;
 }
 
-
-/* Przyciski w ciemnym motywie */
 .dark-mode .btn-link.custom-link {
-    background-color: #333; /* Tło dla ciemnego motywu */
-    color: #e0e0e0; /* Kolor tekstu */
-    border: none; /* Usuń obramowanie */
-    border-radius: 5px; /* Zaokrąglone rogi */
-    padding: 10px 20px; /* Dodaj padding */
-    text-align: center; /* Wyrównanie tekstu */
-    display: block; /* Ustawienie jako blok */
-    transition: background-color 0.3s, color 0.3s; /* Dodanie efektu przejścia */
+    background-color: #333;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-align: center;
+    display: block;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* Efekt hover dla przycisków w ciemnym motywie */
 .dark-mode .btn-link.custom-link:hover {
-    background-color: #555; /* Zmiana tła po najechaniu */
-    color: #ffffff; /* Zmiana koloru tekstu po najechaniu */
-    text-decoration: none; /* Usuń podkreślenie */
+    background-color: #555;
+    color: #ffffff;
+    text-decoration: none;
 }
 
-/* Styl dla przycisków w jasnym motywie */
 .btn-link.custom-link {
-    background-color: #007bff; /* Tło dla jasnego motywu */
-    color: #ffffff; /* Kolor tekstu */
-    border: none; /* Usuń obramowanie */
-    border-radius: 5px; /* Zaokrąglone rogi */
-    padding: 10px 20px; /* Dodaj padding */
-    text-align: center; /* Wyrównanie tekstu */
-    display: block; /* Ustawienie jako blok */
-    transition: background-color 0.3s, color 0.3s; /* Dodanie efektu przejścia */
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-align: center;
+    display: block;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* Efekt hover dla przycisków w jasnym motywie */
 .btn-link.custom-link:hover {
-    background-color: #0056b3; /* Zmiana tła po najechaniu */
-    color: #ffffff; /* Zmiana koloru tekstu po najechaniu */
-    text-decoration: none; /* Usuń podkreślenie */
+    background-color: #0056b3;
+    color: #ffffff;
+    text-decoration: none;
 }
 
-
-/* Styl dla kontenera czatu w trybie ciemnym */
 body.dark-mode #chat-window {
-    background-color: #1f1f1f; /* Ciemniejsze tło */
-    border: 1px solid #333; /* Ciemniejsza ramka */
-    color: #e0e0e0; /* Jasny tekst */
+    background-color: #1f1f1f;
+    border: 1px solid #333;
+    color: #e0e0e0;
 }
 
-/* Styl wiadomości w trybie ciemnym */
 body.dark-mode .message {
-    color: #ffffff; /* Jasny kolor tekstu */
+    color: #ffffff;
 }
 
 body.dark-mode .message.user {
-    background-color: #007bff; /* Kolor dla wiadomości użytkownika */
+    background-color: #007bff;
 }
 
 body.dark-mode .message.admin {
-    background-color: #dc3545; /* Kolor dla wiadomości admina */
+    background-color: #dc3545;
 }
 
 body.dark-mode .message-time {
-    color: #888888; /* Kolor dla czasu wiadomości */
+    color: #888888;
 }
 
-/* Styl dla okna wprowadzania wiadomości w trybie ciemnym */
 body.dark-mode textarea.form-control {
-    background-color: #2b2b2b; /* Ciemniejsze tło dla pola tekstowego */
-    color: #e0e0e0; /* Jasny tekst */
-    border: 1px solid #444444; /* Ciemna ramka */
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    border: 1px solid #444444;
 }
 
 body.dark-mode textarea.form-control::placeholder {
-    color: #888888; /* Kolor placeholdera */
+    color: #888888;
 }
 
-/* Styl dla przycisku wysyłania wiadomości w trybie ciemnym */
 body.dark-mode .btn-primary {
-    background-color: #333; /* Ciemniejsze tło dla przycisku */
-    color: #e0e0e0; /* Jasny tekst */
-    border: 1px solid #444; /* Ciemniejsza ramka */
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
 }
 
 body.dark-mode .btn-primary:hover {
-    background-color: #555; /* Jaśniejsze tło po najechaniu */
-    color: #ffffff; /* Jaśniejszy tekst po najechaniu */
+    background-color: #555;
+    color: #ffffff;
 }
 
-/* Ogólne style dla strzałki */
 .back-arrow {
-    background-color: transparent; /* Usuń tło */
-    border: none; /* Usuń obramowanie */
-    color: black; /* Domyślny kolor strzałki */
-    font-size: 24px; /* Ustaw rozmiar strzałki */
-    cursor: pointer; /* Ustawienie kursora jako wskaźnik */
-    text-decoration: none; /* Usuń podkreślenie linka */
+    background-color: transparent;
+    border: none;
+    color: black;
+    font-size: 24px;
+    cursor: pointer;
+    text-decoration: none;
 }
 
-/* Styl strzałki w trybie ciemnym */
 body.dark-mode .back-arrow i {
-    color: white; /* Zmień kolor strzałki na biały */
+    color: white;
 }
 
 .back-arrow i {
-    color: black; /* Ustaw kolor strzałki na czarny */
-
+    color: black;
 }
 
-/* Styl na hover */
 .back-arrow:hover i {
-    color: #007bff; /* Zmień kolor na niebieski po najechaniu */
+    color: #007bff;
 }
 
-/* Usuń domyślny wygląd przycisku */
 .back-arrow:focus {
     outline: none;
     box-shadow: none;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+main.content-wrapper {
+    flex-grow: 1;
+    padding-bottom: 20px;
+}
+
+footer.footer-bar {
+    padding: 10px 20px; /* Zmniejszenie paddingu */
+    background-color: #000;
+    color: white;
+    text-align: center;
+    margin-top: auto;
+    font-size: 14px; /* Zmniejszenie rozmiaru czcionki */
+}
+
+footer.footer-bar a {
+    color: #ffffff;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 14px; /* Zmniejszenie rozmiaru czcionki linków */
+}
+
+footer.footer-bar a:hover {
+    color: #007bff;
+}
+
+.search-container {
+    flex-grow: 1;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sort-container {
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* vqvnjqnvqjveq */
+
+/* Ukrycie modala na starcie */
+.modal-category {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    overflow: auto;
+    padding-top: 60px;
+}
+
+.modal-category-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.close-category-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-category-modal:hover,
+.close-category-modal:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.category-tree {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.category-tree li {
+    margin: 10px 0;
+}
+
+.category-tree a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.category-tree a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Stylowanie linków w sidebarze */
+.sidebar-nav a {
+    text-decoration: none;
+    color: #333; /* Dostosuj kolor linku */
+    font-weight: bold;
+    display: block;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-nav a:hover {
+    background-color: #f1f1f1; /* Dostosuj kolor tła przy najechaniu */
+    color: #007bff; /* Dostosuj kolor tekstu przy najechaniu */
+    border-radius: 5px;
+}
+
+.sidebar-nav a.active {
+    background-color: #007bff; /* Dostosuj kolor tła dla aktywnego linku */
+    color: white; /* Dostosuj kolor tekstu dla aktywnego linku */
+    border-radius: 5px;
+}
+
+/* Dostosowanie tekstu w trybie ciemnym */
+.dark-mode .sidebar-nav a {
+    color: #fff; /* Biały tekst w trybie ciemnym */
+}
+
+.dark-mode .sidebar-nav a:hover {
+    background-color: #555; /* Dostosuj kolor tła przy najechaniu w trybie ciemnym */
+}
+
+/* Stylizacja kategorii i podkategorii */
+.category-tree,
+.subcategory-tree {
+    list-style: none; /* Usunięcie kropek */
+    padding-left: 0; /* Usunięcie domyślnego wcięcia */
+    margin-left: 0; /* Usunięcie domyślnego marginesu */
+}
+
+.category-item {
+    margin-bottom: 10px;
+    padding-left: 10px; /* Dodaj lekkie wcięcie dla wszystkich elementów */
+    display: block;
+}
+
+.subcategory-tree {
+    display: none;
+    padding-left: 20px; /* Większe wcięcie dla podkategorii */
+}
+
+.category-item.open > .subcategory-tree {
+    display: block;
+}
+
+.toggle-arrow {
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.no-arrow {
+    visibility: hidden;
+}
+
+.sticky-filter {
+    position: fixed; /* Zamiast sticky */
+    top: 0;
+    z-index: 9999;
+    background-color: white;
+    padding: 5px; /* Zmniejszony padding */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100vw; /* Pełna szerokość okna przeglądarki */
+    left: 0; /* Ustawienie pozycji od lewej */
+    right: 0; /* Ustawienie pozycji od prawej */
+    margin: 0; /* Usunięcie marginesów */
+    box-sizing: border-box; /* Upewnienie się, że padding nie wpływa na szerokość */
+}
+
+.sticky-filter .btn {
+    flex: 1;
+    margin: 0 5px;
+    font-size: 14px; /* Zmniejszenie rozmiaru czcionki */
+    padding: 5px; /* Zmniejszenie paddingu */
+    width: 100%; /* Szerokość na całą dostępną przestrzeń */
+}
+
+.sort-container {
+    flex: 1;
+    margin-left: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 5px; /* Zmniejszenie paddingu selecta */
+    font-size: 14px; /* Zmniejszenie rozmiaru czcionki */
+    margin-left: 5px;
+}
+
+.main-content {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body.dark-mode .sidebar {
+    background-color: #000; /* Czarny kolor tła dla trybu ciemnego */
+}
+
+body.dark-mode .sidebar-nav a {
+    color: #fff; /* Biały tekst dla linków w trybie ciemnym */
+}
+
+body.dark-mode .sidebar-nav a:hover {
+    background-color: #333; /* Ciemniejszy szary kolor tła przy najechaniu w trybie ciemnym */
+    color: #fff; /* Biały tekst przy najechaniu */
+}
+
+body.dark-mode .close-sidebar {
+    color: #fff; /* Biały kolor przycisku zamykania */
+}
+
+body.dark-mode .sticky-filter {
+    background-color: #121212;
+}
+
+/* Ukrywamy hamburger menu dla większych ekranów */
+.navbar-toggler {
+    display: none;
+}
+
+/* Ustawienia dla sidebaru */
+.sidebar {
+    position: fixed;
+    right: -100%;
+    top: 0;
+    width: 250px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.sidebar.open {
+    right: 0;
+}
+
+/* Ukrywanie standardowej nawigacji na mniejszych ekranach */
+@media (max-width: 768px) {
+    .navbar-links {
+        display: none;
+    }
+
+    .navbar-toggler {
+        display: block;
+    }
+
+    .navbar-icons {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+}
+
+.close-sidebar {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #000;
+}
+
+/* Dostosowanie sidebaru do ciemnego motywu */
+body.dark-mode .sidebar {
+    background-color: #000;
+    color: #fff;
+}
+
+body.dark-mode .close-sidebar {
+    color: #fff;
+}
+
+body.dark-mode .sidebar-nav a {
+    color: #fff;
+}
+
+.navbar-container {
+    border: none;
+}
+
+body.dark-mode #filterModal .modal-content {
+    background-color: #333; /* Ciemne tło dla modala w trybie ciemnym */
+    color: #f0f0f0; /* Jasny tekst w trybie ciemnym */
+}
+
+body.dark-mode #filterModal .close-category-modal {
+    color: #f0f0f0; /* Jasny kolor ikony zamykania w trybie ciemnym */
+}
+
+body.dark-mode #filterModal .category-tree {
+    color: #f0f0f0; /* Jasny kolor tekstu dla drzewa kategorii w trybie ciemnym */
+}
+
+body.dark-mode #filterModal .category-tree .toggle-arrow,
+body.dark-mode #filterModal .category-tree .no-arrow {
+    color: #f0f0f0; /* Jasny kolor dla strzałek w trybie ciemnym */
+}
+
+
+body.dark-mode .modal-category-content{
+    background-color: #121212;
+    color: wheat;
 }
