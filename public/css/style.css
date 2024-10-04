@@ -1796,7 +1796,6 @@ body.dark-mode .navbar-icons a:hover {
 
 body.dark-mode .navbar-container {
     background-color: #1f1f1f;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 body.dark-mode .navbar-container .navbar-links a {
     color: #e0e0e0;
@@ -2401,4 +2400,118 @@ footer.footer-bar a:hover {
 .main-content {
     margin-top: 0;
     padding-top: 0;
+}
+
+body.dark-mode .sidebar {
+    background-color: #000; /* Czarny kolor tła dla trybu ciemnego */
+}
+
+body.dark-mode .sidebar-nav a {
+    color: #fff; /* Biały tekst dla linków w trybie ciemnym */
+}
+
+body.dark-mode .sidebar-nav a:hover {
+    background-color: #333; /* Ciemniejszy szary kolor tła przy najechaniu w trybie ciemnym */
+    color: #fff; /* Biały tekst przy najechaniu */
+}
+
+body.dark-mode .close-sidebar {
+    color: #fff; /* Biały kolor przycisku zamykania */
+}
+
+body.dark-mode .sticky-filter {
+    background-color: #121212;
+}
+
+/* Ukrywamy hamburger menu dla większych ekranów */
+.navbar-toggler {
+    display: none;
+}
+
+/* Ustawienia dla sidebaru */
+.sidebar {
+    position: fixed;
+    right: -100%;
+    top: 0;
+    width: 250px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.sidebar.open {
+    right: 0;
+}
+
+/* Ukrywanie standardowej nawigacji na mniejszych ekranach */
+@media (max-width: 768px) {
+    .navbar-links {
+        display: none;
+    }
+
+    .navbar-toggler {
+        display: block;
+    }
+
+    .navbar-icons {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+}
+
+.close-sidebar {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #000;
+}
+
+/* Dostosowanie sidebaru do ciemnego motywu */
+body.dark-mode .sidebar {
+    background-color: #000;
+    color: #fff;
+}
+
+body.dark-mode .close-sidebar {
+    color: #fff;
+}
+
+body.dark-mode .sidebar-nav a {
+    color: #fff;
+}
+
+.navbar-container {
+    border: none;
+}
+
+body.dark-mode #filterModal .modal-content {
+    background-color: #333; /* Ciemne tło dla modala w trybie ciemnym */
+    color: #f0f0f0; /* Jasny tekst w trybie ciemnym */
+}
+
+body.dark-mode #filterModal .close-category-modal {
+    color: #f0f0f0; /* Jasny kolor ikony zamykania w trybie ciemnym */
+}
+
+body.dark-mode #filterModal .category-tree {
+    color: #f0f0f0; /* Jasny kolor tekstu dla drzewa kategorii w trybie ciemnym */
+}
+
+body.dark-mode #filterModal .category-tree .toggle-arrow,
+body.dark-mode #filterModal .category-tree .no-arrow {
+    color: #f0f0f0; /* Jasny kolor dla strzałek w trybie ciemnym */
+}
+
+
+body.dark-mode .modal-category-content{
+    background-color: #121212;
+    color: wheat;
 }

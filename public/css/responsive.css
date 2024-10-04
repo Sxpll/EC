@@ -197,7 +197,7 @@
     }
     .filter-sort,
     .filter-select {
-        display: none;
+        display: flex;
     }
 }
 
@@ -546,5 +546,132 @@ select {
     /* Upewnij się, że navbar ma odpowiedni z-index, aby był poniżej sidebaru */
     .navbar {
         z-index: 1000;
+    }
+}
+
+/* Responsywność dla modalnego okna i zakładek */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        /* Szerokość dla małych ekranów */
+    }
+
+    .sticky-filter{
+        z-index: 1;
+    }
+
+    .tab-link {
+        font-size: 14px;
+        /* Zmniejszenie rozmiaru czcionki */
+    }
+
+    .tab-content {
+        padding: 10px;
+        /* Zmniejszenie paddingu */
+    }
+
+    .gallery-item {
+        width: 100px;
+        /* Zmniejszenie rozmiaru obrazów */
+        height: 100px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        width: 100%;
+    }
+
+    .table th,
+    .table td {
+        font-size: 12px;
+    }
+
+    .btn-view {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        padding: 5px 10px;
+    }
+
+    .table-responsive .table td {
+        word-wrap: break-word;
+        white-space: normal;
+    }
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.back-arrow {
+    margin: 0 auto 20px auto; /* wyśrodkowanie strzałki */
+    font-size: 18px;
+}
+
+.card {
+    width: 100%;
+    max-width: 600px; /* maksymalna szerokość karty */
+    margin: 0 auto;
+}
+
+#scrollable-category-tree {
+    width: 100%;
+    max-width: 600px; /* szerokość kontenera drzewa kategorii */
+}
+
+.btn {
+    width: 100%;
+    max-width: 300px;
+    margin: 10px 0;
+}
+
+/* Dostosowanie układu do małych ekranów */
+@media (max-width: 576px) {
+    .container {
+        padding: 10px;
+    }
+
+    .back-arrow {
+        font-size: 16px;
+        justify-content: center;
+        justify-items: center;
+    }
+
+    .card {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    #scrollable-category-tree {
+        max-height: 400px; /* zmniejszenie wysokości kontenera */
+    }
+}
+
+/* Zaktualizowane style dla wyszukiwania i sortowania */
+@media (min-width: 768px) {
+    .filter-sort,
+    .search-container,
+    .sort-container {
+        display: flex !important;
+        margin-top: 100px;
+    }
+
+    .sticky-filter {
+        display: none !important;
     }
 }

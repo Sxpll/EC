@@ -19,7 +19,7 @@
     <!-- Główna sekcja z produktami -->
     <div class="main-content">
         <!-- Wyszukiwarka i sortowanie na większych ekranach -->
-        <div class="filter-sort d-none d-md-flex justify-content-between align-items-center flex-wrap">
+        <div class="filter-sort sort-large d-flex justify-content-between align-items-center flex-wrap">
             <div class="search-container flex-grow-1 mb-2">
                 <form action="{{ route('products.publicIndex') }}" method="GET" class="search-form d-flex align-items-center">
                     <input type="text" name="search" class="search-input" placeholder="Wyszukaj produkty..." value="{{ request()->input('search') }}">
@@ -40,7 +40,7 @@
         </div>
 
         <!-- Przyciski Filtruj i Sortuj na mniejszych ekranach -->
-        <div class="sticky-filter">
+        <div class="sticky-filter sort-small">
             <button id="openFilterModal" class="btn btn-primary filtrujprzycisk">Filtruj</button>
             <form action="{{ route('products.publicIndex') }}" method="GET" class="sort-container">
                 <select class="filter-select" name="sort_by" onchange="this.form.submit()">
@@ -52,7 +52,6 @@
                 </select>
             </form>
         </div>
-
 
         <!-- Grid produktów -->
         <div class="product-grid" id="products-list">
@@ -144,27 +143,25 @@
             @endforeach
         </ul>
     </div>
-    </
+</div>
 
+@endsection
 
-
-        @endsection
-
-        @section('scripts')
-        <script>
+@section('scripts')
+<script>
     // Obsługa otwierania i zamykania modala
     document.getElementById('openFilterModal').addEventListener('click', function() {
-    document.getElementById('filterModal').style.display = 'block';
+        document.getElementById('filterModal').style.display = 'block';
     });
 
     document.getElementById('closeFilterModal').addEventListener('click', function() {
-    document.getElementById('filterModal').style.display = 'none';
+        document.getElementById('filterModal').style.display = 'none';
     });
 
     window.addEventListener('click', function(event) {
-    if (event.target == document.getElementById('filterModal')) {
-    document.getElementById('filterModal').style.display = 'none';
-    }
+        if (event.target == document.getElementById('filterModal')) {
+            document.getElementById('filterModal').style.display = 'none';
+        }
     });
 
     let lastScrollTop = 0;
@@ -172,60 +169,58 @@
     let stickyFilter = document.querySelector('.sticky-filter');
 
     window.addEventListener('scroll', function() {
-    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-    if (scrollTop > lastScrollTop) {
-    // Przewijanie w dół - ukryj navbar
-    navbar.style.top = '-100px'; // Można dostosować w zależności od wysokości navbara
-    stickyFilter.style.top = '0'; // Sticky bar pozostaje na górze
-    } else {
-    // Przewijanie w górę - pokaż navbar
-    navbar.style.top = '0';
-    stickyFilter.style.top = '60px'; // Przesuń sticky bar pod navbar
-    }
+        if (scrollTop > lastScrollTop) {
+            // Przewijanie w dół - ukryj navbar
+            navbar.style.top = '-100px'; // Można dostosować w zależności od wysokości navbara
+            stickyFilter.style.top = '0'; // Sticky bar pozostaje na górze
+        } else {
+            // Przewijanie w górę - pokaż navbar
+            navbar.style.top = '0';
+            stickyFilter.style.top = '60px'; // Przesuń sticky bar pod navbar
+        }
 
-    lastScrollTop = scrollTop;
+        lastScrollTop = scrollTop;
     });
-
 
     // Obsługa rozwijania kategorii
     document.querySelectorAll('.toggle-arrow').forEach(function(toggle) {
-    toggle.addEventListener('click', function() {
-    const categoryItem = this.parentElement;
-    categoryItem.classList.toggle('open');
-    const subcategories = categoryItem.querySelector('.subcategory-tree');
-    if (subcategories) {
-    subcategories.classList.toggle('open');
-    }
+        toggle.addEventListener('click', function() {
+            const categoryItem = this.parentElement;
+            categoryItem.classList.toggle('open');
+            const subcategories = categoryItem.querySelector('.subcategory-tree');
+            if (subcategories) {
+                subcategories.classList.toggle('open');
+            }
+        });
     });
-    });
-
 
     // Obsługa przycisku "Pokaż więcej"
     let page = 2;
     document.getElementById('show-more-btn').addEventListener('click', function() {
-    let url = `/products00?page=${page}`;
-    let categoryId = "{{ request()->input('category_id') }}";
-    if (categoryId) {
-    url += `&category_id=${categoryId}`;
-    }
-    let sortBy = "{{ request()->input('sort_by') }}";
-    if (sortBy) {
-    url += `&sort_by=${sortBy}`;
-    }
-    fetch(url, {
-    headers: {
-    'X-Requested-With': 'XMLHttpRequest'
-    }
-    })
-    .then(response => response.json())
-    .then(data => {
-    document.getElementById('products-list').innerHTML += data.html;
-    page++;
-    if (!data.hasMore) {
-    document.getElementById('show-more-btn').style.display = 'none';
-    }
+        let url = `/products00?page=${page}`;
+        let categoryId = "{{ request()->input('category_id') }}";
+        if (categoryId) {
+            url += `&category_id=${categoryId}`;
+        }
+        let sortBy = "{{ request()->input('sort_by') }}";
+        if (sortBy) {
+            url += `&sort_by=${sortBy}`;
+        }
+        fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('products-list').innerHTML += data.html;
+                page++;
+                if (!data.hasMore) {
+                    document.getElementById('show-more-btn').style.display = 'none';
+                }
+            });
     });
-    });
-    </script>
-    @endsection
+</script>
+@endsection

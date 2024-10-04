@@ -1,40 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<header>
-    <div class="navbar-container">
-        <a class="navbar-brand" href="{{ url('/') }}">
-            <img src="{{ asset('img/logo.png') }}" alt="Logo" style="height: 40px;">
-        </a>
-        <nav class="navbar-links">
-            <a href="{{ url('/home') }}">Home</a>
-            <a href="{{ route('products.publicIndex') }}">Products</a>
-            @if(auth()->check() && auth()->user()->role === 'admin')
-            <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
-            @endif
-            <a href="{{ route('chat.index') }}">Chat</a>
-        </nav>
-        <div class="navbar-icons">
-            <div class="theme-switch">
-                <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
-                <label for="theme-toggle" class="theme-toggle-label">
-                    <span class="theme-icon theme-sun"><i class="fas fa-sun"></i></span>
-                    <span class="theme-icon theme-moon"><i class="fas fa-moon"></i></span>
-                </label>
-            </div>
-            @if(auth()->check())
-            <a href="{{ route('account.edit') }}"><i class="fa fa-user"></i></a>
-            @endif
-            <a><i class="fa fa-shopping-cart"></i></a>
-            @if(auth()->check() && auth()->user()->role === 'admin')
-            <a id="notificationBell" href="#"><i class="fa fa-bell"></i><span id="notificationCount" class="notification-count" style="display: none;"></span></a>
-            @endif
-            @if(auth()->check())
-            <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fa fa-sign-out-alt"></i></a>
-            @endif
-        </div>
-    </div>
-</header>
+
+
+<div id="sidebar" class="sidebar">
+    <button id="close-sidebar" class="close-sidebar">&times;</button>
+    <nav class="sidebar-nav">
+        <a href="{{ url('/home') }}">Home</a>
+        <a href="{{ route('products.publicIndex') }}">Products</a>
+        @if(auth()->check() && auth()->user()->role === 'admin')
+        <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
+        @endif
+        <a href="{{ route('chat.index') }}">Chat</a>
+        @if(auth()->check())
+        <a href="{{ route('account.edit') }}">My Account</a>
+        <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+        @endif
+    </nav>
+</div>
 
 <main class="content-wrapper">
     <div class="container-admin manage-products-container">
@@ -66,7 +49,6 @@
                         <tbody id="products-table">
                             @foreach ($products as $product)
                             <tr class="{{ $product->isActive == 0 ? 'text-danger' : '' }}">
-
                                 <td>{{ $product->name }}</td>
                                 <td>
                                     @foreach ($product->categories as $category)
@@ -276,21 +258,13 @@
 </footer>
 @endsection
 
-@section('scripts')
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 <link href="{{ asset('css/style.css') }}" rel="stylesheet">
-
-
-<style>
-    .assigned-category {
-        color: gray;
-        font-weight: bold;
-    }
-</style>
-
+<link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
 
 
 <script>
@@ -302,6 +276,9 @@
         var viewBtns = document.getElementsByClassName("btn-view");
         var deleteProductBtn = document.getElementById("deleteProductBtn");
         var activateProductBtn = document.getElementById("activateProductBtn");
+
+
+
 
         // Inicjalizacja drzewa kategorii do wyboru
         $('#category-tree').jstree({
@@ -583,21 +560,7 @@
                 });
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeToggleInput = document.getElementById('theme-toggle');
 
-            // Sprawdź preferencje zapisane w localStorage
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.classList.toggle('dark-mode', savedTheme === 'dark');
-            themeToggleInput.checked = savedTheme === 'dark';
-
-            // Funkcja przełączania motywu
-            themeToggleInput.addEventListener('change', () => {
-                const isDarkMode = themeToggleInput.checked;
-                document.body.classList.toggle('dark-mode', isDarkMode);
-                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            });
-        });
 
 
         $('#viewProductForm').submit(function(event) {
@@ -627,4 +590,3 @@
         });
     });
 </script>
-@endsection
