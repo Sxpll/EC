@@ -556,7 +556,7 @@ select {
         /* Szerokość dla małych ekranów */
     }
 
-    .sticky-filter{
+    .sticky-filter {
         z-index: 1;
     }
 
@@ -673,5 +673,50 @@ select {
 
     .sticky-filter {
         display: none !important;
+    }
+}
+
+/* Stylowanie responsywny` linków */
+.responsive-link {
+    display: inline-block;
+    width: auto;
+    margin: 10px 0;
+    text-align: center;
+}
+
+@media (max-width: 576px) {
+    .responsive-link {
+        width: 90%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 576px) {
+    .d-flex {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto; /* Wyśrodkowanie całej sekcji */
+    }
+
+    .costest {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%; /* Dostosowanie do szerokości kontenera */
+        margin-top: 10px;
+    }
+
+    .new-chat-button {
+        width: 90%; /* Szerokość przycisku dopasowana do kontenera */
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    #chatStatusFilter {
+        width: 90%; /* Szerokość select boxa dopasowana do kontenera */
+        text-align: center;
+        margin-top: 10px;
     }
 }
