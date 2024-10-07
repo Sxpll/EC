@@ -54,7 +54,7 @@
         </div>
 
         <!-- Grid produktów -->
-        <div class="product-grid" id="products-list">
+        <div class="product-grid row" id="products-list">
             @foreach($products as $product)
             <div class="product-card">
                 <div class="card">
@@ -97,7 +97,6 @@
 </div>
 
 <!-- Modal Filtrów -->
-<!-- Modal Filtrów -->
 <div id="filterModal" class="modal-category">
     <div class="modal-category-content">
         <span id="closeFilterModal" class="close-category-modal">&times;</span>
@@ -132,7 +131,6 @@
     </div>
 </div>
 
-
 @endsection
 
 @section('scripts')
@@ -156,7 +154,7 @@
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const url = new URL(window.location.href);
-                url.searchParams.delete('category_id'); // Usunięcie filtru kategorii
+                url.searchParams.delete('category_id');
                 window.location.href = url.toString();
             });
         });
@@ -188,7 +186,6 @@
             });
         }
 
-        // Obsługa rozwijania kategorii w sidebarze oraz w modalu
         const handleCategoryTree = (selector) => {
             document.querySelectorAll(selector).forEach(function(categoryItem) {
                 const subcategoryTree = categoryItem.querySelector('.subcategory-tree');
@@ -206,14 +203,12 @@
                     }
                 });
 
-                // Sprawdzamy czy kategoria ma być otwarta na starcie
                 if (categoryItem.classList.contains('selected-category')) {
                     categoryItem.classList.add('open');
                     if (subcategoryTree) {
                         subcategoryTree.classList.add('open');
                         toggleArrow.innerHTML = '&#9660;';
                     }
-                    // Dodanie przycisku "X" dla usunięcia zaznaczonej kategorii
                     if (!categoryItem.querySelector('.remove-category')) {
                         const removeBtn = document.createElement('span');
                         removeBtn.className = 'remove-category';
@@ -232,10 +227,7 @@
             });
         };
 
-        // Obsługa kategorii w sidebarze
         handleCategoryTree('.custom-sidebar .category-item');
-
-        // Obsługa kategorii w modalu
         handleCategoryTree('#filterModal .category-item');
 
         let page = 2;
@@ -263,7 +255,9 @@
                         return response.json();
                     })
                     .then(data => {
-                        document.getElementById('products-list').innerHTML += data.html;
+                        const productsList = document.getElementById('products-list');
+                        productsList.innerHTML += data.html;
+
                         page++;
                         if (!data.hasMore) {
                             showMoreBtn.style.display = 'none';
