@@ -97,43 +97,30 @@
 </div>
 
 <!-- Modal Filtrów -->
+<!-- Modal Filtrów -->
 <div id="filterModal" class="modal-category">
     <div class="modal-category-content">
         <span id="closeFilterModal" class="close-category-modal">&times;</span>
         <h2>Kategorie</h2>
         <ul class="category-tree">
             @foreach ($categories as $category)
-            <li class="category-item">
-                @if ($category->children->count())
-                <span class="toggle-arrow">&#x25BC;</span>
-                @else
-                <span class="no-arrow">&#x25BC;</span>
-                @endif
+            <li class="category-item {{ request()->input('category_id') == $category->id ? 'selected-category' : '' }}">
                 <a href="{{ route('products.publicIndex', ['category_id' => $category->id]) }}">
                     {{ $category->name }}
                 </a>
+                @if (request()->input('category_id') == $category->id)
+                <span class="remove-category" data-category-id="{{ $category->id }}">X</span>
+                @endif
+
                 @if ($category->children->count())
                 <ul class="subcategory-tree">
                     @foreach ($category->children as $child)
-                    <li class="category-item">
-                        @if ($child->children->count())
-                        <span class="toggle-arrow">&#x25BC;</span>
-                        @else
-                        <span class="no-arrow">&#x25BC;</span>
-                        @endif
+                    <li class="category-item {{ request()->input('category_id') == $child->id ? 'selected-category' : '' }}">
                         <a href="{{ route('products.publicIndex', ['category_id' => $child->id]) }}">
                             {{ $child->name }}
                         </a>
-                        @if ($child->children->count())
-                        <ul class="subcategory-tree">
-                            @foreach ($child->children as $grandchild)
-                            <li class="category-item">
-                                <a href="{{ route('products.publicIndex', ['category_id' => $grandchild->id]) }}">
-                                    {{ $grandchild->name }}
-                                </a>
-                            </li>
-                            @endforeach
-                        </ul>
+                        @if (request()->input('category_id') == $child->id)
+                        <span class="remove-category" data-category-id="{{ $child->id }}">X</span>
                         @endif
                     </li>
                     @endforeach
@@ -145,82 +132,148 @@
     </div>
 </div>
 
+
 @endsection
 
 @section('scripts')
 <script>
-    // Obsługa otwierania i zamykania modala
-    document.getElementById('openFilterModal').addEventListener('click', function() {
-        document.getElementById('filterModal').style.display = 'block';
-    });
-
-    document.getElementById('closeFilterModal').addEventListener('click', function() {
-        document.getElementById('filterModal').style.display = 'none';
-    });
-
-    window.addEventListener('click', function(event) {
-        if (event.target == document.getElementById('filterModal')) {
-            document.getElementById('filterModal').style.display = 'none';
-        }
-    });
-
-    let lastScrollTop = 0;
-    let navbar = document.querySelector('.navbar');
-    let stickyFilter = document.querySelector('.sticky-filter');
-
-    window.addEventListener('scroll', function() {
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        if (scrollTop > lastScrollTop) {
-            // Przewijanie w dół - ukryj navbar
-            navbar.style.top = '-100px'; // Można dostosować w zależności od wysokości navbara
-            stickyFilter.style.top = '0'; // Sticky bar pozostaje na górze
-        } else {
-            // Przewijanie w górę - pokaż navbar
-            navbar.style.top = '0';
-            stickyFilter.style.top = '60px'; // Przesuń sticky bar pod navbar
+    document.addEventListener('DOMContentLoaded', function() {
+        const openFilterModalBtn = document.getElementById('openFilterModal');
+        if (openFilterModalBtn) {
+            openFilterModalBtn.addEventListener('click', function() {
+                document.getElementById('filterModal').style.display = 'block';
+            });
         }
 
-        lastScrollTop = scrollTop;
-    });
+        const closeFilterModalBtn = document.getElementById('closeFilterModal');
+        if (closeFilterModalBtn) {
+            closeFilterModalBtn.addEventListener('click', function() {
+                document.getElementById('filterModal').style.display = 'none';
+            });
+        }
 
-    // Obsługa rozwijania kategorii
-    document.querySelectorAll('.toggle-arrow').forEach(function(toggle) {
-        toggle.addEventListener('click', function() {
-            const categoryItem = this.parentElement;
-            categoryItem.classList.toggle('open');
-            const subcategories = categoryItem.querySelector('.subcategory-tree');
-            if (subcategories) {
-                subcategories.classList.toggle('open');
+        document.querySelectorAll('.remove-category').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = new URL(window.location.href);
+                url.searchParams.delete('category_id'); // Usunięcie filtru kategorii
+                window.location.href = url.toString();
+            });
+        });
+
+        window.addEventListener('click', function(event) {
+            const filterModal = document.getElementById('filterModal');
+            if (event.target == filterModal) {
+                filterModal.style.display = 'none';
             }
         });
-    });
 
-    // Obsługa przycisku "Pokaż więcej"
-    let page = 2;
-    document.getElementById('show-more-btn').addEventListener('click', function() {
-        let url = `/products00?page=${page}`;
-        let categoryId = "{{ request()->input('category_id') }}";
-        if (categoryId) {
-            url += `&category_id=${categoryId}`;
-        }
-        let sortBy = "{{ request()->input('sort_by') }}";
-        if (sortBy) {
-            url += `&sort_by=${sortBy}`;
-        }
-        fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+        let lastScrollTop = 0;
+        const navbar = document.querySelector('.navbar');
+        const stickyFilter = document.querySelector('.sticky-filter');
+
+        if (navbar && stickyFilter) {
+            window.addEventListener('scroll', function() {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                if (scrollTop > lastScrollTop) {
+                    navbar.style.top = '-100px';
+                    stickyFilter.style.top = '0';
+                } else {
+                    navbar.style.top = '0';
+                    stickyFilter.style.top = '60px';
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('products-list').innerHTML += data.html;
-                page++;
-                if (!data.hasMore) {
-                    document.getElementById('show-more-btn').style.display = 'none';
+
+                lastScrollTop = scrollTop;
+            });
+        }
+
+        // Obsługa rozwijania kategorii w sidebarze oraz w modalu
+        const handleCategoryTree = (selector) => {
+            document.querySelectorAll(selector).forEach(function(categoryItem) {
+                const subcategoryTree = categoryItem.querySelector('.subcategory-tree');
+                const toggleArrow = document.createElement('span');
+                toggleArrow.className = 'toggle-arrow';
+                toggleArrow.innerHTML = subcategoryTree && !categoryItem.classList.contains('open') ? '&#9654;' : '&#9660;';
+
+                categoryItem.prepend(toggleArrow);
+
+                toggleArrow.addEventListener('click', function() {
+                    categoryItem.classList.toggle('open');
+                    toggleArrow.innerHTML = categoryItem.classList.contains('open') ? '&#9660;' : '&#9654;';
+                    if (subcategoryTree) {
+                        subcategoryTree.classList.toggle('open');
+                    }
+                });
+
+                // Sprawdzamy czy kategoria ma być otwarta na starcie
+                if (categoryItem.classList.contains('selected-category')) {
+                    categoryItem.classList.add('open');
+                    if (subcategoryTree) {
+                        subcategoryTree.classList.add('open');
+                        toggleArrow.innerHTML = '&#9660;';
+                    }
+                    // Dodanie przycisku "X" dla usunięcia zaznaczonej kategorii
+                    if (!categoryItem.querySelector('.remove-category')) {
+                        const removeBtn = document.createElement('span');
+                        removeBtn.className = 'remove-category';
+                        removeBtn.textContent = 'X';
+                        removeBtn.style.marginLeft = '10px';
+                        categoryItem.querySelector('a').after(removeBtn);
+
+                        removeBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const url = new URL(window.location.href);
+                            url.searchParams.delete('category_id');
+                            window.location.href = url.toString();
+                        });
+                    }
                 }
             });
+        };
+
+        // Obsługa kategorii w sidebarze
+        handleCategoryTree('.custom-sidebar .category-item');
+
+        // Obsługa kategorii w modalu
+        handleCategoryTree('#filterModal .category-item');
+
+        let page = 2;
+        const showMoreBtn = document.getElementById('show-more-btn');
+        if (showMoreBtn) {
+            showMoreBtn.addEventListener('click', function() {
+                let url = `{{ route('products.publicIndex') }}?page=${page}`;
+                let categoryId = "{{ request()->input('category_id') }}";
+                if (categoryId) {
+                    url += `&category_id=${categoryId}`;
+                }
+                let sortBy = "{{ request()->input('sort_by') }}";
+                if (sortBy) {
+                    url += `&sort_by=${sortBy}`;
+                }
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById('products-list').innerHTML += data.html;
+                        page++;
+                        if (!data.hasMore) {
+                            showMoreBtn.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                    });
+            });
+        }
     });
 </script>
 @endsection

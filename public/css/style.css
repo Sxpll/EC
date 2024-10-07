@@ -2510,8 +2510,31 @@ body.dark-mode #filterModal .category-tree .no-arrow {
     color: #f0f0f0; /* Jasny kolor dla strzałek w trybie ciemnym */
 }
 
-
-body.dark-mode .modal-category-content{
+body.dark-mode .modal-category-content {
     background-color: #121212;
     color: wheat;
+}
+
+.selected-category > a {
+    color: white;
+    background-color: purple;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.selected-category > a:hover {
+    color: white;
+}
+
+.subcategory-tree {
+    display: none;
+}
+
+.category-item.open > .subcategory-tree {
+    display: block;
+}
+
+.toggle-arrow {
+    cursor: pointer;
+    margin-right: 10px;
 }
