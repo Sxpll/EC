@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
     Route::get('/products2', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
     Route::get('/products00', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
-    Route::get('/products/{id}', [ProductController::class, 'showProduct'])->name('products.show');
+    Route::get('/public/products/{id}', [ProductController::class, 'showProduct'])->name('products.show');
 
 
 
