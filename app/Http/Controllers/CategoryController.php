@@ -285,4 +285,13 @@ class CategoryController extends Controller
         }
         return $path;
     }
+
+    public function show($id)
+    {
+        // Znalezienie kategorii po jej ID
+        $category = Category::with('childrenRecursive')->findOrFail($id);
+
+        // Przekierowanie do widoku produktów z filtrowaniem po kategorii
+        return redirect()->route('products.publicIndex', ['category_id' => $category->id]);
+    }
 }

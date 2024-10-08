@@ -39,24 +39,11 @@
             </div>
         </div>
 
-        <!-- Przyciski Filtruj i Sortuj na mniejszych ekranach -->
-        <div class="sticky-filter sort-small">
-            <button id="openFilterModal" class="btn btn-primary filtrujprzycisk">Filtruj</button>
-            <form action="{{ route('products.publicIndex') }}" method="GET" class="sort-container">
-                <select class="filter-select" name="sort_by" onchange="this.form.submit()">
-                    <option value="">Sortuj według</option>
-                    <option value="name_asc">Nazwa (A-Z)</option>
-                    <option value="name_desc">Nazwa (Z-A)</option>
-                    <option value="price_asc">Cena (od najniższej)</option>
-                    <option value="price_desc">Cena (od najwyższej)</option>
-                </select>
-            </form>
-        </div>
-
         <!-- Grid produktów -->
         <div class="product-grid row" id="products-list">
             @foreach($products as $product)
-            <div class="product-card">
+            <div class="product-card col-md-4 mb-4">
+                <a href="{{ route('products.show', $product->id) }}" class="stretched-link"></a>
                 <div class="card">
                     @if($product->images->count())
                     <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}">
@@ -80,7 +67,7 @@
                     </div>
                     <div class="card-footer text-center">
                         <i class="fas fa-shopping-cart"></i>
-                        <button class="btn btn-primary">Do koszyka</button>
+                        <button class="btn btn-primary" disabled>Do koszyka</button> <!-- Przycisk, który na razie nic nie robi -->
                     </div>
                 </div>
             </div>
@@ -268,6 +255,17 @@
                     });
             });
         }
+
+        // Użycie event delegation, aby eventy działały także na nowo załadowanych produktach
+        document.getElementById('products-list').addEventListener('click', function(e) {
+            const card = e.target.closest('.product-card');
+            if (card) {
+                const link = card.querySelector('a.stretched-link');
+                if (link) {
+                    window.location.href = link.getAttribute('href');
+                }
+            }
+        });
     });
 </script>
 @endsection

@@ -454,4 +454,11 @@ class ProductController extends Controller
             return response()->json(['error' => 'Error fetching product details'], 500);
         }
     }
+
+
+    public function showProduct($id)
+    {
+        $product = Product::with(['categories', 'images', 'attachments'])->findOrFail($id);
+        return view('products.show', compact('product'));
+    }
 }
