@@ -43,7 +43,7 @@
         <div class="product-grid row" id="products-list">
             @foreach($products as $product)
             <div class="product-card col-md-4 mb-4">
-                <a href="{{ route('products.show', $product->id) }}" class="stretched-link"></a>
+                <a href="{{ route('products.show', $product->id) }}" class="stretched-link product-link"></a>
                 <div class="card">
                     @if($product->images->count())
                     <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}">
@@ -52,6 +52,7 @@
                     @endif
                     <div class="card-body">
                         <h5 class="card-title">{{ $product->name }}</h5>
+                        <p class="card-text">{{ Str::limit($product->description, 60) }}</p> <!-- Ograniczenie długości opisu -->
                         <p class="card-text"><strong>Cena:</strong> {{ number_format($product->price, 2) }} zł</p>
                         <p class="card-text"><strong>Dostępność:</strong>
                             @if ($product->availability === 'available')
@@ -123,6 +124,7 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
         const openFilterModalBtn = document.getElementById('openFilterModal');
         if (openFilterModalBtn) {
             openFilterModalBtn.addEventListener('click', function() {
@@ -249,6 +251,9 @@
                         if (!data.hasMore) {
                             showMoreBtn.style.display = 'none';
                         }
+
+                        // Przypisz event listener dla nowo załadowanych produktów
+                        registerProductLinks();
                     })
                     .catch(error => {
                         console.error('Fetch error:', error);
@@ -256,16 +261,22 @@
             });
         }
 
-        // Użycie event delegation, aby eventy działały także na nowo załadowanych produktach
-        document.getElementById('products-list').addEventListener('click', function(e) {
-            const card = e.target.closest('.product-card');
-            if (card) {
-                const link = card.querySelector('a.stretched-link');
-                if (link) {
+        // Funkcja przypisywania event listenerów do linków produktów
+        function registerProductLinks() {
+            const productLinks = document.querySelectorAll('.product-link');
+            console.log('Znaleziono linków:', productLinks.length); // Wyświetli liczbę znalezionych linków
+            productLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Kliknięty link', link.getAttribute('href'));
                     window.location.href = link.getAttribute('href');
-                }
-            }
-        });
+                });
+            });
+        }
+
+
+        // Początkowe przypisanie event listenerów
+        registerProductLinks();
     });
 </script>
 @endsection
