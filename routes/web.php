@@ -9,6 +9,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -16,9 +18,31 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+Route::get('/cart/contents', [CartController::class, 'contents'])->name('cart.contents');
 
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+
+
+
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+
+
+    Route::get('/order/create', [OrderController::class, 'create'])->name('orders.create');
+    Route::post('/order/store', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/order/thankyou', [OrderController::class, 'thankyou'])->name('orders.thankyou');
+    Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+    Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
+
+
+
+
 
     Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
     Route::put('/account', [AccountController::class, 'update'])->name('account.update');
@@ -34,6 +58,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
+    Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
+
+    // Szczegóły zamówienia
+    Route::get('/admin/orders/{id}', [AdminController::class, 'orderDetails'])->name('admin.orderDetails');
 
     // Product routes
     Route::resource('products', ProductController::class)->except(['show']);
@@ -50,6 +78,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/products2', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
     Route::get('/products00', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
     Route::get('/public/products/{id}', [ProductController::class, 'showProduct'])->name('products.show');
+
+
+
+
 
 
 

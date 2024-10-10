@@ -2597,3 +2597,32 @@ body.dark-mode .modal-category-content {
     height: 100%;
     z-index: 1; /* Ustaw niższy z-index dla klikalnego obszaru */
 }
+
+.cart-container {
+    position: relative;
+    display: inline-block;
+}
+
+.cart-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 100%; /* Position it below the cart icon */
+    right: 0; /* Align to the right */
+    background-color: #fff;
+    min-width: 250px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.cart-dropdown::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    border-width: 0 10px 10px 10px;
+    border-style: solid;
+    border-color: transparent transparent #fff transparent;
+}

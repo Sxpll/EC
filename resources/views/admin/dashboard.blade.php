@@ -69,6 +69,8 @@
                     <a href="{{ route('admin.manageUsers') }}" class="btn btn-primary btn-block dashboard-btn">Manage Users</a>
                     <a href="{{ route('products.index') }}" class="btn btn-primary btn-block dashboard-btn">Manage Products</a>
                     <a href="{{ route('categories.index') }}" class="btn btn-primary btn-block dashboard-btn">Manage Categories</a>
+                    <a href="{{ route('admin.orders') }}" class="btn btn-primary btn-block dashboard-btn">Manage Orders</a>
+
                 </div>
             </div>
         </div>

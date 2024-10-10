@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="main-container">
-    <!-- Sidebar z kategoriami - widoczny na większych ekranach -->
+    <!-- Sidebar with categories -->
     <div class="custom-sidebar d-none d-md-block">
         <div class="floating-sidebar shadow">
-            <h3 class="sidebar-header">Kategorie</h3>
+            <h3 class="sidebar-header">Categories</h3>
             <div class="category-wrapper">
                 <ul class="category-tree">
                     @foreach ($categories as $category)
@@ -16,43 +16,49 @@
         </div>
     </div>
 
-    <!-- Główna sekcja z produktami -->
+    <!-- Main content with products -->
     <div class="main-content">
-        <!-- Wyszukiwarka i sortowanie na większych ekranach -->
+        <!-- Search and sorting -->
         <div class="filter-sort sort-large d-flex justify-content-between align-items-center flex-wrap">
             <div class="search-container flex-grow-1 mb-2">
                 <form action="{{ route('products.publicIndex') }}" method="GET" class="search-form d-flex align-items-center">
-                    <input type="text" name="search" class="search-input" placeholder="Wyszukaj produkty..." value="{{ request()->input('search') }}">
-                    <button class="btn btn-primary ml-2">Szukaj</button>
+                    <input type="text" name="search" class="search-input" placeholder="Search products..." value="{{ request()->input('search') }}">
+                    <button class="btn btn-primary ml-2">Search</button>
                 </form>
             </div>
             <div class="sort-container mb-2">
                 <form action="{{ route('products.publicIndex') }}" method="GET">
                     <select class="filter-select" name="sort_by" onchange="this.form.submit()">
-                        <option value="">Sortuj według</option>
-                        <option value="name_asc" {{ request()->input('sort_by') == 'name_asc' ? 'selected' : '' }}>Nazwa (A-Z)</option>
-                        <option value="name_desc" {{ request()->input('sort_by') == 'name_desc' ? 'selected' : '' }}>Nazwa (Z-A)</option>
-                        <option value="price_asc" {{ request()->input('sort_by') == 'price_asc' ? 'selected' : '' }}>Cena (od najniższej)</option>
-                        <option value="price_desc" {{ request()->input('sort_by') == 'price_desc' ? 'selected' : '' }}>Cena (od najwyższej)</option>
+                        <option value="">Sort by</option>
+                        <option value="name_asc" {{ request()->input('sort_by') == 'name_asc' ? 'selected' : '' }}>Name (A-Z)</option>
+                        <option value="name_desc" {{ request()->input('sort_by') == 'name_desc' ? 'selected' : '' }}>Name (Z-A)</option>
+                        <option value="price_asc" {{ request()->input('sort_by') == 'price_asc' ? 'selected' : '' }}>Price (Low to High)</option>
+                        <option value="price_desc" {{ request()->input('sort_by') == 'price_desc' ? 'selected' : '' }}>Price (High to Low)</option>
                     </select>
                 </form>
             </div>
         </div>
 
-        <!-- Grid produktów -->
         <div class="product-grid row" id="products-list">
             @foreach($products as $product)
             <div class="product-card col-md-4 mb-4">
-                <a href="{{ route('products.show', $product->id) }}" class="stretched-link product-link"></a>
                 <div class="card">
-                    @if($product->images->count())
-                    <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}">
-                    @else
-                    <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}">
-                    @endif
+                    <!-- Obrazek produktu z linkiem -->
+                    <a href="{{ route('products.show', $product->id) }}" class="product-link">
+                        @if($product->images->count())
+                        <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}">
+                        @else
+                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ $product->name }}">
+                        @endif
+                    </a>
                     <div class="card-body">
-                        <h5 class="card-title">{{ $product->name }}</h5>
-                        <p class="card-text">{{ Str::limit($product->description, 60) }}</p> <!-- Ograniczenie długości opisu -->
+                        <!-- Nazwa produktu z linkiem -->
+                        <h5 class="card-title">
+                            <a href="{{ route('products.show', $product->id) }}" class="product-link">{{ $product->name }}</a>
+                        </h5>
+                        <!-- Opis produktu -->
+                        <p class="card-text">{{ Str::limit($product->description, 60) }}</p>
+                        <!-- Cena i dostępność -->
                         <p class="card-text"><strong>Cena:</strong> {{ number_format($product->price, 2) }} zł</p>
                         <p class="card-text"><strong>Dostępność:</strong>
                             @if ($product->availability === 'available')
@@ -67,28 +73,33 @@
                         </p>
                     </div>
                     <div class="card-footer text-center">
-                        <i class="fas fa-shopping-cart"></i>
-                        <button class="btn btn-primary" disabled>Do koszyka</button> <!-- Przycisk, który na razie nic nie robi -->
+                        <!-- Formularz dodawania do koszyka -->
+                        <form action="{{ route('cart.add', $product->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart"></i> Dodaj do koszyka
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
             @endforeach
         </div>
 
-        <!-- Pokaż więcej - Tylko jeśli są jeszcze produkty do wyświetlenia -->
+        <!-- Show more button -->
         @if($hasMorePages)
         <div class="pagination-wrapper">
-            <button id="show-more-btn" class="btn btn-primary">Pokaż więcej</button>
+            <button id="show-more-btn" class="btn btn-primary">Show More</button>
         </div>
         @endif
     </div>
 </div>
 
-<!-- Modal Filtrów -->
+<!-- Filter Modal -->
 <div id="filterModal" class="modal-category">
     <div class="modal-category-content">
         <span id="closeFilterModal" class="close-category-modal">&times;</span>
-        <h2>Kategorie</h2>
+        <h2>Categories</h2>
         <ul class="category-tree">
             @foreach ($categories as $category)
             <li class="category-item {{ request()->input('category_id') == $category->id ? 'selected-category' : '' }}">
@@ -253,7 +264,7 @@
                         }
 
                         // Przypisz event listener dla nowo załadowanych produktów
-                        registerProductLinks();
+                        registerAddToCartForms();
                     })
                     .catch(error => {
                         console.error('Fetch error:', error);
@@ -261,22 +272,57 @@
             });
         }
 
-        // Funkcja przypisywania event listenerów do linków produktów
-        function registerProductLinks() {
-            const productLinks = document.querySelectorAll('.product-link');
-            console.log('Znaleziono linków:', productLinks.length); // Wyświetli liczbę znalezionych linków
-            productLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('Kliknięty link', link.getAttribute('href'));
-                    window.location.href = link.getAttribute('href');
+        // Funkcja przypisywania event listenerów do formularzy 'Dodaj do koszyka'
+        function registerAddToCartForms() {
+            const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+
+            addToCartForms.forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(form);
+                    const action = form.getAttribute('action');
+
+                    axios.post(action, formData)
+                        .then(response => {
+                            updateCartItemCount();
+                            alert('Product added to cart!');
+                        })
+                        .catch(error => {
+                            console.error('Error adding to cart:', error);
+                        });
                 });
+
+                // Prevent click propagation from the button
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.addEventListener('click', function(event) {
+                        event.stopPropagation();
+                    });
+                }
             });
         }
 
+        // Funkcja aktualizująca licznik produktów w koszyku
+        function updateCartItemCount() {
+            axios.get("{{ route('cart.contents') }}")
+                .then(response => {
+                    const cart = response.data.cart;
+                    const itemCount = Object.keys(cart).length;
+                    const cartItemCount = document.getElementById('cartItemCount');
+                    if (cartItemCount) {
+                        cartItemCount.textContent = itemCount;
+                        cartItemCount.style.display = itemCount > 0 ? 'inline-block' : 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating cart item count:', error);
+                });
+        }
 
         // Początkowe przypisanie event listenerów
-        registerProductLinks();
+        registerAddToCartForms();
+
     });
 </script>
 @endsection

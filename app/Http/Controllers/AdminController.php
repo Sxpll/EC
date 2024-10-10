@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserHistory;
+use App\Models\Order;
+use App\Models\OrderItem;
+
 
 class AdminController extends Controller
 {
@@ -175,5 +178,17 @@ class AdminController extends Controller
 
         $histories = UserHistory::where('user_id', $id)->orderBy('created_at', 'desc')->get();
         return response()->json($histories);
+    }
+
+    public function orders()
+    {
+        $orders = Order::with('orderItems.product')->orderBy('created_at', 'desc')->get();
+        return view('admin.orders.index', compact('orders'));
+    }
+
+    public function orderDetails($id)
+    {
+        $order = Order::with('orderItems.product')->findOrFail($id);
+        return view('admin.orders.show', compact('order'));
     }
 }
