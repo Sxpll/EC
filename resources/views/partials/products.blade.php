@@ -1,6 +1,8 @@
 @foreach($products as $product)
 <div class="product-card ">
     <div class="card">
+        <a href="{{ route('products.show', $product->id) }}" class="stretched-link product-link"></a>
+
         @if($product->images->count())
         <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}">
         @else

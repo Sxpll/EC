@@ -49,6 +49,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
     Route::get('/products2', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
     Route::get('/products00', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
+    Route::get('/public/products/{id}', [ProductController::class, 'showProduct'])->name('products.show');
+
 
 
 
@@ -62,6 +64,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
     Route::get('/categories/{id}/products', [CategoryController::class, 'getProducts'])->name('categories.getProducts');
     Route::post('/categories/move-products', [CategoryController::class, 'moveProductsToNewSubcategory'])->name('categories.moveProducts');
+    Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/categories/{id}', [App\Http\Controllers\CategoryController::class, 'show'])->name('categories.show');
+
+
+
+
 
     // Resource route for categories should be at the end
     Route::resource('categories', CategoryController::class)->except(['show']);

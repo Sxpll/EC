@@ -116,6 +116,7 @@
     <script>
         // Theme switch logic
         document.addEventListener('DOMContentLoaded', function() {
+            
             const themeToggleNavbar = document.getElementById('theme-toggle-navbar');
             const themeToggleSidebar = document.getElementById('theme-toggle-sidebar');
 
