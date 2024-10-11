@@ -6,7 +6,7 @@
     <form action="{{ route('orders.store') }}" method="POST">
         @csrf
         <div class="form-group">
-            <label for="customer_name">Name:</label>
+            <label for="customer_name">Imię i nazwisko:</label>
             <input type="text" name="customer_name" class="form-control" required>
         </div>
         <div class="form-group">
@@ -14,10 +14,11 @@
             <input type="email" name="customer_email" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="customer_address">Address:</label>
+            <label for="customer_address">Adres:</label>
             <textarea name="customer_address" class="form-control" required></textarea>
         </div>
-        <button type="submit" class="btn btn-success">Submit Order</button>
+        <button type="submit" class="btn btn-success">Złóż zamówienie</button>
     </form>
+
 </div>
 @endsection

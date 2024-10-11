@@ -34,11 +34,14 @@ Route::middleware('auth')->group(function () {
 
 
 
+
     Route::get('/order/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/order/store', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/order/thankyou', [OrderController::class, 'thankyou'])->name('orders.thankyou');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/my-orders', [OrderController::class, 'myOrders'])->name('orders.myOrders');
+
 
 
 
@@ -59,6 +62,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
     Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
+
+    Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders');
+    Route::post('/admin/orders/{order}/update', [OrderController::class, 'update'])->name('admin.orders.update');
 
     // Szczegóły zamówienia
     Route::get('/admin/orders/{id}', [AdminController::class, 'orderDetails'])->name('admin.orderDetails');

@@ -22,19 +22,27 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Produkt nie został znaleziony.');
         }
 
+        if ($product->availability === 'unavailable') {
+            return redirect()->back()->with('error', 'Ten produkt jest niedostępny i nie może zostać dodany do koszyka.');
+        }
+
         // Pobierz koszyk z sesji
         $cart = session()->get('cart', []);
 
         // Dodaj lub zaktualizuj produkt w koszyku
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
-        } else {
+        // Dodaj lub zaktualizuj produkt w koszyku
+        if (!isset($cart[$id])) {
             $cart[$id] = [
                 'name' => $product->name,
                 'quantity' => 1,
                 'price' => $product->price,
+                'image' => $product->images->first() ? 'data:' . $product->images->first()->mime_type . ';base64,' . $product->images->first()->file_data : 'https://via.placeholder.com/150',
             ];
+        } else {
+            $cart[$id]['quantity'] = $cart[$id]['quantity'] === 1 ? 1 : ++$cart[$id]['quantity'];
         }
+
+
 
         // Zapisz koszyk w sesji
         session()->put('cart', $cart);
@@ -50,13 +58,22 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = $request->quantity;
+            $quantity = $request->input('quantity');
+            if ($quantity > 0) {
+                $cart[$id]['quantity'] = $quantity;
+            } else {
+                unset($cart[$id]);
+            }
             session()->put('cart', $cart);
             return back()->with('success', 'Koszyk został zaktualizowany!');
         }
 
-        return back()->with('error', 'Produkt nie znajduje się w koszyku!');
+        return back()->with(
+            'error',
+            'Produkt nie znajduje się w koszyku!'
+        );
     }
+
 
     // Usuwanie produktu z koszyka
     public function remove(Request $request, $id)

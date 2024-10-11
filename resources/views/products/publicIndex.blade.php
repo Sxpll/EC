@@ -74,9 +74,9 @@
                     </div>
                     <div class="card-footer text-center">
                         <!-- Formularz dodawania do koszyka -->
-                        <form action="{{ route('cart.add', $product->id) }}" method="POST">
+                        <form action="{{ route('cart.add', $product->id) }}" method="POST" class="add-to-cart-form">
                             @csrf
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary add-to-cart-btn">
                                 <i class="fas fa-shopping-cart"></i> Dodaj do koszyka
                             </button>
                         </form>
@@ -85,7 +85,6 @@
             </div>
             @endforeach
         </div>
-
         <!-- Show more button -->
         @if($hasMorePages)
         <div class="pagination-wrapper">
@@ -286,14 +285,14 @@
                     axios.post(action, formData)
                         .then(response => {
                             updateCartItemCount();
-                            alert('Product added to cart!');
+
                         })
                         .catch(error => {
-                            console.error('Error adding to cart:', error);
+                            console.error('Błąd podczas dodawania do koszyka:', error);
                         });
                 });
 
-                // Prevent click propagation from the button
+                // Zapobieganie propagacji kliknięcia z przycisku
                 const submitButton = form.querySelector('button[type="submit"]');
                 if (submitButton) {
                     submitButton.addEventListener('click', function(event) {
@@ -302,6 +301,7 @@
                 }
             });
         }
+
 
         // Funkcja aktualizująca licznik produktów w koszyku
         function updateCartItemCount() {
