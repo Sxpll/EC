@@ -38,8 +38,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/order/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/order/store', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/order/thankyou', [OrderController::class, 'thankyou'])->name('orders.thankyou');
-    Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
-    Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/my-orders', [OrderController::class, 'myOrders'])->name('orders.myOrders');
 
 
