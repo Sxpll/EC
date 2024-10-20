@@ -55,24 +55,22 @@ class CartController extends Controller
     // Aktualizacja ilości produktu w koszyku
     public function update(Request $request, $id)
     {
-        $cart = session()->get('cart', []);
-
+        $cart = session()->get('cart');
         if (isset($cart[$id])) {
-            $quantity = $request->input('quantity');
-            if ($quantity > 0) {
-                $cart[$id]['quantity'] = $quantity;
-            } else {
-                unset($cart[$id]);
-            }
+            $cart[$id]['quantity'] = $request->quantity;
+            $cart[$id]['subtotal'] = $cart[$id]['price'] * $cart[$id]['quantity'];
             session()->put('cart', $cart);
-            return back()->with('success', 'Koszyk został zaktualizowany!');
-        }
 
-        return back()->with(
-            'error',
-            'Produkt nie znajduje się w koszyku!'
-        );
+            $total = array_sum(array_column($cart, 'subtotal'));
+            return response()->json([
+                'success' => true,
+                'item' => $cart[$id],
+                'total' => $total
+            ]);
+        }
+        return response()->json(['success' => false]);
     }
+
 
 
     // Usuwanie produktu z koszyka
