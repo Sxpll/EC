@@ -101,29 +101,7 @@
         <h2>Categories</h2>
         <ul class="category-tree">
             @foreach ($categories as $category)
-            <li class="category-item {{ request()->input('category_id') == $category->id ? 'selected-category' : '' }}">
-                <a href="{{ route('products.publicIndex', ['category_id' => $category->id]) }}">
-                    {{ $category->name }}
-                </a>
-                @if (request()->input('category_id') == $category->id)
-                <span class="remove-category" data-category-id="{{ $category->id }}">X</span>
-                @endif
-
-                @if ($category->children->count())
-                <ul class="subcategory-tree">
-                    @foreach ($category->children as $child)
-                    <li class="category-item {{ request()->input('category_id') == $child->id ? 'selected-category' : '' }}">
-                        <a href="{{ route('products.publicIndex', ['category_id' => $child->id]) }}">
-                            {{ $child->name }}
-                        </a>
-                        @if (request()->input('category_id') == $child->id)
-                        <span class="remove-category" data-category-id="{{ $child->id }}">X</span>
-                        @endif
-                    </li>
-                    @endforeach
-                </ul>
-                @endif
-            </li>
+            @include('partials.category-node', ['category' => $category])
             @endforeach
         </ul>
     </div>
@@ -165,69 +143,7 @@
             }
         });
 
-        let lastScrollTop = 0;
-        const navbar = document.querySelector('.navbar');
-        const stickyFilter = document.querySelector('.sticky-filter');
-
-        if (navbar && stickyFilter) {
-            window.addEventListener('scroll', function() {
-                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-                if (scrollTop > lastScrollTop) {
-                    navbar.style.top = '-100px';
-                    stickyFilter.style.top = '0';
-                } else {
-                    navbar.style.top = '0';
-                    stickyFilter.style.top = '60px';
-                }
-
-                lastScrollTop = scrollTop;
-            });
-        }
-
-        const handleCategoryTree = (selector) => {
-            document.querySelectorAll(selector).forEach(function(categoryItem) {
-                const subcategoryTree = categoryItem.querySelector('.subcategory-tree');
-                const toggleArrow = document.createElement('span');
-                toggleArrow.className = 'toggle-arrow';
-                toggleArrow.innerHTML = subcategoryTree && !categoryItem.classList.contains('open') ? '&#9654;' : '&#9660;';
-
-                categoryItem.prepend(toggleArrow);
-
-                toggleArrow.addEventListener('click', function() {
-                    categoryItem.classList.toggle('open');
-                    toggleArrow.innerHTML = categoryItem.classList.contains('open') ? '&#9660;' : '&#9654;';
-                    if (subcategoryTree) {
-                        subcategoryTree.classList.toggle('open');
-                    }
-                });
-
-                if (categoryItem.classList.contains('selected-category')) {
-                    categoryItem.classList.add('open');
-                    if (subcategoryTree) {
-                        subcategoryTree.classList.add('open');
-                        toggleArrow.innerHTML = '&#9660;';
-                    }
-                    if (!categoryItem.querySelector('.remove-category')) {
-                        const removeBtn = document.createElement('span');
-                        removeBtn.className = 'remove-category';
-                        removeBtn.textContent = 'X';
-                        removeBtn.style.marginLeft = '10px';
-                        categoryItem.querySelector('a').after(removeBtn);
-
-                        removeBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            const url = new URL(window.location.href);
-                            url.searchParams.delete('category_id');
-                            window.location.href = url.toString();
-                        });
-                    }
-                }
-            });
-        };
-
-        handleCategoryTree('.custom-sidebar .category-item');
-        handleCategoryTree('#filterModal .category-item');
+        // Usuwamy funkcje związane z rozwijaniem kategorii
 
         let page = 2;
         const showMoreBtn = document.getElementById('show-more-btn');
@@ -301,7 +217,6 @@
                 }
             });
         }
-
 
         // Funkcja aktualizująca licznik produktów w koszyku
         function updateCartItemCount() {

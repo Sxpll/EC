@@ -263,6 +263,15 @@
     <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Ustawienie domyślnych nagłówków dla Axios
+            axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+            // Pobierz token CSRF z meta tagu
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Ustaw token CSRF w nagłówkach Axios
+            axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+
             // Theme switch logic
             const themeToggleNavbar = document.getElementById('theme-toggle-navbar');
             const themeToggleSidebar = document.getElementById('theme-toggle-sidebar');
@@ -299,12 +308,15 @@
             });
 
             // Notifications functionality
-            document.getElementById('notificationBell').addEventListener('click', function(event) {
-                event.preventDefault();
-                const notificationsDropdown = document.getElementById('notificationsDropdown');
-                const isDisplayed = notificationsDropdown.style.display === 'block';
-                notificationsDropdown.style.display = isDisplayed ? 'none' : 'block';
-            });
+            const notificationBell = document.getElementById('notificationBell');
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const notificationsDropdown = document.getElementById('notificationsDropdown');
+                    const isDisplayed = notificationsDropdown.style.display === 'block';
+                    notificationsDropdown.style.display = isDisplayed ? 'none' : 'block';
+                });
+            }
 
             // Fetch notifications periodically
             function fetchNotifications() {
@@ -469,8 +481,7 @@
             function updateCartItemQuantity(productId, quantity) {
                 if (quantity < 1) return;
                 axios.post(`/cart/update/${productId}`, {
-                        quantity: quantity,
-                        _token: '{{ csrf_token() }}'
+                        quantity: quantity
                     })
                     .then(response => {
                         fetchCartContents();
