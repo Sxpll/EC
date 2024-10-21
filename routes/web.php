@@ -85,6 +85,15 @@ Route::middleware('auth')->group(function () {
 
 
 
+    Route::get('/send-test-email', function () {
+        \Illuminate\Support\Facades\Mail::raw('This is a test email.', function ($message) {
+            $message->to('bartsob08@gmail.com') // Replace with your email address
+            ->subject('Test Email');
+        });
+        return 'Test email sent.';
+    });
+
+
 
 
 

@@ -1,72 +1,81 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-admin-dashboard">
-    <div class="card-admin-dashboard">
-        <div class="card-header">
-            <a href="{{ route('admin.dashboard') }}" class="back-arrow" style="margin-right: auto;">
+<div class="orders-container">
+    <div class="orders-card">
+        <div class="orders-card-header d-flex align-items-center">
+            <a href="{{ route('admin.dashboard') }}" class="back-arrow mr-auto">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <h1>Manage Orders</h1>
-
+            <h1>Zarządzaj Zamówieniami</h1>
         </div>
-        <div class="card-body">
+        <div class="orders-card-body">
             @if(session('success'))
-            <div class="alert alert-success">
+            <div class="alert alert-success text-center">
                 {{ session('success') }}
             </div>
             @endif
 
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>User</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Ordered At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($orders as $order)
-                    <tr class="order-row" onclick="toggleOrderDetails(this)">
-                        <td>{{ $order->id }}</td>
-                        <td>{{ $order->user->name }} {{ $order->user->lastname }}</td>
-                        <td>{{ number_format($order->total, 2) }} zł</td>
-                        <td>{{ ucfirst($order->status) }}</td>
-                        <td>{{ $order->created_at }}</td>
-                        <td>
-                            <button class="btn-details">View</button>
-                            <span class="expand-icon">&#9654;</span>
-                        </td>
-                    </tr>
-                    <tr class="orders-details">
-                        <td colspan="6">
-                            <h5>Order Items:</h5>
-                            <ul>
-                                @foreach($order->orderItems as $item)
-                                <li>{{ $item->product->name }} x {{ $item->quantity }} - {{ number_format($item->price * $item->quantity, 2) }} zł</li>
-                                @endforeach
-                            </ul>
-                            <div class="order-management">
-                                <form action="{{ route('admin.orders.update', $order->id) }}" method="POST">
-                                    @csrf
-                                    <select name="status" class="form-control">
-                                        <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Processing</option>
-                                        <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                        <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    </select>
-                                    <button type="submit" class="btn-update">Update Status</button>
-                                    <button type="button" class="btn-cancel">Cancel Order</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <!-- Dodano kontener dla tabeli -->
+            <div class="orders-table-wrapper">
+                <table class="orders-table table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Nr Zamówienia</th>
+                            <th>Użytkownik</th>
+                            <th>Łącznie</th>
+                            <th>Status</th>
+                            <th>Data Zamówienia</th>
+                            <th>Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($orders as $order)
+                        <tr class="order-row" onclick="toggleOrderDetails(this)">
+                            <td>{{ $order->id }}</td>
+                            <td>{{ $order->user->name }} {{ $order->user->lastname }}</td>
+                            <td>{{ number_format($order->total, 2) }} zł</td>
+                            <td>{{ ucfirst($order->status) }}</td>
+                            <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
+                            <td>
+                                <button class="btn-details btn btn-primary btn-sm">view</button>
+                                <span class="expand-icon">&#9654;</span>
+                            </td>
+                        </tr>
+                        <tr class="orders-details">
+                            <td colspan="6">
+                                <h5>Pozycje Zamówienia:</h5>
+                                <ul>
+                                    @foreach($order->orderItems as $item)
+                                    <li>{{ $item->product->name }} x {{ $item->quantity }} - {{ number_format($item->price * $item->quantity, 2) }} zł</li>
+                                    @endforeach
+                                </ul>
+                                <div class="order-management">
+                                    <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="form-inline">
+                                        @csrf
+                                        <div class="form-group mb-2">
+                                            <label for="status" class="mr-2">Status:</label>
+                                            <select name="status" class="form-control">
+                                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Oczekujące</option>
+                                                <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>W realizacji</option>
+                                                <option value="on_the_way" {{ $order->status == 'on_the_way' ? 'selected' : '' }}>W drodze</option>
+                                                <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Zakończone</option>
+                                                <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Anulowane</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn-update btn btn-success mb-2 ml-2">Zaktualizuj Status</button>
+                                        <!-- Opcjonalny przycisk anulowania
+                                        <button type="button" class="btn-cancel btn btn-danger mb-2 ml-2">Anuluj Zamówienie</button>
+                                        -->
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div> <!-- Koniec kontenera orders-table-wrapper -->
+
         </div>
     </div>
 </div>

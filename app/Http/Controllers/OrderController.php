@@ -5,6 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmationMail;
+
+
+
 
 class OrderController extends Controller
 {
@@ -14,6 +20,7 @@ class OrderController extends Controller
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
+
 
         return view('orders.create', compact('cart'));
     }
@@ -58,7 +65,7 @@ class OrderController extends Controller
             $orderItem->price = $item['price'];
             $orderItem->save();
         }
-
+        Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
         // Wyczyść koszyk
         session()->forget('cart');
 
@@ -87,9 +94,34 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
-        $order->status = $request->input('status');
-        $order->save();
+        $oldStatus = $order->status;
+        $newStatus = $request->input('status');
 
-        return redirect()->route('admin.orders')->with('success', 'Order status updated successfully.');
+        if ($oldStatus != $newStatus) {
+            $order->status = $newStatus;
+
+            // Jeśli nowy status to "on_the_way" i kod odbioru nie jest ustawiony
+            if ($newStatus == 'on_the_way' && !$order->pickup_code) {
+                // Wygeneruj 6-znakowy kod
+                $pickupCode = strtoupper(Str::random(6));
+
+                // Zapisz kod w zamówieniu
+                $order->pickup_code = $pickupCode;
+            }
+
+            $order->save();
+
+            // Wyślij e-mail z aktualizacją statusu
+            Mail::to($order->customer_email)->send(new \App\Mail\OrderStatusUpdateMail($order));
+
+            // Jeśli status to "on_the_way", wyślij e-mail z kodem odbioru
+            if ($newStatus == 'on_the_way') {
+                Mail::to($order->customer_email)->send(new \App\Mail\OrderPickupCodeMail($order));
+            }
+
+            return redirect()->route('admin.orders')->with('success', 'Status zamówienia został zaktualizowany.');
+        }
+
+        return redirect()->route('admin.orders')->with('info', 'Status zamówienia pozostał bez zmian.');
     }
 }

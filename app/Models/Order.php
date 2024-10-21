@@ -10,13 +10,15 @@ use App\Models\User;
 class Order extends Model
 {
     protected $fillable = [
-        'user_id',
-        'total',
-        'status',
         'customer_name',
         'customer_email',
         'customer_address',
+        'total',
+        'status',
+        'user_id',
+        'pickup_code',
     ];
+
 
     public function orderItems()
     {
