@@ -14,13 +14,11 @@ class ChatController extends Controller
 {
     public function index(Request $request)
     {
-        // Sprawdzenie, czy użytkownik jest zalogowany
         if (!Auth::check()) {
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
         if (Auth::user()->role === 'admin') {
-            // Jeśli użytkownik jest adminem, pobierz wszystkie czaty dla widoku admina
             $search = $request->get('search');
             $chats = Chat::with(['user:id,name,lastname', 'messages' => function ($query) {
                 $query->select('id', 'chat_id', 'is_read', 'admin_id');
@@ -34,15 +32,12 @@ class ChatController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Sprawdzenie, czy żądanie jest AJAX-owe i zwrócenie JSON-a
             if ($request->ajax()) {
                 return response()->json($chats);
             }
 
-            // Zwraca widok dla admina
             return view('chat.index', compact('chats'));
         } else {
-            // Dla zwykłego użytkownika przekieruj do jego widoku czatów
             return redirect()->route('chat.userChats');
         }
     }
@@ -50,7 +45,6 @@ class ChatController extends Controller
 
     public function userChats()
     {
-        // Widok dla zwykłego użytkownika, który wyświetla jego własne czaty
         $chats = Chat::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
@@ -73,7 +67,6 @@ class ChatController extends Controller
                     ->update(['is_read' => true]);
             }
 
-            // Logowanie odpowiedzi
             Log::info('Chat details fetched', ['chat' => $chat]);
 
             return response()->json([
@@ -93,17 +86,14 @@ class ChatController extends Controller
     {
         Log::info('Start sendMessage function for chat ID: ' . $id);
 
-        // Walidacja żądania
         $request->validate([
             'message' => 'required|string|max:1000',
         ]);
 
         try {
-            // Znajdź czat, sprawdź, czy istnieje
             $chat = Chat::findOrFail($id);
             Log::info('Chat found: ' . $chat->id);
 
-            // Sprawdź, czy czat nie jest zakończony
             if ($chat->status === 'completed') {
                 Log::warning('Cannot send messages to a completed chat.');
                 return response()->json([
@@ -112,27 +102,22 @@ class ChatController extends Controller
                 ], 400);
             }
 
-            // Utwórz nową wiadomość
             $message = new Message();
             $message->chat_id = $chat->id;
             $message->message = $request->message;
 
-            // Przypisanie admin_id lub user_id w zależności od roli
             if (Auth::user()->role === 'admin') {
                 $message->admin_id = Auth::id();
             } else {
                 $message->user_id = Auth::id();
             }
 
-            $message->is_read = false; // Oznacz nową wiadomość jako nieprzeczytaną
+            $message->is_read = false;
             $message->save();
             Log::info('Message saved for chat: ' . $chat->id);
 
-            // Sprawdzenie, czy wiadomość pochodzi od admina
             if ($message->admin_id) {
-                // Jeśli admin wysłał wiadomość, sprawdź, czy to admin przypisany do czatu
                 if ($chat->admin_id && $chat->admin_id !== $message->admin_id) {
-                    // Powiadom przypisanego admina, że nowa wiadomość została wysłana
                     Notification::create([
                         'chat_id' => $chat->id,
                         'user_id' => $chat->admin_id,
@@ -142,7 +127,6 @@ class ChatController extends Controller
                     Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
                 }
             } else {
-                // Wiadomość pochodzi od użytkownika, wyślij powiadomienie do przypisanego admina
                 if ($chat->admin_id) {
                     Notification::create([
                         'chat_id' => $chat->id,
@@ -154,12 +138,10 @@ class ChatController extends Controller
                 }
             }
 
-            // Zwróć pomyślną odpowiedź
             return response()->json(['success' => true], 200);
         } catch (\Exception $e) {
             Log::error('Error in sendMessage: ' . $e->getMessage());
 
-            // Zwróć odpowiedź z kodem błędu 500
             return response()->json([
                 'success' => false,
                 'message' => 'Internal Server Error'
@@ -177,7 +159,6 @@ class ChatController extends Controller
             $chat->is_taken = true;
             $chat->save();
 
-            // Usunięcie poprzednich powiadomień, które zostały wysłane do wszystkich adminów
             Notification::where('chat_id', $chat->id)
                 ->where('user_id', '!=', Auth::id())
                 ->delete();

@@ -49,10 +49,8 @@ class ProductController extends Controller
 
         $product = Product::create($request->only('name', 'description', 'price', 'availability'));
 
-        // Pobierz ID wszystkich zaznaczonych kategorii
         $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
 
-        // Filtruj kategorie: tylko najniższe (liście) lub te, które nie mają dzieci
         $validCategoryIds = Category::whereIn('id', $selectedCategoryIds)
             ->pluck('id')
             ->toArray();
@@ -61,14 +59,12 @@ class ProductController extends Controller
 
         $product->categories()->sync($validCategoryIds);
 
-        // Pobranie nazw kategorii
         $categoryNames = Category::whereIn('id', $validCategoryIds)->pluck('name')->toArray();
         $categoryNamesString = implode(', ', $categoryNames);
 
         $this->archiveCategories($product, $validCategoryIds);
         $this->addImagesAndAttachments($request, $product);
 
-        // Formatowanie danych produktu dla historii
         $productData = [
             'name' => $product->name,
             'description' => $product->description,
@@ -115,7 +111,6 @@ class ProductController extends Controller
             $oldProductData = $product->only(['name', 'description', 'price', 'availability']);
             $newProductData = $request->only(['name', 'description', 'price', 'availability']);
 
-            // Sprawdzenie zmian w polach
             foreach ($newProductData as $field => $newValue) {
                 $oldValue = $oldProductData[$field];
                 if ($oldValue != $newValue) {
@@ -135,7 +130,6 @@ class ProductController extends Controller
 
             $product->update($newProductData);
 
-            // Aktualizacja kategorii
             $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
 
             $validCategoryIds = Category::whereIn('id', $selectedCategoryIds)
@@ -210,7 +204,6 @@ class ProductController extends Controller
     {
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                // Przeskalowanie obrazu do rozdzielczości 250x250
                 $resizedImage = $this->resizeImage($image, 250, 250);
 
                 ProductImage::create([
@@ -371,7 +364,7 @@ class ProductController extends Controller
             $archivedCategories = \DB::table('product_category_history')
                 ->join('categories', 'product_category_history.category_id', '=', 'categories.id')
                 ->where('product_category_history.product_id', $id)
-                ->where('categories.isActive', 0) // Tylko nieaktywne kategorie
+                ->where('categories.isActive', 0)
                 ->select('product_category_history.path')
                 ->get();
 
@@ -389,29 +382,28 @@ class ProductController extends Controller
         $path = [];
 
         while ($category) {
-            array_unshift($path, $category->name); // Dodaj kategorię na początek
-            $category = $category->parent; // Przejdź do rodzica
+            array_unshift($path, $category->name);
+            $category = $category->parent;
         }
 
-        return implode('\\', $path); // Zwraca ścieżkę jako ciąg znaków z separatorami
+        return implode('\\', $path);
     }
 
     public function publicIndex(Request $request)
     {
-        // Pobierz numer strony (jeśli nie ma, domyślnie strona 1)
         $page = $request->get('page', 1);
 
-        // Pobierz tylko aktywne produkty
+
         try {
             $productsQuery = Product::where('isActive', true);
 
-            // Obsługa wyszukiwania
+
             if ($request->has('search')) {
                 $search = $request->input('search');
                 $productsQuery = $productsQuery->where('name', 'LIKE', "%{$search}%");
             }
 
-            // Obsługa filtrowania po kategorii
+
             if ($request->has('category_id')) {
                 $categoryId = $request->input('category_id');
                 $productsQuery->whereHas('categories', function ($query) use ($categoryId) {
@@ -419,7 +411,7 @@ class ProductController extends Controller
                 });
             }
 
-            // Obsługa sortowania
+
             if ($request->has('sort_by')) {
                 $sortBy = $request->input('sort_by');
                 if ($sortBy === 'price_asc') {
@@ -433,13 +425,13 @@ class ProductController extends Controller
                 }
             }
 
-            // Paginacja - 10 produktów na stronę
+
             $products = $productsQuery->paginate(10, ['*'], 'page', $page);
 
-            // Sprawdzenie, czy istnieje więcej stron
+
             $hasMorePages = $products->hasMorePages();
 
-            // Sprawdź, czy jest to zapytanie AJAX
+
             if ($request->expectsJson()) {
                 $view = view('partials.products', compact('products'))->render();
                 return response()->json([
@@ -448,10 +440,10 @@ class ProductController extends Controller
                 ]);
             }
 
-            // Pobierz wszystkie kategorie do wyświetlenia w sidebarze
+
             $categories = Category::whereNull('parent_id')->with('childrenRecursive')->where('isActive', 1)->get();
 
-            // Jeśli nie jest to zapytanie AJAX, zwróć pełny widok
+
             return view('products.publicIndex', compact('products', 'hasMorePages', 'categories'));
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error fetching product details'], 500);
@@ -469,7 +461,7 @@ class ProductController extends Controller
     {
         list($originalWidth, $originalHeight) = getimagesize($image->getRealPath());
 
-        // Tworzenie proporcjonalnej szerokości i wysokości
+
         $ratio = $originalWidth / $originalHeight;
         if ($width / $height > $ratio) {
             $width = $height * $ratio;
@@ -477,7 +469,7 @@ class ProductController extends Controller
             $height = $width / $ratio;
         }
 
-        // Wybieramy typ obrazu (JPEG, PNG)
+
         $imageResource = null;
         $extension = strtolower($image->getClientOriginalExtension());
         if ($extension === 'jpeg' || $extension === 'jpg') {
@@ -492,7 +484,7 @@ class ProductController extends Controller
             $resizedImage = imagecreatetruecolor($width, $height);
             imagecopyresampled($resizedImage, $imageResource, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
 
-            ob_start(); // Rozpoczynamy buforowanie
+            ob_start();
             if ($extension === 'jpeg' || $extension === 'jpg') {
                 imagejpeg($resizedImage);
             } elseif ($extension === 'png') {
@@ -500,7 +492,7 @@ class ProductController extends Controller
             } elseif ($extension === 'gif') {
                 imagegif($resizedImage);
             }
-            $imageContents = ob_get_clean(); // Pobieramy dane obrazu z bufora
+            $imageContents = ob_get_clean();
             return base64_encode($imageContents);
         }
 

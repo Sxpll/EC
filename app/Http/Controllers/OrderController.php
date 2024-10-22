@@ -32,20 +32,20 @@ class OrderController extends Controller
             return redirect()->route('cart.index')->with('error', 'Twój koszyk jest pusty.');
         }
 
-        // Walidacja danych
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email',
             'customer_address' => 'required|string',
         ]);
 
-        // Oblicz łączną kwotę
+
         $total = 0;
         foreach ($cart as $id => $item) {
             $total += $item['price'] * $item['quantity'];
         }
 
-        // Tworzenie zamówienia
+
         $order = new Order();
         $order->customer_name = $request->input('customer_name');
         $order->customer_email = $request->input('customer_email');
@@ -56,7 +56,7 @@ class OrderController extends Controller
 
         $order->save();
 
-        // Dodawanie pozycji zamówienia
+
         foreach ($cart as $id => $item) {
             $orderItem = new OrderItem();
             $orderItem->order_id = $order->id;
@@ -100,21 +100,21 @@ class OrderController extends Controller
         if ($oldStatus != $newStatus) {
             $order->status = $newStatus;
 
-            // Jeśli nowy status to "on_the_way" i kod odbioru nie jest ustawiony
+
             if ($newStatus == 'W drodze' && !$order->pickup_code) {
-                // Wygeneruj 6-znakowy kod
+
                 $pickupCode = strtoupper(Str::random(6));
 
-                // Zapisz kod w zamówieniu
+
                 $order->pickup_code = $pickupCode;
             }
 
             $order->save();
 
-            // Wyślij e-mail z aktualizacją statusu
+
             Mail::to($order->customer_email)->send(new \App\Mail\OrderStatusUpdateMail($order));
 
-            // Jeśli status to "on_the_way", wyślij e-mail z kodem odbioru
+
             if ($newStatus == 'W drodze') {
                 Mail::to($order->customer_email)->send(new \App\Mail\OrderPickupCodeMail($order));
             }

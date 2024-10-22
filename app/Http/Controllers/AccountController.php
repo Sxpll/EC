@@ -21,13 +21,13 @@ class AccountController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255', // Dodane
+            'lastname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         $user->name = $request->name;
-        $user->lastname = $request->lastname; // Dodane
+        $user->lastname = $request->lastname;
         $user->email = $request->email;
 
         if ($request->password) {

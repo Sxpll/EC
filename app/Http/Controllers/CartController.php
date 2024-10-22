@@ -7,7 +7,6 @@ use App\Models\Product;
 
 class CartController extends Controller
 {
-    // Wyświetlanie koszyka
     public function index()
     {
         $cart = session()->get('cart', []);
@@ -16,7 +15,7 @@ class CartController extends Controller
 
     public function add(Request $request, $id)
     {
-        // Znajdź produkt
+
         $product = Product::find($id);
         if (!$product) {
             return redirect()->back()->with('error', 'Produkt nie został znaleziony.');
@@ -26,11 +25,8 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Ten produkt jest niedostępny i nie może zostać dodany do koszyka.');
         }
 
-        // Pobierz koszyk z sesji
         $cart = session()->get('cart', []);
 
-        // Dodaj lub zaktualizuj produkt w koszyku
-        // Dodaj lub zaktualizuj produkt w koszyku
         if (!isset($cart[$id])) {
             $cart[$id] = [
                 'name' => $product->name,
@@ -44,15 +40,12 @@ class CartController extends Controller
 
 
 
-        // Zapisz koszyk w sesji
         session()->put('cart', $cart);
 
-        // Przekieruj z komunikatem sukcesu
         return redirect()->back()->with('success', 'Produkt został dodany do koszyka.');
     }
 
 
-    // Aktualizacja ilości produktu w koszyku
     public function update(Request $request, $id)
     {
         $cart = session()->get('cart');
@@ -73,7 +66,6 @@ class CartController extends Controller
 
 
 
-    // Usuwanie produktu z koszyka
     public function remove(Request $request, $id)
     {
         $cart = session()->get('cart', []);
@@ -87,7 +79,6 @@ class CartController extends Controller
         return back()->with('error', 'Produkt nie znajduje się w koszyku!');
     }
 
-    // Czyszczenie koszyka
     public function clear()
     {
         session()->forget('cart');

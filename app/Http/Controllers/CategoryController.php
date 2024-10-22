@@ -38,7 +38,6 @@ class CategoryController extends Controller
         ]);
 
         try {
-            // Tworzenie nowej kategorii
             $category = Category::create([
                 'name' => $request->name,
                 'parent_id' => $request->parent_id,
@@ -46,7 +45,6 @@ class CategoryController extends Controller
 
             Log::info('Category created successfully', ['category_id' => $category->id]);
 
-            // Jeśli żądanie jest typu AJAX, zwróć odpowiedź JSON z ID nowej kategorii
             if ($request->ajax()) {
                 return response()->json(['success' => 'Category added successfully', 'category_id' => $category->id]);
             }
@@ -98,19 +96,14 @@ class CategoryController extends Controller
         }
 
         try {
-            // Znajdź kategorię
             $category = Category::findOrFail($id);
 
-            // Najpierw rekurencyjnie usuń wszystkie dzieci tej kategorii
             foreach ($category->childrenRecursive as $child) {
-                // tu wywoluje sama siebie dla kazdego dziecka
                 $this->destroy($child->id);
             }
 
-            // Po usunięciu wszystkich dzieci, dezaktywuj kategorię
             $category->update(['isActive' => 0]);
 
-            // Zapisz historię produktów przed usunięciem
             $products = $category->products;
 
             foreach ($products as $product) {
@@ -123,7 +116,6 @@ class CategoryController extends Controller
                 ]);
             }
 
-            // Zwróć odpowiedź o powodzeniu
             return response()->json(['success' => 'Category and its subcategories deactivated successfully.']);
         } catch (\Exception $e) {
             Log::error('Error deactivating category: ' . $e->getMessage());
@@ -159,7 +151,7 @@ class CategoryController extends Controller
                 ]);
 
                 if ($categoryData['isActive'] == 0) {
-                    $this->deactivateChildren($category); // Dezaktywacja dzieci, jeśli rodzic jest nieaktywny
+                    $this->deactivateChildren($category);
                 }
 
                 if (!empty($categoryData['children'])) {
@@ -268,13 +260,6 @@ class CategoryController extends Controller
         return response()->json(['products' => $products]);
     }
 
-    // private function deactivateChildren(Category $category)
-    // {
-    //     foreach ($category->childrenRecursive as $child) {
-    //         $child->update(['isActive' => 0]);
-    //         $this->deactivateChildren($child); // Rekurencyjnie deaktywuj wszystkie dzieci
-    //     }
-    // }
 
     private function getCategoryPath($category)
     {
@@ -288,10 +273,8 @@ class CategoryController extends Controller
 
     public function show($id)
     {
-        // Znalezienie kategorii po jej ID
         $category = Category::with('childrenRecursive')->findOrFail($id);
 
-        // Przekierowanie do widoku produktów z filtrowaniem po kategorii
         return redirect()->route('products.publicIndex', ['category_id' => $category->id]);
     }
 }
