@@ -56,13 +56,14 @@
                                         <div class="form-group mb-2">
                                             <label for="status" class="mr-2">Status:</label>
                                             <select name="status" class="form-control">
-                                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Oczekujące</option>
-                                                <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>W realizacji</option>
-                                                <option value="on_the_way" {{ $order->status == 'on_the_way' ? 'selected' : '' }}>W drodze</option>
-                                                <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Zakończone</option>
-                                                <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Anulowane</option>
+                                                <option value="Oczekujące" {{ $order->status == 'Oczekujące' ? 'selected' : '' }}>Oczekujące</option>
+                                                <option value="W realizacji" {{ $order->status == 'W realizacji' ? 'selected' : '' }}>W realizacji</option>
+                                                <option value="W drodze" {{ $order->status == 'W drodze' ? 'selected' : '' }}>W drodze</option>
+                                                <option value="Zakończone" {{ $order->status == 'Zakończone' ? 'selected' : '' }}>Zakończone</option>
+                                                <option value="Anulowane" {{ $order->status == 'Anulowane' ? 'selected' : '' }}>Anulowane</option>
                                             </select>
                                         </div>
+
                                         <button type="submit" class="btn-update btn btn-success mb-2 ml-2">Zaktualizuj Status</button>
                                         <!-- Opcjonalny przycisk anulowania
                                         <button type="button" class="btn-cancel btn btn-danger mb-2 ml-2">Anuluj Zamówienie</button>
