@@ -51,7 +51,7 @@ class OrderController extends Controller
         $order->customer_email = $request->input('customer_email');
         $order->customer_address = $request->input('customer_address');
         $order->total = $total;
-        $order->status = 'pending';
+        $order->status = 'W realizacji';
         $order->user_id = auth()->id();
 
         $order->save();
@@ -66,7 +66,7 @@ class OrderController extends Controller
             $orderItem->save();
         }
         Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
-        // Wyczyść koszyk
+
         session()->forget('cart');
 
         return redirect()->route('orders.thankyou')->with('success', 'Zamówienie zostało złożone pomyślnie!');
@@ -101,7 +101,7 @@ class OrderController extends Controller
             $order->status = $newStatus;
 
             // Jeśli nowy status to "on_the_way" i kod odbioru nie jest ustawiony
-            if ($newStatus == 'on_the_way' && !$order->pickup_code) {
+            if ($newStatus == 'W drodze' && !$order->pickup_code) {
                 // Wygeneruj 6-znakowy kod
                 $pickupCode = strtoupper(Str::random(6));
 
@@ -115,7 +115,7 @@ class OrderController extends Controller
             Mail::to($order->customer_email)->send(new \App\Mail\OrderStatusUpdateMail($order));
 
             // Jeśli status to "on_the_way", wyślij e-mail z kodem odbioru
-            if ($newStatus == 'on_the_way') {
+            if ($newStatus == 'W drodze') {
                 Mail::to($order->customer_email)->send(new \App\Mail\OrderPickupCodeMail($order));
             }
 
