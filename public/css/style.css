@@ -2597,3 +2597,1030 @@ body.dark-mode .modal-category-content {
     height: 100%;
     z-index: 1; /* Ustaw niższy z-index dla klikalnego obszaru */
 }
+
+.cart-container {
+    position: relative;
+    display: inline-block;
+}
+
+.cart-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 100%; /* Position it below the cart icon */
+    right: 0; /* Align to the right */
+    background-color: #fff;
+    min-width: 250px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.cart-dropdown::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    border-width: 0 10px 10px 10px;
+    border-style: solid;
+    border-color: transparent transparent #fff transparent;
+}
+.btn-go-to-cart {
+    font-size: 18px;
+    padding: 10px 20px;
+}
+
+/* Styl dla linku produktu */
+.product-card .card {
+    position: relative;
+}
+
+.product-link {
+    display: block;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-link::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Zmniejszamy wysokość, aby nie pokrywała przycisku */
+    height: calc(
+        100% - 50px
+    ); /* Przyjmujemy, że stopka karty ma 50px wysokości */
+    z-index: 1;
+    background-color: transparent;
+}
+
+/* Ustawiamy wyższy z-index dla przycisku */
+.add-to-cart-btn {
+    position: relative;
+    z-index: 2;
+}
+
+.dashboard-btn {
+    font-size: 16px;
+    padding: 10px 20px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Hide spin buttons in number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Stylizacja tabeli zamówień */
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.orders-table th,
+.orders-table td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+    transition: background-color 0.3s;
+}
+
+.orders-table th {
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+}
+
+.order-row {
+    cursor: pointer;
+}
+
+.order-row:hover {
+    background-color: #f9f9f9;
+}
+
+.orders-details {
+    display: none;
+    transition: all 0.3s ease-out;
+    overflow: hidden;
+    background-color: #f7f7f7;
+}
+
+.orders-details.expanded {
+    display: table-row;
+}
+
+.orders-details td {
+    padding: 20px;
+    border-top: none;
+}
+
+/* Zarządzanie zamówieniem */
+.order-management {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.order-management button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-update {
+    background-color: #28a745;
+}
+
+.btn-update:hover {
+    background-color: #218838;
+}
+
+.btn-cancel {
+    background-color: #dc3545;
+}
+
+.btn-cancel:hover {
+    background-color: #c82333;
+}
+
+.btn-details {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-details:hover {
+    background-color: #0056b3;
+}
+
+/* Stylizacja ikonki rozwijania */
+.expand-icon {
+    margin-left: 10px;
+    color: #007bff;
+    font-size: 18px;
+    transition: transform 0.3s;
+}
+
+.expand-icon.rotated {
+    transform: rotate(90deg);
+}
+
+/* Stylizacja dashboardu */
+.container-admin-dashboard {
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.card-admin-dashboard {
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.card-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.card-header h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.dashboard-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.dashboard-card {
+    flex: 1;
+    min-width: 220px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card h3 {
+    font-size: 18px;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.dashboard-card p {
+    font-size: 24px;
+    color: #333;
+    font-weight: bold;
+}
+
+.dashboard-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.dashboard-btn {
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 15px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+.dashboard-btn:hover {
+    background-color: #0056b3;
+    color: #ffffff;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+.chat-container {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+}
+
+/* Styles for the Orders Management page */
+
+/* Container for the orders page */
+.orders-container {
+    padding: 20px;
+    box-sizing: border-box;
+    margin-top: 80px;
+    /* Allow the container to expand with content */
+    min-height: 100vh;
+    /* Enable vertical scrolling when content overflows */
+    overflow-y: auto;
+}
+
+/* Card styling for orders */
+.orders-card {
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    margin-top: 50px;
+}
+
+/* Header styling for the card */
+.orders-card-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Orders table styling */
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.orders-table th,
+.orders-table td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+    transition: background-color 0.3s;
+}
+
+.orders-table th {
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+}
+
+.order-row {
+    cursor: pointer;
+}
+
+.order-row:hover {
+    background-color: #f9f9f9;
+}
+
+/* Details row styling */
+.orders-details {
+    display: none;
+    transition: all 0.3s ease-out;
+    overflow: hidden;
+    background-color: #f7f7f7;
+}
+
+.orders-details.expanded {
+    display: table-row;
+}
+
+.orders-details td {
+    padding: 20px;
+    border-top: none;
+}
+
+/* Order management form styling */
+.order-management {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.order-management .form-control {
+    width: auto;
+    display: inline-block;
+}
+
+.order-management .btn-update {
+    margin-left: 10px;
+}
+
+/* Expand icon styling */
+.expand-icon {
+    margin-left: 10px;
+    color: #007bff;
+    font-size: 18px;
+    transition: transform 0.3s;
+}
+
+.expand-icon.rotated {
+    transform: rotate(90deg);
+}
+
+/* Button styling */
+.btn-details {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-details:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .orders-card {
+        padding: 10px;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        padding: 10px;
+    }
+
+    .order-management {
+        flex-direction: column;
+    }
+
+    .order-management .btn-update {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+/* Styl dla kontenera przewijalnego z tabelą zamówień */
+.orders-table-wrapper {
+    max-height: 60vh; /* Dostosuj wysokość w razie potrzeby */
+    overflow-y: auto;
+}
+
+/* Upewnij się, że tabela wypełnia szerokość kontenera */
+.orders-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* Opcjonalnie: Przyklejanie nagłówka tabeli podczas przewijania */
+.orders-table thead {
+    position: sticky;
+    top: 0;
+    background-color: #f0f0f0; /* Kolor tła nagłówka */
+    z-index: 2;
+}
+
+/* Upewnij się, że komórki tabeli nie wykraczają poza obszar */
+.orders-table th,
+.orders-table td {
+    word-wrap: break-word;
+}
+
+.custom-cart-container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.custom-cart-actions-top {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.custom-btn-clear-cart {
+    background-color: #ffc107;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.custom-btn-clear-cart:hover {
+    background-color: #e0a800;
+}
+
+.custom-cart-table-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.custom-cart-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.custom-cart-table th,
+.custom-cart-table td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.custom-cart-table th {
+    background-color: #f8f8f8;
+}
+
+.custom-product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.custom-quantity-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-quantity-input {
+    width: 50px;
+    text-align: center;
+    margin: 0 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.custom-btn-decrease,
+.custom-btn-increase {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.custom-btn-decrease:hover,
+.custom-btn-increase:hover {
+    background-color: #0056b3;
+}
+
+.custom-btn-remove {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.custom-btn-remove:hover {
+    background-color: #c82333;
+}
+
+.custom-total-row {
+    background-color: #f1f1f1;
+}
+
+.custom-total-label {
+    text-align: right;
+    font-size: 16px;
+}
+
+.custom-total-amount {
+    font-size: 16px;
+}
+
+.custom-cart-actions-bottom {
+    text-align: right;
+    margin-top: 15px;
+}
+
+.custom-btn-place-order {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.custom-btn-place-order:hover {
+    background-color: #218838;
+}
+
+/* Stylizacja scrollbarów */
+.custom-cart-table-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-cart-table-wrapper::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+}
+
+.custom-cart-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+/* Ukrycie spin buttonów w polach liczbowych */
+.custom-quantity-input::-webkit-outer-spin-button,
+.custom-quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.custom-quantity-input {
+    -moz-appearance: textfield;
+}
+
+.category-tree li.category-item > a {
+    color: #333;
+}
+
+.category-tree li.category-item.selected-category > a {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Stylowanie linków w sidebarze */
+.category-tree a {
+    text-decoration: none;
+    color: #333; /* Domyślny czarny kolor tekstu */
+    font-weight: bold;
+    display: block;
+    padding: 5px 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.category-tree a:hover {
+    background-color: #f1f1f1;
+    color: #007bff;
+    border-radius: 5px;
+}
+
+.category-item .selected-category {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.remove-category {
+    margin-left: 5px;
+    color: #dc3545;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.remove-category:hover {
+    color: #c82333;
+}
+
+/* Dostosowanie tekstu w trybie ciemnym */
+.dark-mode .category-tree a {
+    color: #fff;
+}
+
+.dark-mode .category-tree a:hover {
+    background-color: #555;
+    color: #007bff;
+}
+
+.dark-mode .category-item .selected-category {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Stylowanie linków w sidebarze */
+.category-tree {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.category-tree .subcategory-tree {
+    list-style: none;
+    padding-left: 15px; /* Wcięcie dla podkategorii */
+}
+
+.category-item {
+    margin-bottom: 5px;
+}
+
+.category-link-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.category-link-wrapper a {
+    text-decoration: none;
+    color: #333; /* Domyślny czarny kolor tekstu */
+    font-weight: bold;
+    flex-grow: 1;
+    padding: 5px 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.category-link-wrapper a:hover {
+    background-color: #f1f1f1;
+    color: #007bff;
+    border-radius: 5px;
+}
+
+.selected-category {
+    background-color: #007bff;
+    color: #fff !important;
+    border-radius: 5px;
+}
+
+.remove-category {
+    margin-left: 10px;
+    color: #dc3545;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.remove-category:hover {
+    color: #c82333;
+}
+
+/* Dostosowanie tekstu w trybie ciemnym */
+.dark-mode .category-link-wrapper a {
+    color: #fff;
+}
+
+.dark-mode .category-link-wrapper a:hover {
+    background-color: #555;
+    color: #007bff;
+}
+
+.dark-mode .selected-category {
+    background-color: #007bff;
+    color: #fff !important;
+}
+
+.dark-mode .remove-category {
+    color: #ff6b6b;
+}
+
+.dark-mode .remove-category:hover {
+    color: #ff4c4c;
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+}
+
+body.dark-mode .container-admin-dashboard {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-mode .card-admin-dashboard {
+    background-color: #1f1f1f;
+    border-color: #333;
+    color: #e0e0e0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .card-header {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+body.dark-mode .card-header h1,
+body.dark-mode .card-header p {
+    color: #e0e0e0;
+}
+
+body.dark-mode .dashboard-card {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .dashboard-card h3 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .dashboard-card p {
+    color: #ffffff;
+}
+
+body.dark-mode .dashboard-btn {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+body.dark-mode .dashboard-btn:hover {
+    background-color: #555;
+    color: #ffffff;
+}
+
+body.dark-mode .orders-container {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-mode .orders-card {
+    background-color: #1f1f1f;
+    border-color: #333;
+    color: #e0e0e0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .orders-card-header {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+body.dark-mode .orders-card-header h1,
+body.dark-mode .orders-card-header a {
+    color: #e0e0e0;
+}
+
+body.dark-mode .orders-table {
+    background-color: #1f1f1f;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .orders-table th {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+body.dark-mode .orders-table td {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-mode .btn-details {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+body.dark-mode .btn-details:hover {
+    background-color: #555;
+    color: #ffffff;
+}
+
+body.dark-mode .expand-icon {
+    color: #007bff;
+}
+
+body.dark-mode .orders-details {
+    background-color: #222;
+    color: #e0e0e0;
+}
+
+body.dark-mode .order-management {
+    background-color: #1f1f1f;
+    border: 1px solid #444;
+}
+
+body.dark-mode .btn-update {
+    background-color: #28a745;
+    border: 1px solid #3c763d;
+}
+
+body.dark-mode .btn-cancel {
+    background-color: #dc3545;
+    border: 1px solid #bd2130;
+}
+
+body.dark-mode .custom-cart-container {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-cart-table {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-cart-table th {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-cart-table td {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-cart-table-wrapper {
+    border-color: #333;
+}
+
+body.dark-mode .custom-btn-clear-cart {
+    background-color: #ffc107;
+    color: #333;
+}
+
+body.dark-mode .custom-btn-clear-cart:hover {
+    background-color: #e0a800;
+}
+
+body.dark-mode .custom-btn-remove {
+    background-color: #dc3545;
+    color: #e0e0e0;
+    border: 1px solid #c82333;
+}
+
+body.dark-mode .custom-btn-remove:hover {
+    background-color: #c82333;
+    color: #ffffff;
+}
+
+body.dark-mode .custom-btn-place-order {
+    background-color: #28a745;
+    color: #e0e0e0;
+    border: 1px solid #218838;
+}
+
+body.dark-mode .custom-btn-place-order:hover {
+    background-color: #218838;
+}
+
+body.dark-mode .custom-quantity-control {
+    background-color: #1f1f1f;
+}
+
+body.dark-mode .custom-quantity-input {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+body.dark-mode .custom-btn-increase,
+body.dark-mode .custom-btn-decrease {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+body.dark-mode .custom-btn-increase:hover,
+body.dark-mode .custom-btn-decrease:hover {
+    background-color: #555;
+    color: #ffffff;
+}
+
+body.dark-mode .custom-total-row {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-total-label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-total-amount {
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-cart-actions-bottom a {
+    background-color: #28a745;
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-cart-actions-bottom a:hover {
+    background-color: #218838;
+    color: #ffffff;
+}
+
+body.dark-mode .cart-dropdown {
+    background-color: #2b2b2b;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .cart-dropdown::before {
+    border-color: transparent transparent #2b2b2b transparent;
+}
+
+body.dark-mode .cart-dropdown h6 {
+    background-color: #333;
+    color: #e0e0e0;
+    border-bottom-color: #444;
+}
+
+body.dark-mode .cart-item {
+    background-color: #1f1f1f;
+    border-bottom: 1px solid #333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .cart-item img {
+    border: 1px solid #444;
+}
+
+body.dark-mode .cart-item-details {
+    color: #e0e0e0;
+}
+
+body.dark-mode .quantity-controls button {
+    background-color: #444;
+    color: #e0e0e0;
+    border: none;
+}
+
+body.dark-mode .quantity-controls input {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+body.dark-mode .cart-total {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    border-top-color: #444;
+}
+
+body.dark-mode .btn-go-to-cart {
+    background-color: #444;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-mode .btn-go-to-cart:hover {
+    background-color: #555;
+    color: #ffffff;
+}

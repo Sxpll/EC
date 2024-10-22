@@ -74,7 +74,12 @@
         </div>
 
         <!-- Przycisk do koszyka -->
-        <button type="button" class="btn btn-primary" style="padding: 10px 20px; margin-top: 20px;">Dodaj do koszyka</button>
+        <!-- Przycisk do koszyka -->
+        <form action="{{ route('cart.add', $product->id) }}" method="POST" style="margin-top: 20px;">
+            @csrf
+            <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">Dodaj do koszyka</button>
+        </form>
+
     </div>
 </div>
 

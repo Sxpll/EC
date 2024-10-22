@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="">
         <h1 class="elo">Your Threads</h1>
         <div class="costest">
             <button id="newThreadButton" class="new-chat-button">New Chat</button>
