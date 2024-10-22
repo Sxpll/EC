@@ -181,6 +181,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
+
         /*
          * Dostawcy usług pakietów...
          */
@@ -245,6 +246,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        
+
 
         // Dodaj ten wpis dla Darryldecode Cart
         'Cart' => Darryldecode\Cart\Facades\CartFacade::class,

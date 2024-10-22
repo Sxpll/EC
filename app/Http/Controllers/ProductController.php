@@ -210,9 +210,12 @@ class ProductController extends Controller
     {
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
+                // Przeskalowanie obrazu do rozdzielczości 250x250
+                $resizedImage = $this->resizeImage($image, 250, 250);
+
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'file_data' => base64_encode(file_get_contents($image->getRealPath())),
+                    'file_data' => $resizedImage,
                     'mime_type' => $image->getClientMimeType()
                 ]);
             }
@@ -460,5 +463,47 @@ class ProductController extends Controller
     {
         $product = Product::with(['categories', 'images', 'attachments'])->findOrFail($id);
         return view('products.show', compact('product'));
+    }
+
+    private function resizeImage($image, $width, $height)
+    {
+        list($originalWidth, $originalHeight) = getimagesize($image->getRealPath());
+
+        // Tworzenie proporcjonalnej szerokości i wysokości
+        $ratio = $originalWidth / $originalHeight;
+        if ($width / $height > $ratio) {
+            $width = $height * $ratio;
+        } else {
+            $height = $width / $ratio;
+        }
+
+        // Wybieramy typ obrazu (JPEG, PNG)
+        $imageResource = null;
+        $extension = strtolower($image->getClientOriginalExtension());
+        if ($extension === 'jpeg' || $extension === 'jpg') {
+            $imageResource = imagecreatefromjpeg($image->getRealPath());
+        } elseif ($extension === 'png') {
+            $imageResource = imagecreatefrompng($image->getRealPath());
+        } elseif ($extension === 'gif') {
+            $imageResource = imagecreatefromgif($image->getRealPath());
+        }
+
+        if ($imageResource) {
+            $resizedImage = imagecreatetruecolor($width, $height);
+            imagecopyresampled($resizedImage, $imageResource, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
+
+            ob_start(); // Rozpoczynamy buforowanie
+            if ($extension === 'jpeg' || $extension === 'jpg') {
+                imagejpeg($resizedImage);
+            } elseif ($extension === 'png') {
+                imagepng($resizedImage);
+            } elseif ($extension === 'gif') {
+                imagegif($resizedImage);
+            }
+            $imageContents = ob_get_clean(); // Pobieramy dane obrazu z bufora
+            return base64_encode($imageContents);
+        }
+
+        return null;
     }
 }
