@@ -112,9 +112,13 @@ class OrderController extends Controller
 
     public function myOrders()
     {
-        $orders = Order::where('user_id', auth()->id())->with('orderItems.product')->get();
+        $orders = Order::where('user_id', auth()->id())
+            ->with(['orderItems.product', 'discountCode'])
+            ->get();
+
         return view('orders.my_orders', compact('orders'));
     }
+
 
     public function adminIndex()
     {
