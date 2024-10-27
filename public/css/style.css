@@ -3625,3 +3625,9 @@ body.dark-mode .btn-go-to-cart:hover {
     color: #ffffff;
 }
 
+.new-discount-indicator {
+    color: red;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-left: 5px;
+}

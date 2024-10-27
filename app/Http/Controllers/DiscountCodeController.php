@@ -62,11 +62,14 @@ class DiscountCodeController extends Controller
             'users.*' => 'exists:users,id',
         ]);
 
+        // Generowanie unikalnego kodu i haszowanie go
         do {
             $plainCode = Str::upper(Str::random(8));
-            $exists = DiscountCode::where('code_hash', Hash::make($plainCode))->exists();
+            $codeHash = Hash::make($plainCode);
+            $exists = DiscountCode::where('code_hash', $codeHash)->exists();
         } while ($exists);
 
+        // Tworzenie nowego kodu rabatowego
         $discountCode = new DiscountCode([
             'description' => $request->input('description'),
             'amount' => $request->input('amount'),
@@ -75,11 +78,12 @@ class DiscountCodeController extends Controller
             'valid_until' => $request->input('valid_until'),
             'is_active' => $request->boolean('is_active'),
             'is_single_use' => $request->boolean('is_single_use'),
-            'code_hash' => Hash::make($plainCode), // Ustawienie zahashowanej wersji kodu
+            'code_hash' => $codeHash, // Zapisanie zahashowanego kodu
         ]);
 
         $discountCode->save();
 
+        // Przypisanie kodu do wybranych użytkowników i wysyłanie maili
         if ($request->has('users')) {
             $discountCode->users()->attach($request->input('users'));
 
@@ -88,17 +92,25 @@ class DiscountCodeController extends Controller
                 $request->input('users')
             )->get();
             foreach ($users as $user) {
+                // Ustawienie flagi nowego kodu rabatowego
+                $user->has_new_discount = true;
+                $user->save();
+
+                // Wysłanie e-maila z kodem rabatowym
                 Mail::to($user->email)->send(new DiscountCodeMail($plainCode, $discountCode));
             }
         } else {
             $users = User::all();
             foreach ($users as $user) {
+                $user->has_new_discount = true;
+                $user->save();
                 Mail::to($user->email)->send(new DiscountCodeMail($plainCode, $discountCode));
             }
         }
 
         return redirect()->route('discount_codes.index')->with('success', 'Kod rabatowy został utworzony i wysłany do użytkowników.');
     }
+
 
 
     // Formularz edycji kodu rabatowego (dla administratora)
@@ -165,7 +177,6 @@ class DiscountCodeController extends Controller
         return redirect()->route('discount_codes.index')->with('success', 'Kod rabatowy został usunięty.');
     }
 
-    // Wyświetlanie kodów rabatowych użytkownika
     public function myDiscountCodes()
     {
         if (!Auth::check()) {
@@ -177,6 +188,12 @@ class DiscountCodeController extends Controller
 
         // Pobranie historii użyć
         $usages = DiscountCodeUsage::where('user_id', $user->id)->with('discountCode', 'order')->get();
+
+        // Resetowanie flagi nowego kodu po wyświetleniu strony
+        if ($user->has_new_discount) {
+            $user->has_new_discount = false;
+            $user->save();
+        }
 
         return view('discount_codes.my_codes', compact('discountCodes', 'usages'));
     }

@@ -174,8 +174,15 @@
                         </label>
                     </div>
 
-                    <!-- Account Icon -->
-                    <a href="{{ route('account.edit') }}" class="account-icon"><i class="fa fa-user"></i></a>
+                    <!-- Ikona My Account -->
+                    <a href="{{ route('account.edit') }}" class="account-icon">
+                        <i class="fa fa-user"></i>
+                        @if(Auth::check() && Auth::user()->has_new_discount)
+                        <span class="new-discount-indicator">!</span> <!-- Wykrzyknik, jeśli jest nowy kod -->
+                        @endif
+                    </a>
+
+
 
                     <!-- Cart Icon -->
                     <div class="cart-container">
