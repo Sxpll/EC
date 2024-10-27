@@ -56,6 +56,12 @@
             <label for="is_active" class="form-check-label">Aktywny</label>
         </div>
 
+        <div class="form-group form-check">
+            <input type="checkbox" name="is_single_use" id="is_single_use" class="form-check-input" value="1" {{ old('is_single_use', true) ? 'checked' : '' }}>
+            <label for="is_single_use" class="form-check-label">Jednorazowy kod</label>
+        </div>
+
+
         <!-- Wybór użytkowników -->
         <div class="form-group">
             <label for="users">Przypisz do użytkowników (opcjonalnie):</label>

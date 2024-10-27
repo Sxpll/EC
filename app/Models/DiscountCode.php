@@ -18,6 +18,7 @@ class DiscountCode extends Model
         'valid_from',
         'valid_until',
         'is_active',
+        'is_single_use',
     ];
 
     // Rzutowanie pól na typ daty

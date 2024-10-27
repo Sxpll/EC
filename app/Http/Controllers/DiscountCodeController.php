@@ -76,6 +76,7 @@ class DiscountCodeController extends Controller
             'valid_from' => $request->input('valid_from'),
             'valid_until' => $request->input('valid_until'),
             'is_active' => $request->boolean('is_active'),
+            'is_single_use' => $request->boolean('is_single_use'),
         ]);
 
         // Ustawienie kodu (spowoduje to również ustawienie code_hash dzięki metodzie setCodeAttribute)
