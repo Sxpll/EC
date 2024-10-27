@@ -44,7 +44,6 @@ class DiscountCodeController extends Controller
         return view('admin.discount_codes.create', compact('users'));
     }
 
-    // Zapisywanie nowego kodu rabatowego (dla administratora)
     public function store(Request $request)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
@@ -58,17 +57,16 @@ class DiscountCodeController extends Controller
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date|after_or_equal:valid_from',
             'is_active' => 'required|boolean',
+            'is_single_use' => 'required|boolean',
             'users' => 'nullable|array',
             'users.*' => 'exists:users,id',
         ]);
 
-        // Generowanie unikalnego kodu
         do {
             $plainCode = Str::upper(Str::random(8));
-            $exists = DiscountCode::where('code', $plainCode)->exists();
+            $exists = DiscountCode::where('code_hash', Hash::make($plainCode))->exists();
         } while ($exists);
 
-        // Tworzenie kodu rabatowego
         $discountCode = new DiscountCode([
             'description' => $request->input('description'),
             'amount' => $request->input('amount'),
@@ -77,26 +75,22 @@ class DiscountCodeController extends Controller
             'valid_until' => $request->input('valid_until'),
             'is_active' => $request->boolean('is_active'),
             'is_single_use' => $request->boolean('is_single_use'),
+            'code_hash' => Hash::make($plainCode), // Ustawienie zahashowanej wersji kodu
         ]);
-
-        // Ustawienie kodu (spowoduje to również ustawienie code_hash dzięki metodzie setCodeAttribute)
-        $discountCode->code = $plainCode;
 
         $discountCode->save();
 
-        // Przypisanie kodu do użytkowników
         if ($request->has('users')) {
             $discountCode->users()->attach($request->input('users'));
 
-            // Wysyłanie e-maili do użytkowników
-            $users = User::whereIn('id', $request->input('users'))->get();
-
+            $users = User::whereIn(
+                'id',
+                $request->input('users')
+            )->get();
             foreach ($users as $user) {
-                // Wysyłanie e-maila
                 Mail::to($user->email)->send(new DiscountCodeMail($plainCode, $discountCode));
             }
         } else {
-            // Kod globalny, wysyłamy e-maile do wszystkich użytkowników
             $users = User::all();
             foreach ($users as $user) {
                 Mail::to($user->email)->send(new DiscountCodeMail($plainCode, $discountCode));
@@ -105,6 +99,7 @@ class DiscountCodeController extends Controller
 
         return redirect()->route('discount_codes.index')->with('success', 'Kod rabatowy został utworzony i wysłany do użytkowników.');
     }
+
 
     // Formularz edycji kodu rabatowego (dla administratora)
     public function edit($id)

@@ -114,14 +114,15 @@ class CartController extends Controller
 
         $enteredCode = $request->input('discount_code');
 
-        // Pobierz kod rabatowy z bazy danych
-        $discountCode = DiscountCode::where('code', $enteredCode)
-            ->where('is_active', true)
-            ->first();
+        // Zastąp dotychczasowe pobieranie kodu tym fragmentem
+        $discountCode = DiscountCode::where('is_active', true)->get()->first(function ($code) use ($enteredCode) {
+            return Hash::check($enteredCode, $code->code_hash);
+        });
 
         if (!$discountCode) {
             return redirect()->back()->with('error', 'Podany kod rabatowy jest nieprawidłowy lub nieaktywny.');
         }
+
 
         // Sprawdź daty ważności
         $now = Carbon::now();
