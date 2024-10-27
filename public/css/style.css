@@ -3631,3 +3631,29 @@ body.dark-mode .btn-go-to-cart:hover {
     font-size: 1.2em;
     margin-left: 5px;
 }
+
+.caret {
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+}
+
+.caret::before {
+    content: "\25B6"; /* trójkąt dla rozwijania */
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.caret-down::before {
+    transform: rotate(90deg); /* Obrót trójkąta po rozwinięciu */
+}
+
+.nested {
+    display: none;
+    margin-left: 20px;
+}
+
+.nested.active {
+    display: block;
+}

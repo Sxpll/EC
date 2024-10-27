@@ -11,6 +11,8 @@ use App\Mail\DiscountCodeMail;
 use Illuminate\Support\Facades\Hash;
 use App\Models\DiscountCodeUsage;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Category;
+use App\Models\Product;
 
 class DiscountCodeController extends Controller
 {
@@ -33,7 +35,6 @@ class DiscountCodeController extends Controller
         return view('admin.discount_codes.index', compact('discountCodes'));
     }
 
-    // Formularz tworzenia nowego kodu rabatowego (dla administratora)
     public function create()
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
@@ -41,8 +42,13 @@ class DiscountCodeController extends Controller
         }
 
         $users = User::all();
-        return view('admin.discount_codes.create', compact('users'));
+        $categories = $this->getJsTreeCategories(); // Pobranie danych w formacie JSON do `jstree`
+        $discountCode = new DiscountCode();
+
+        return view('admin.discount_codes.create', compact('users', 'categories', 'discountCode'));
     }
+
+
 
     public function store(Request $request)
     {
@@ -60,16 +66,16 @@ class DiscountCodeController extends Controller
             'is_single_use' => 'required|boolean',
             'users' => 'nullable|array',
             'users.*' => 'exists:users,id',
+            'categories' => 'nullable|array',  // upewnij się, że jest tablicą
+            'categories.*' => 'exists:categories,id',
         ]);
 
-        // Generowanie unikalnego kodu i haszowanie go
         do {
             $plainCode = Str::upper(Str::random(8));
             $codeHash = Hash::make($plainCode);
             $exists = DiscountCode::where('code_hash', $codeHash)->exists();
         } while ($exists);
 
-        // Tworzenie nowego kodu rabatowego
         $discountCode = new DiscountCode([
             'description' => $request->input('description'),
             'amount' => $request->input('amount'),
@@ -78,29 +84,24 @@ class DiscountCodeController extends Controller
             'valid_until' => $request->input('valid_until'),
             'is_active' => $request->boolean('is_active'),
             'is_single_use' => $request->boolean('is_single_use'),
-            'code_hash' => $codeHash, // Zapisanie zahashowanego kodu
+            'code_hash' => $codeHash,
         ]);
 
         $discountCode->save();
 
-        // Przypisanie kodu do wybranych użytkowników i wysyłanie maili
+        if ($request->has('categories')) {
+            // Konwersja na tablicę, aby upewnić się, że są pojedyncze wartości ID
+            $categories = array_map('intval', (array) $request->input('categories'));
+            $discountCode->categories()->attach($categories);
+        }
+
+
         if ($request->has('users')) {
             $discountCode->users()->attach($request->input('users'));
-
             $users = User::whereIn(
                 'id',
                 $request->input('users')
             )->get();
-            foreach ($users as $user) {
-                // Ustawienie flagi nowego kodu rabatowego
-                $user->has_new_discount = true;
-                $user->save();
-
-                // Wysłanie e-maila z kodem rabatowym
-                Mail::to($user->email)->send(new DiscountCodeMail($plainCode, $discountCode));
-            }
-        } else {
-            $users = User::all();
             foreach ($users as $user) {
                 $user->has_new_discount = true;
                 $user->save();
@@ -112,8 +113,6 @@ class DiscountCodeController extends Controller
     }
 
 
-
-    // Formularz edycji kodu rabatowego (dla administratora)
     public function edit($id)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
@@ -122,8 +121,28 @@ class DiscountCodeController extends Controller
 
         $discountCode = DiscountCode::findOrFail($id);
         $users = User::all();
-        return view('admin.discount_codes.edit', compact('discountCode', 'users'));
+        $categories = $this->getJsTreeCategories();
+        return view('admin.discount_codes.edit', compact('discountCode', 'users', 'categories'));
     }
+
+    private function getJsTreeCategories()
+    {
+        $categories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
+
+        $formatCategories = function ($categories) use (&$formatCategories) {
+            return $categories->map(function ($category) use ($formatCategories) {
+                return [
+                    'id' => $category->id,
+                    'text' => $category->name,
+                    'children' => $category->childrenRecursive->isEmpty() ? [] : $formatCategories($category->childrenRecursive),
+                ];
+            });
+        };
+
+        return $formatCategories($categories)->toArray(); // Dodajemy `toArray()` dla poprawnego formatu JSON
+    }
+
+
 
     // Aktualizacja kodu rabatowego (dla administratora)
     public function update(Request $request, $id)
@@ -196,5 +215,37 @@ class DiscountCodeController extends Controller
         }
 
         return view('discount_codes.my_codes', compact('discountCodes', 'usages'));
+    }
+
+    private function calculateDiscountedPrice($price, DiscountCode $discountCode)
+    {
+        if ($discountCode->type === 'fixed') {
+            return max(0, $price - $discountCode->amount);
+        } elseif ($discountCode->type === 'percentage') {
+            return max(0, $price * (1 - $discountCode->amount / 100));
+        }
+
+        return $price;
+    }
+
+    public function applyDiscountCode(Request $request, $productId)
+    {
+        $discountCode = DiscountCode::where('code', $request->input('code'))->first();
+
+        if (!$discountCode) {
+            return response()->json(['error' => 'Kod rabatowy nie istnieje.'], 404);
+        }
+
+        // Pobierz produkt
+        $product = Product::findOrFail($productId);
+
+        // Sprawdź, czy kod rabatowy można zastosować do tego produktu
+        if (!$discountCode->isApplicableToProduct($product)) {
+            return response()->json(['error' => 'Kod rabatowy nie dotyczy tego produktu.'], 400);
+        }
+
+        // Zastosuj rabat
+        $discountedPrice = $this->calculateDiscountedPrice($product->price, $discountCode);
+        return response()->json(['discounted_price' => $discountedPrice]);
     }
 }

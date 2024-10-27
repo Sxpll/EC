@@ -14,7 +14,7 @@
     </div>
     @endif
 
-    <form action="{{ route('discount_codes.store') }}" method="POST">
+    <form action="{{ route('discount_codes.store') }}" method="POST" style="overflow-y: auto; max-height: 80vh;">
         @csrf
 
         <!-- Opis -->
@@ -38,6 +38,13 @@
             <input type="number" name="amount" id="amount" class="form-control" step="0.01" required value="{{ old('amount') }}">
         </div>
 
+        <!-- Wybierz kategorie -->
+        <div class="form-group">
+            <label for="categories">Wybierz kategorie:</label>
+            <div id="category-tree"></div>
+            <input type="hidden" name="categories[]" id="selected-categories">
+        </div>
+
         <!-- Data ważności od -->
         <div class="form-group">
             <label for="valid_from">Ważny od:</label>
@@ -56,13 +63,13 @@
             <label for="is_active" class="form-check-label">Aktywny</label>
         </div>
 
+        <!-- Czy jednorazowy kod -->
         <div class="form-group form-check">
             <input type="checkbox" name="is_single_use" id="is_single_use" class="form-check-input" value="1" {{ old('is_single_use', true) ? 'checked' : '' }}>
             <label for="is_single_use" class="form-check-label">Jednorazowy kod</label>
         </div>
 
-
-        <!-- Wybór użytkowników -->
+        <!-- Przypisz do użytkowników -->
         <div class="form-group">
             <label for="users">Przypisz do użytkowników (opcjonalnie):</label>
             <select name="users[]" id="users" class="form-control" multiple>
@@ -77,4 +84,48 @@
         <button type="submit" class="btn btn-primary">Utwórz Kod Rabatowy</button>
     </form>
 </div>
+@endsection
+
+@section('scripts')
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        const categoriesData = @json($categories);
+
+        $('#category-tree').jstree({
+            'core': {
+                'data': categoriesData,
+                'themes': {
+                    'variant': 'large',
+                    'dots': false,
+                    'icons': true
+                }
+            },
+            'plugins': ["checkbox"],
+            'checkbox': {
+                'three_state': false, // Wyłącza automatyczne zaznaczanie podrzędnych
+                'whole_node': false // Kliknięcie na nazwę węzła nie zaznacza go
+            },
+            'multiple': false // Pozwala na wybór tylko jednej kategorii
+        });
+
+        // Zapisz wybraną kategorię przed wysłaniem formularza
+        $('form').submit(function(e) {
+            const selectedCategory = $('#category-tree').jstree("get_selected");
+            $('#selected-categories').val(selectedCategory.length ? selectedCategory[0] : ''); // Pobiera tylko jedną wybraną kategorię
+        });
+
+        // Inicjalizacja Select2 dla użytkowników
+        $('#users').select2({
+            placeholder: "Wybierz użytkowników",
+            allowClear: true
+        });
+    });
+</script>
+
 @endsection

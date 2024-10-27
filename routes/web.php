@@ -106,6 +106,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/categories/move-products', [CategoryController::class, 'moveProductsToNewSubcategory'])->name('categories.moveProducts');
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
     Route::get('/categories/{id}', [App\Http\Controllers\CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/categories/tree', [CategoryController::class, 'getTree'])->name('categories.tree');
+
 
 
 

@@ -14,7 +14,7 @@
     </div>
     @endif
 
-    <form action="{{ route('discount_codes.update', $discountCode->id) }}" method="POST">
+    <form action="{{ route('discount_codes.update', $discountCode->id) }}" method="POST" style="overflow-y: auto; max-height: 80vh;">
         @csrf
         @method('PUT')
 
@@ -39,16 +39,23 @@
             <input type="number" name="amount" id="amount" class="form-control" step="0.01" required value="{{ old('amount', $discountCode->amount) }}">
         </div>
 
+        <!-- Wybierz kategorie -->
+        <div class="form-group">
+            <label for="categories">Wybierz kategorie:</label>
+            <div id="category-tree"></div>
+            <input type="hidden" name="categories" id="selected-categories">
+        </div>
+
         <!-- Data ważności od -->
         <div class="form-group">
             <label for="valid_from">Ważny od:</label>
-            <input type="date" name="valid_from" id="valid_from" class="form-control" value="{{ old('valid_from', $discountCode->valid_from ? $discountCode->valid_from->format('Y-m-d') : '') }}">
+            <input type="date" name="valid_from" id="valid_from" class="form-control" value="{{ old('valid_from', optional($discountCode->valid_from)->format('Y-m-d')) }}">
         </div>
 
         <!-- Data ważności do -->
         <div class="form-group">
             <label for="valid_until">Ważny do:</label>
-            <input type="date" name="valid_until" id="valid_until" class="form-control" value="{{ old('valid_until', $discountCode->valid_until ? $discountCode->valid_until->format('Y-m-d') : '') }}">
+            <input type="date" name="valid_until" id="valid_until" class="form-control" value="{{ old('valid_until', optional($discountCode->valid_until)->format('Y-m-d')) }}">
         </div>
 
         <!-- Czy aktywny -->
@@ -57,14 +64,12 @@
             <label for="is_active" class="form-check-label">Aktywny</label>
         </div>
 
-        <!-- Wybór użytkowników -->
+        <!-- Przypisz do użytkowników -->
         <div class="form-group">
             <label for="users">Przypisz do użytkowników (opcjonalnie):</label>
             <select name="users[]" id="users" class="form-control" multiple>
                 @foreach($users as $user)
-                <option value="{{ $user->id }}" {{ $discountCode->users->contains($user->id) ? 'selected' : '' }}>
-                    {{ $user->email }} - {{ $user->name }} {{ $user->lastname }}
-                </option>
+                <option value="{{ $user->id }}" {{ $discountCode->users->contains($user->id) ? 'selected' : '' }}>{{ $user->email }} - {{ $user->name }} {{ $user->lastname }}</option>
                 @endforeach
             </select>
             <small class="form-text text-muted">Jeśli nie wybierzesz użytkowników, kod będzie globalny i dostępny dla wszystkich.</small>
@@ -77,13 +82,39 @@
 @endsection
 
 @section('scripts')
-<!-- Dodajemy Select2 dla lepszego wyboru użytkowników -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function() {
+        const categoriesData = @json($categories);
+
+        $('#category-tree').jstree({
+            'core': {
+                'data': categoriesData,
+                'themes': {
+                    'variant': 'large',
+                    'dots': false,
+                    'icons': true
+                }
+            },
+            'plugins': ["checkbox"],
+            'checkbox': {
+                'three_state': false, // Wyłącza automatyczne zaznaczanie podrzędnych
+                'whole_node': false // Kliknięcie na nazwę węzła nie zaznacza go
+            },
+            'multiple': false // Pozwala na wybór tylko jednej kategorii
+        });
+
+        // Zapisz wybraną kategorię przed wysłaniem formularza
+        $('form').submit(function(e) {
+            const selectedCategory = $('#category-tree').jstree("get_selected");
+            $('#selected-categories').val(selectedCategory.length ? selectedCategory[0] : ''); // Pobiera tylko jedną wybraną kategorię
+        });
+
+        // Inicjalizacja Select2 dla użytkowników
         $('#users').select2({
             placeholder: "Wybierz użytkowników",
             allowClear: true

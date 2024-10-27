@@ -49,4 +49,9 @@ class Category extends Model
     {
         return is_null($this->parent_id);
     }
+
+    public function descendants()
+    {
+        return $this->hasMany(Category::class, 'parent_id')->with('descendants');
+    }
 }
