@@ -13,6 +13,10 @@ use App\Models\DiscountCodeUsage;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+
+
 
 class DiscountCodeController extends Controller
 {
@@ -42,13 +46,11 @@ class DiscountCodeController extends Controller
         }
 
         $users = User::all();
-        $categories = $this->getJsTreeCategories(); // Pobranie danych w formacie JSON do `jstree`
+        $categories = $this->getJsTreeCategories();
         $discountCode = new DiscountCode();
 
         return view('admin.discount_codes.create', compact('users', 'categories', 'discountCode'));
     }
-
-
 
     public function store(Request $request)
     {
@@ -66,8 +68,7 @@ class DiscountCodeController extends Controller
             'is_single_use' => 'required|boolean',
             'users' => 'nullable|array',
             'users.*' => 'exists:users,id',
-            'categories' => 'nullable|array',  // upewnij się, że jest tablicą
-            'categories.*' => 'exists:categories,id',
+            'categories' => 'nullable', // Usuwamy walidację 'array'
         ]);
 
         do {
@@ -87,22 +88,20 @@ class DiscountCodeController extends Controller
             'code_hash' => $codeHash,
         ]);
 
-
         $discountCode->save();
 
+        // Przetwarzanie kategorii, jeśli zostały wybrane
         if ($request->has('categories')) {
-            // Konwersja na tablicę, aby upewnić się, że są pojedyncze wartości ID
-            $categories = array_map('intval', (array) $request->input('categories'));
-            $discountCode->categories()->attach($categories);
+            $categories = json_decode($request->input('categories'), true);
+            foreach ($categories as $categoryId) {
+                Log::info("Dodawanie kategorii {$categoryId} do kodu rabatowego {$discountCode->id}");
+                $discountCode->categories()->attach($categoryId);
+            }
         }
-
 
         if ($request->has('users')) {
             $discountCode->users()->attach($request->input('users'));
-            $users = User::whereIn(
-                'id',
-                $request->input('users')
-            )->get();
+            $users = User::whereIn('id', $request->input('users'))->get();
             foreach ($users as $user) {
                 $user->has_new_discount = true;
                 $user->save();
@@ -112,6 +111,8 @@ class DiscountCodeController extends Controller
 
         return redirect()->route('discount_codes.index')->with('success', 'Kod rabatowy został utworzony i wysłany do użytkowników.');
     }
+
+
 
 
     public function edit($id)
@@ -218,35 +219,99 @@ class DiscountCodeController extends Controller
         return view('discount_codes.my_codes', compact('discountCodes', 'usages'));
     }
 
-    private function calculateDiscountedPrice($price, DiscountCode $discountCode)
-    {
-        if ($discountCode->type === 'fixed') {
-            return max(0, $price - $discountCode->amount);
-        } elseif ($discountCode->type === 'percentage') {
-            return max(0, $price * (1 - $discountCode->amount / 100));
-        }
 
-        return $price;
-    }
-
-    public function applyDiscountCode(Request $request, $productId)
+    public function applyDiscountCode(Request $request)
     {
-        $discountCode = DiscountCode::where('code', $request->input('code'))->first();
+        $enteredCode = $request->input('discount_code');
+        $discountCode = DiscountCode::where('is_active', true)->get()->first(function ($code) use ($enteredCode) {
+            return Hash::check($enteredCode, $code->code_hash);
+        });
 
         if (!$discountCode) {
-            return response()->json(['error' => 'Kod rabatowy nie istnieje.'], 404);
+            // Powiadomienie o nieistniejącym lub nieaktywnym kodzie
+            return redirect()->route('cart.index')->with('error', 'Kod rabatowy nie istnieje lub jest nieaktywny.');
         }
 
-        // Pobierz produkt
-        $product = Product::findOrFail($productId);
+        $cart = session()->get(
+            'cart',
+            []
+        );
+        $totalApplicable = 0;
+        $nonApplicableProducts = [];
 
-        // Sprawdź, czy kod rabatowy można zastosować do tego produktu
-        if (!$discountCode->isApplicableToProduct($product)) {
-            return response()->json(['error' => 'Kod rabatowy nie dotyczy tego produktu.'], 400);
+        foreach ($cart as $id => $item) {
+            $product = Product::find($id);
+            if ($discountCode->isApplicableToProduct($product)) {
+                $totalApplicable += $item['price'] * $item['quantity'];
+            } else {
+                $nonApplicableProducts[] = $product->name;
+            }
         }
 
-        // Zastosuj rabat
-        $discountedPrice = $this->calculateDiscountedPrice($product->price, $discountCode);
-        return response()->json(['discounted_price' => $discountedPrice]);
+        if (
+            $totalApplicable == 0
+        ) {
+            // Powiadomienie, gdy żaden produkt nie jest objęty rabatem
+            return redirect()->route('cart.index')->with('error', 'Kod rabatowy nie dotyczy żadnego z produktów w koszyku.');
+        }
+
+        // Obliczenie kwoty rabatu
+        $discountAmount = $discountCode->calculateDiscountAmount($totalApplicable);
+
+        // Zapisujemy kod i rabat do sesji
+        Session::put('discount_code', $enteredCode);
+        Session::put('discount_amount', $discountAmount);
+        Session::put('discount_code_id', $discountCode->id);
+
+        // Ustawienie powiadomienia o zastosowaniu rabatu
+        if (count($nonApplicableProducts) > 0) {
+            // Kod dotyczy tylko części produktów
+            $nonApplicableList = implode(', ', $nonApplicableProducts);
+            return redirect()->route('cart.index')->with([
+                'success' => 'Kod rabatowy został częściowo zastosowany. Zniżka: ' . number_format($discountAmount, 2) . ' zł',
+                'info' => 'Kod nie dotyczy niektórych produktów w koszyku: ' . $nonApplicableList
+            ]);
+        }
+
+        // Kod w pełni zastosowany
+        return redirect()->route('cart.index')->with('success', 'Kod rabatowy został w pełni zastosowany. Zniżka: ' . number_format($discountAmount, 2) . ' zł');
+    }
+
+
+
+
+    private function calculateDiscountAmount(DiscountCode $discountCode)
+    {
+        $cart = session()->get('cart', []);
+        $total = array_reduce($cart, function ($sum, $item) {
+            return $sum + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        $discountAmount = $discountCode->type === 'fixed'
+            ? $discountCode->amount
+            : $total * ($discountCode->amount / 100);
+
+        return min($discountAmount, $total);
+    }
+
+
+    public function calculateTotal()
+    {
+        $cart = session()->get('cart', []);
+        $total = array_reduce($cart, function ($sum, $item) {
+            return $sum + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        $discountAmount = session('discount_amount', 0);
+        return max($total - $discountAmount, 0);
+    }
+
+    public function removeDiscount()
+    {
+        Session::forget('discount_code');
+        Session::forget('discount_amount');
+        Session::forget('discount_code_id');
+
+        return redirect()->back()->with('success', 'Kod rabatowy został usunięty.');
     }
 }

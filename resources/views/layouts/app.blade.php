@@ -25,6 +25,7 @@
     <!-- Przekazanie URL trasy do JavaScript -->
     <script type="text/javascript">
         const cartContentsUrl = "{{ route('cart.contents') }}";
+        const clearCartUrl = "{{ route('cart.clear') }}"; // Dodana trasa do czyszczenia koszyka
     </script>
 
     <!-- Dodajemy style dla pop-upu koszyka -->
@@ -137,6 +138,48 @@
             padding: 10px;
         }
 
+        .clear-cart-link {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            font-size: 0.9em;
+            color: red;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .btn-clear {
+            background-color: #f8f9fa;
+            /* Jasnoszary kolor tła */
+            border: 1px solid #ccc;
+            /* Delikatna szara ramka */
+            color: #333;
+            /* Kolor tekstu */
+            font-size: 0.9em;
+            /* Mniejszy rozmiar tekstu */
+            padding: 5px 10px;
+            /* Małe wewnętrzne odstępy */
+            border-radius: 4px;
+            /* Zaokrąglenie rogów */
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            text-align: center;
+            width: fit-content;
+            /* Dopasowanie szerokości do treści */
+            margin: 8px auto 0;
+            /* Wyśrodkowanie */
+        }
+
+        .btn-clear:hover {
+            background-color: #e0e0e0;
+            /* Ciemniejszy odcień przy najechaniu */
+            color: #000;
+            /* Zmiana koloru tekstu */
+            border-color: #bbb;
+            /* Subtelna zmiana koloru obramowania */
+        }
+
+
         /* Responsywność dla mniejszych ekranów */
         @media (max-width: 576px) {
             .cart-dropdown {
@@ -197,6 +240,7 @@
                                 <strong>Łączna kwota:</strong> <span id="cartTotal">0.00</span> zł
                             </div>
                             <a href="{{ route('cart.index') }}" class="btn btn-primary btn-go-to-cart">Przejdź do koszyka</a>
+                            <button id="clearCartBtn" class="btn btn-clear btn-clear-cart">Wyczyść koszyk</button>
                         </div>
                     </div>
 
@@ -385,9 +429,7 @@
                             cartItemCount.style.display = itemCount > 0 ? 'inline-block' : 'none';
                         }
                     })
-                    .catch(error => {
-                        console.error('Błąd podczas aktualizacji liczby produktów w koszyku:', error);
-                    });
+                    .catch(error => console.error('Error updating cart item count:', error));
             }
 
             // Wywołaj funkcję po załadowaniu strony
@@ -406,12 +448,17 @@
                     }
                 });
             }
+            const clearCartBtn = document.getElementById('clearCartBtn');
+            clearCartBtn.addEventListener('click', function() {
+                axios.post(clearCartUrl)
+                    .then(() => {
+                        fetchCartContents();
+                        updateCartItemCount();
+                    })
+                    .catch(error => console.error('Error clearing cart:', error));
+            });
 
-            // Funkcja fetchCartContents()
             function fetchCartContents() {
-                const cartList = document.getElementById('cartList');
-                const cartTotal = document.getElementById('cartTotal');
-
                 axios.get(cartContentsUrl)
                     .then(response => {
                         const cart = response.data.cart;
@@ -424,7 +471,6 @@
                                 const itemDiv = document.createElement('div');
                                 itemDiv.classList.add('cart-item');
 
-                                // Tworzenie elementów
                                 const img = document.createElement('img');
                                 img.src = item.image || 'https://via.placeholder.com/50';
                                 img.alt = item.name;
@@ -441,7 +487,6 @@
 
                                 const minusBtn = document.createElement('button');
                                 minusBtn.innerText = '-';
-                                minusBtn.classList.add('btn-quantity');
                                 minusBtn.addEventListener('click', function() {
                                     updateCartItemQuantity(id, item.quantity - 1);
                                 });
@@ -456,7 +501,6 @@
 
                                 const plusBtn = document.createElement('button');
                                 plusBtn.innerText = '+';
-                                plusBtn.classList.add('btn-quantity');
                                 plusBtn.addEventListener('click', function() {
                                     updateCartItemQuantity(id, item.quantity + 1);
                                 });
@@ -479,24 +523,19 @@
                             cartTotal.innerText = '0.00';
                         }
                     })
-                    .catch(error => {
-                        console.error('Błąd podczas pobierania zawartości koszyka:', error);
-                    });
+                    .catch(error => console.error('Error fetching cart contents:', error));
             }
-
-            // Funkcja do aktualizacji ilości produktu w koszyku
+            // Update Cart Item Quantity
             function updateCartItemQuantity(productId, quantity) {
                 if (quantity < 1) return;
                 axios.post(`/cart/update/${productId}`, {
-                        quantity: quantity
+                        quantity
                     })
-                    .then(response => {
+                    .then(() => {
                         fetchCartContents();
                         updateCartItemCount();
                     })
-                    .catch(error => {
-                        console.error('Błąd podczas aktualizacji ilości produktu w koszyku:', error);
-                    });
+                    .catch(error => console.error('Error updating cart item quantity:', error));
             }
 
             // Zamknięcie dropdownu koszyka po kliknięciu poza nim

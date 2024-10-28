@@ -4,21 +4,18 @@
 <div class="custom-cart-container">
     <h1>Twój Koszyk</h1>
 
-    <!-- Wyświetlanie komunikatów o błędach i sukcesach -->
     @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
+    <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if(session('info'))
+    <div class="alert alert-info">{{ session('info') }}</div>
     @endif
     @if(session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
+    <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-    @if(session('cart') && count(session('cart')) > 0)
 
-    <!-- Przycisk "Wyczyść Koszyk" nad koszykiem -->
+    @if(session('cart') && count(session('cart')) > 0)
     <div class="custom-cart-actions-top">
         <form action="{{ route('cart.clear') }}" method="POST">
             @csrf
@@ -26,7 +23,6 @@
         </form>
     </div>
 
-    <!-- Kontener przewijalny dla tabeli koszyka -->
     <div class="custom-cart-table-wrapper">
         <table class="custom-cart-table">
             <thead>
@@ -71,7 +67,6 @@
                 </tr>
                 @endforeach
 
-                <!-- Wyświetlanie rabatu, jeśli został zastosowany -->
                 @if(session('discount_amount'))
                 <tr class="custom-discount-row">
                     <td colspan="4" class="custom-total-label"><strong>Rabat:</strong></td>
@@ -91,7 +86,6 @@
         </table>
     </div>
 
-    <!-- Formularz kodu rabatowego -->
     <div class="custom-discount-code-form">
         @if(session('discount_code'))
         <p>Zastosowano kod rabatowy: <strong>{{ session('discount_code') }}</strong></p>
@@ -109,7 +103,6 @@
         @endif
     </div>
 
-    <!-- Przyciski akcji poniżej koszyka -->
     <div class="custom-cart-actions-bottom">
         <a href="{{ route('orders.create') }}" class="custom-btn-place-order">Złóż Zamówienie</a>
     </div>
@@ -117,71 +110,4 @@
     <p>Twój koszyk jest pusty.</p>
     @endif
 </div>
-@endsection
-
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const updateCart = (id, quantity) => {
-            fetch(`/cart/update/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        quantity: quantity
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const row = document.querySelector(`tr[data-id="${id}"]`);
-                        row.querySelector('.custom-quantity-input').value = data.item.quantity;
-                        row.querySelector('.custom-subtotal').innerText = data.item.subtotal.toFixed(2) + ' zł';
-                        document.querySelector('.custom-total-amount').innerText = data.total_formatted;
-                    }
-                });
-        };
-
-        // Obsługa przycisków zwiększania ilości
-        document.querySelectorAll('.custom-btn-increase').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.dataset.id;
-                const quantityInput = document.querySelector(`.custom-quantity-input[data-id="${id}"]`);
-                let quantity = parseInt(quantityInput.value) || 1;
-                quantity += 1;
-                quantityInput.value = quantity;
-                updateCart(id, quantity);
-            });
-        });
-
-        // Obsługa przycisków zmniejszania ilości
-        document.querySelectorAll('.custom-btn-decrease').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.dataset.id;
-                const quantityInput = document.querySelector(`.custom-quantity-input[data-id="${id}"]`);
-                let quantity = parseInt(quantityInput.value) || 1;
-                if (quantity > 1) {
-                    quantity -= 1;
-                    quantityInput.value = quantity;
-                    updateCart(id, quantity);
-                }
-            });
-        });
-
-        // Obsługa zmiany wartości w polu input
-        document.querySelectorAll('.custom-quantity-input').forEach(input => {
-            input.addEventListener('change', () => {
-                const id = input.dataset.id;
-                let quantity = parseInt(input.value);
-                if (quantity < 1 || isNaN(quantity)) {
-                    quantity = 1;
-                    input.value = 1;
-                }
-                updateCart(id, quantity);
-            });
-        });
-    });
-</script>
 @endsection

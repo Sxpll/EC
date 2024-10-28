@@ -42,7 +42,7 @@
         <div class="form-group">
             <label for="categories">Wybierz kategorie:</label>
             <div id="category-tree"></div>
-            <input type="hidden" name="categories[]" id="selected-categories">
+            <input type="hidden" name="categories" id="selected-categories">
         </div>
 
         <!-- Data ważności od -->
@@ -111,19 +111,22 @@
             },
             'plugins': ["checkbox"],
             'checkbox': {
-                'three_state': false, // Wyłącza automatyczne zaznaczanie podrzędnych
-                'whole_node': false // Kliknięcie na nazwę węzła nie zaznacza go
+                'three_state': false,
+                'whole_node': false
             },
-            'multiple': false // Pozwala na wybór tylko jednej kategorii
+            'multiple': true // Umożliwia wybór wielu kategorii
         });
 
-        // Zapisz wybraną kategorię przed wysłaniem formularza
+        // Zapisz wybrane kategorie przed wysłaniem formularza
         $('form').submit(function(e) {
-            const selectedCategory = $('#category-tree').jstree("get_selected");
-            $('#selected-categories').val(selectedCategory.length ? selectedCategory[0] : ''); // Pobiera tylko jedną wybraną kategorię
+            const selectedCategories = $('#category-tree').jstree("get_selected");
+
+            if (selectedCategories.length > 0) {
+                $('#selected-categories').val(JSON.stringify(selectedCategories)); // Zapisuje wybrane kategorie jako JSON
+            } else {
+                $('#selected-categories').remove(); // Usuwa pole, jeśli brak wyboru kategorii
+            }
         });
-
-
     });
 </script>
 

@@ -1,19 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AccountController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\ChatController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\{
+    AccountController,
+    HomeController,
+    AdminController,
+    ChatController,
+    UserController,
+    NotificationController,
+    ProductController,
+    CategoryController,
+    CartController,
+    OrderController,
+    DiscountCodeController
+};
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\DiscountCodeController;
-
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,11 +23,9 @@ Route::get('/', function () {
 Auth::routes();
 Route::get('/cart/contents', [CartController::class, 'contents'])->name('cart.contents');
 
+
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
-
-
-
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
@@ -34,32 +33,24 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
-
-
-
     Route::get('/order/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/order/store', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/order/thankyou', [OrderController::class, 'thankyou'])->name('orders.thankyou');
     Route::get('/orders/my-orders', [OrderController::class, 'myOrders'])->name('orders.myOrders');
 
-
-
     Route::resource('discount_codes', DiscountCodeController::class)->except(['show']);
-
-    // Trasa dla użytkownika do wyświetlania swoich kodów rabatowych
     Route::get('/my-discount-codes', [DiscountCodeController::class, 'myDiscountCodes'])->name('discount_codes.my_codes');
-    Route::post('/cart/apply-discount', [CartController::class, 'applyDiscount'])->name('cart.applyDiscount');
-    Route::post('/cart/remove-discount', [CartController::class, 'removeDiscount'])->name('cart.removeDiscount');
+    Route::post('/cart/apply-discount', [DiscountCodeController::class, 'applyDiscountCode'])->name('cart.applyDiscount');
+    Route::post('/cart/remove-discount', [DiscountCodeController::class, 'removeDiscount'])->name('cart.removeDiscount');
 
-
-    // Trasa do resetowania kodu odbioru
     Route::post('/orders/{orderId}/reset-pickup-code', [OrderController::class, 'resetPickupCode'])->name('orders.resetPickupCode');
-
 
     Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
     Route::put('/account', [AccountController::class, 'update'])->name('account.update');
 
     // Admin routes
+    Route::get('/admin/products', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/admin/chats', [ChatController::class, 'index'])->name('admin.chats');
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/manage-users', [AdminController::class, 'manageUsers'])->name('admin.manageUsers');
@@ -70,16 +61,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/user/{id}', [AdminController::class, 'getUser'])->name('admin.getUser');
     Route::get('/admin/user/{id}/history', [AdminController::class, 'showHistory'])->name('admin.userHistory');
     Route::get('/admin/check-new-messages', [ChatController::class, 'checkNewMessages']);
-    Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
-
     Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders');
     Route::post('/admin/orders/{order}/update', [OrderController::class, 'update'])->name('admin.orders.update');
-
-    // Szczegóły zamówienia
     Route::get('/admin/orders/{id}', [AdminController::class, 'orderDetails'])->name('admin.orderDetails');
 
-    // Product routes
-    Route::resource('products', ProductController::class)->except(['show']);
+
+
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::get('/products/{id}/images', [ProductController::class, 'showImages']);
     Route::get('/products/{id}/attachments', [ProductController::class, 'showAttachments']);
@@ -91,32 +78,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
     Route::get('/products2', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
-    Route::get('/products00', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
     Route::get('/public/products/{id}', [ProductController::class, 'showProduct'])->name('products.show');
 
-
-
-    // Categories routes
+    Route::resource('categories', CategoryController::class)->except(['show']);
     Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
     Route::post('/categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
     Route::get('/categories/{id}/products', [CategoryController::class, 'getProducts'])->name('categories.getProducts');
     Route::post('/categories/move-products', [CategoryController::class, 'moveProductsToNewSubcategory'])->name('categories.moveProducts');
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
-    Route::get('/categories/{id}', [App\Http\Controllers\CategoryController::class, 'show'])->name('categories.show');
-    Route::get('/categories/tree', [CategoryController::class, 'getTree'])->name('categories.tree');
 
-
-
-
-
-
-    // Resource route for categories should be at the end
-    Route::resource('categories', CategoryController::class)->except(['show']);
-
-    // Chat routes
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filterChats');
     Route::get('/user-chats', [ChatController::class, 'userChats'])->name('chat.userChats');
@@ -127,11 +99,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/chat/{id}/manage', [ChatController::class, 'manageChat'])->name('chat.manage');
     Route::get('/chat/{id}/messages', [ChatController::class, 'getMessages']);
 
-    // Notifications routes
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
 
-    // User dashboard
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 });

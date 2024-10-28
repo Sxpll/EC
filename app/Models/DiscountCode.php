@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 
@@ -53,23 +54,9 @@ class DiscountCode extends Model
         return $this->belongsToMany(Category::class, 'discount_code_category', 'discount_code_id', 'category_id');
     }
 
-    public function applyDiscountCode(Request $request, $productId)
-    {
-        $discountCode = DiscountCode::where('code', $request->input('code'))->first();
 
-        if (!$discountCode) {
-            return response()->json(['error' => 'Kod rabatowy nie istnieje.'], 404);
-        }
 
-        $product = Product::findOrFail($productId);
 
-        if (!$discountCode->isApplicableToProduct($product)) {
-            return response()->json(['error' => 'Kod rabatowy nie dotyczy tego produktu.'], 400);
-        }
-
-        $discountedPrice = $this->calculateDiscountedPrice($product->price, $discountCode);
-        return response()->json(['discounted_price' => $discountedPrice]);
-    }
 
     public function isApplicableToProduct(Product $product)
     {
@@ -80,28 +67,9 @@ class DiscountCode extends Model
                 return true;
             }
         }
-        return false;
-    }
-
-
-
-    private function isCategoryOrParentInApplicableCategories(Category $category, array $applicableCategoryIds)
-    {
-        if (in_array($category->id, $applicableCategoryIds)) {
-            return true;
-        }
-
-        // Rekurencyjnie sprawdzamy wszystkie kategorie nadrzędne
-        while ($category->parent) {
-            $category = $category->parent;
-            if (in_array($category->id, $applicableCategoryIds)) {
-                return true;
-            }
-        }
 
         return false;
     }
-
 
     private function getApplicableCategoryIds()
     {
@@ -113,5 +81,12 @@ class DiscountCode extends Model
         }
 
         return $applicableCategories->unique()->toArray();
+    }
+
+    public function calculateDiscountAmount($total)
+    {
+        return $this->type === 'fixed'
+            ? $this->amount
+            : $total * ($this->amount / 100);
     }
 }
