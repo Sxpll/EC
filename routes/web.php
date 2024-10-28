@@ -12,6 +12,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DiscountCodeController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -42,7 +44,16 @@ Route::middleware('auth')->group(function () {
 
 
 
+    Route::resource('discount_codes', DiscountCodeController::class)->except(['show']);
 
+    // Trasa dla użytkownika do wyświetlania swoich kodów rabatowych
+    Route::get('/my-discount-codes', [DiscountCodeController::class, 'myDiscountCodes'])->name('discount_codes.my_codes');
+    Route::post('/cart/apply-discount', [CartController::class, 'applyDiscount'])->name('cart.applyDiscount');
+    Route::post('/cart/remove-discount', [CartController::class, 'removeDiscount'])->name('cart.removeDiscount');
+
+
+    // Trasa do resetowania kodu odbioru
+    Route::post('/orders/{orderId}/reset-pickup-code', [OrderController::class, 'resetPickupCode'])->name('orders.resetPickupCode');
 
 
     Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
@@ -82,15 +93,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/products2', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
     Route::get('/products00', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
     Route::get('/public/products/{id}', [ProductController::class, 'showProduct'])->name('products.show');
-
-
-
-
-
-
-
-
-
 
 
 

@@ -3,6 +3,19 @@
 @section('content')
 <div class="custom-cart-container">
     <h1>Twój Koszyk</h1>
+
+    <!-- Wyświetlanie komunikatów o błędach i sukcesach -->
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
+
     @if(session('cart') && count(session('cart')) > 0)
 
     <!-- Przycisk "Wyczyść Koszyk" nad koszykiem -->
@@ -42,9 +55,9 @@
                     </td>
                     <td>
                         <div class="custom-quantity-control">
-                            <button class="custom-btn-decrease" data-id="{{ $id }}">-</button>
+                            <button type="button" class="custom-btn-decrease" data-id="{{ $id }}">-</button>
                             <input type="number" class="custom-quantity-input" data-id="{{ $id }}" value="{{ $item['quantity'] }}" min="1">
-                            <button class="custom-btn-increase" data-id="{{ $id }}">+</button>
+                            <button type="button" class="custom-btn-increase" data-id="{{ $id }}">+</button>
                         </div>
                     </td>
                     <td>{{ number_format($item['price'], 2) }} zł</td>
@@ -57,12 +70,43 @@
                     </td>
                 </tr>
                 @endforeach
+
+                <!-- Wyświetlanie rabatu, jeśli został zastosowany -->
+                @if(session('discount_amount'))
+                <tr class="custom-discount-row">
+                    <td colspan="4" class="custom-total-label"><strong>Rabat:</strong></td>
+                    <td colspan="2" class="custom-total-amount"><strong>-{{ number_format(session('discount_amount'), 2) }} zł</strong></td>
+                </tr>
+                @endif
+
                 <tr class="custom-total-row">
                     <td colspan="4" class="custom-total-label"><strong>Łącznie:</strong></td>
-                    <td colspan="2" class="custom-total-amount"><strong>{{ number_format($total, 2) }} zł</strong></td>
+                    <td colspan="2" class="custom-total-amount">
+                        <strong>
+                            {{ number_format($total - session('discount_amount', 0), 2) }} zł
+                        </strong>
+                    </td>
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <!-- Formularz kodu rabatowego -->
+    <div class="custom-discount-code-form">
+        @if(session('discount_code'))
+        <p>Zastosowano kod rabatowy: <strong>{{ session('discount_code') }}</strong></p>
+        <form action="{{ route('cart.removeDiscount') }}" method="POST">
+            @csrf
+            <button type="submit" class="custom-btn-remove-discount">Usuń kod rabatowy</button>
+        </form>
+        @else
+        <form action="{{ route('cart.applyDiscount') }}" method="POST">
+            @csrf
+            <label for="discount_code">Kod rabatowy:</label>
+            <input type="text" name="discount_code" id="discount_code" required>
+            <button type="submit" class="custom-btn-apply-discount">Zastosuj</button>
+        </form>
+        @endif
     </div>
 
     <!-- Przyciski akcji poniżej koszyka -->
@@ -95,7 +139,7 @@
                         const row = document.querySelector(`tr[data-id="${id}"]`);
                         row.querySelector('.custom-quantity-input').value = data.item.quantity;
                         row.querySelector('.custom-subtotal').innerText = data.item.subtotal.toFixed(2) + ' zł';
-                        document.querySelector('.custom-total-amount').innerText = data.total.toFixed(2) + ' zł';
+                        document.querySelector('.custom-total-amount').innerText = data.total_formatted;
                     }
                 });
         };

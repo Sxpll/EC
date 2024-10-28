@@ -499,26 +499,23 @@
                 }
             });
 
-            // Dodaj event listener do formularzy 'Dodaj do koszyka'
-            const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+            function hideAlerts() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    setTimeout(() => {
+                        // Dodaj klasę do animacji fade
+                        alert.classList.add('fade-out');
 
-            addToCartForms.forEach(function(form) {
-                form.addEventListener('submit', function(event) {
-                    event.preventDefault();
-
-                    const formData = new FormData(form);
-                    const action = form.getAttribute('action');
-
-                    axios.post(action, formData)
-                        .then(response => {
-                            updateCartItemCount();
-                            alert('Produkt dodany do koszyka!');
-                        })
-                        .catch(error => {
-                            console.error('Błąd podczas dodawania do koszyka:', error);
-                        });
+                        // Usuń alert po animacji
+                        setTimeout(() => {
+                            alert.remove();
+                        }, 500); // Czas trwania animacji w CSS
+                    }, 2000); // 2 sekundy
                 });
-            });
+            }
+
+            // Wywołaj funkcję po załadowaniu strony
+            hideAlerts();
         });
     </script>
 

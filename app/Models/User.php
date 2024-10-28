@@ -6,6 +6,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\DiscountCode; 
 
 class User extends Authenticatable
 {
@@ -19,7 +21,7 @@ class User extends Authenticatable
         'role',
         'is_hr',
         'isActive',
-        'is_deleted'
+        'is_deleted',
     ];
 
     protected $hidden = [
@@ -47,5 +49,11 @@ class User extends Authenticatable
     public function managedChats()
     {
         return $this->hasMany(Chat::class, 'admin_id');
+    }
+
+    // Relacja wiele-do-wielu z kodami rabatowymi
+    public function discountCodes(): BelongsToMany
+    {
+        return $this->belongsToMany(DiscountCode::class, 'discount_code_user');
     }
 }
