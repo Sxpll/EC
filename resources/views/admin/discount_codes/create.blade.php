@@ -63,11 +63,14 @@
             <label for="is_active" class="form-check-label">Aktywny</label>
         </div>
 
-        <!-- Czy jednorazowy kod -->
-        <div class="form-group form-check">
-            <input type="checkbox" name="is_single_use" id="is_single_use" class="form-check-input" value="1" {{ old('is_single_use', true) ? 'checked' : '' }}>
-            <label for="is_single_use" class="form-check-label">Jednorazowy kod</label>
+        <div class="form-group">
+            <label for="is_single_use">Typ kodu:</label>
+            <select name="is_single_use" id="is_single_use" class="form-control">
+                <option value="1" {{ old('is_single_use', $discountCode->is_single_use ?? false) == 1 ? 'selected' : '' }}>Jednorazowy</option>
+                <option value="0" {{ old('is_single_use', $discountCode->is_single_use ?? false) == 0 ? 'selected' : '' }}>Wielokrotnego użytku</option>
+            </select>
         </div>
+
 
         <!-- Przypisz do użytkowników -->
         <div class="form-group">
@@ -120,11 +123,7 @@
             $('#selected-categories').val(selectedCategory.length ? selectedCategory[0] : ''); // Pobiera tylko jedną wybraną kategorię
         });
 
-        // Inicjalizacja Select2 dla użytkowników
-        $('#users').select2({
-            placeholder: "Wybierz użytkowników",
-            allowClear: true
-        });
+
     });
 </script>
 

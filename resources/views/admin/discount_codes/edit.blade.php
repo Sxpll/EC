@@ -114,11 +114,7 @@
             $('#selected-categories').val(selectedCategory.length ? selectedCategory[0] : ''); // Pobiera tylko jedną wybraną kategorię
         });
 
-        // Inicjalizacja Select2 dla użytkowników
-        $('#users').select2({
-            placeholder: "Wybierz użytkowników",
-            allowClear: true
-        });
+        
     });
 </script>
 @endsection

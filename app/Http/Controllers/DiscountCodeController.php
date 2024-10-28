@@ -83,9 +83,10 @@ class DiscountCodeController extends Controller
             'valid_from' => $request->input('valid_from'),
             'valid_until' => $request->input('valid_until'),
             'is_active' => $request->boolean('is_active'),
-            'is_single_use' => $request->boolean('is_single_use'),
+            'is_single_use' => $request->input('is_single_use', 0),
             'code_hash' => $codeHash,
         ]);
+
 
         $discountCode->save();
 

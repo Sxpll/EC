@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 
 class DiscountCode extends Model
 {
@@ -81,22 +83,35 @@ class DiscountCode extends Model
         return false;
     }
 
+
+
     private function isCategoryOrParentInApplicableCategories(Category $category, array $applicableCategoryIds)
     {
         if (in_array($category->id, $applicableCategoryIds)) {
             return true;
         }
 
-        return $category->parent && $this->isCategoryOrParentInApplicableCategories($category->parent, $applicableCategoryIds);
+        // Rekurencyjnie sprawdzamy wszystkie kategorie nadrzędne
+        while ($category->parent) {
+            $category = $category->parent;
+            if (in_array($category->id, $applicableCategoryIds)) {
+                return true;
+            }
+        }
+
+        return false;
     }
+
 
     private function getApplicableCategoryIds()
     {
-        $applicableCategories = [];
+        $applicableCategories = collect();
+
         foreach ($this->categories as $category) {
-            $applicableCategories[] = $category->id;
-            $applicableCategories = array_merge($applicableCategories, $category->descendants->pluck('id')->toArray());
+            $applicableCategories->push($category->id);
+            $applicableCategories = $applicableCategories->merge($category->descendants->pluck('id'));
         }
-        return array_unique($applicableCategories);
+
+        return $applicableCategories->unique()->toArray();
     }
 }
