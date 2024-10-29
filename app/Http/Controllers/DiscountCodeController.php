@@ -15,17 +15,20 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use App\Services\CartService;
 
 
 
 class DiscountCodeController extends Controller
 {
-    // Konstruktor kontrolera
-    public function __construct()
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
     {
-        // Zakładamy, że używasz middleware 'auth'
         $this->middleware('auth');
+        $this->cartService = $cartService;
     }
+
 
     // Wyświetlanie listy kodów rabatowych (dla administratora)
     public function index()
@@ -231,64 +234,28 @@ class DiscountCodeController extends Controller
     public function applyDiscountCode(Request $request)
     {
         $enteredCode = $request->input('discount_code');
-
-        // Znalezienie kodu rabatowego na podstawie wpisanego kodu
         $discountCode = DiscountCode::where('is_active', true)->get()->first(function ($code) use ($enteredCode) {
             return Hash::check($enteredCode, $code->code_hash);
         });
 
-        // Jeśli kod nie istnieje lub jest nieaktywny
         if (!$discountCode) {
             session()->flash('error', 'Kod rabatowy nie istnieje lub jest nieaktywny.');
             return redirect()->route('cart.index');
         }
 
-        // Sprawdzamy, czy kod jest przypisany do aktualnie zalogowanego użytkownika
         if (!$discountCode->users->contains(Auth::id())) {
             session()->flash('error', 'Nieprawidłowy kod rabatowy');
             return redirect()->route('cart.index');
         }
 
-        $cart = session()->get(
-            'cart',
-            []
-        );
-        $totalApplicable = 0;
-        $nonApplicableProducts = [];
-
-        // Obliczanie sumy dla produktów, do których kod można zastosować
-        foreach ($cart as $id => $item) {
-            $product = Product::find($id);
-            if ($discountCode->isApplicableToProduct($product)) {
-                $totalApplicable += $item['price'] * $item['quantity'];
-            } else {
-                $nonApplicableProducts[] = $product->name;
-            }
-        }
-
-        if (
-            $totalApplicable == 0
-        ) {
-            session()->flash('error', 'Kod rabatowy nie dotyczy żadnego z produktów w koszyku.');
-            return redirect()->route('cart.index');
-        }
-
-        // Obliczenie kwoty rabatu
+        $totalApplicable = $this->cartService->calculateTotal();
         $discountAmount = $discountCode->calculateDiscountAmount($totalApplicable);
 
-        // Zapisanie informacji o kodzie rabatowym w sesji
-        Session::put('discount_code', $enteredCode);
-        Session::put('discount_amount', $discountAmount);
-        Session::put('discount_code_id', $discountCode->id);
+        session()->put('discount_code', $enteredCode);
+        session()->put('discount_amount', $discountAmount);
+        session()->put('discount_code_id', $discountCode->id);
 
-        if (count($nonApplicableProducts) > 0) {
-            $nonApplicableList = implode(', ', $nonApplicableProducts);
-            session()->flash('success', 'Kod rabatowy został częściowo zastosowany. Zniżka: ' . number_format($discountAmount, 2) . ' zł');
-            session()->flash('info', 'Kod nie dotyczy niektórych produktów w koszyku: ' . $nonApplicableList);
-        } else {
-            session()->flash('success', 'Kod rabatowy został w pełni zastosowany. Zniżka: ' . number_format($discountAmount, 2) . ' zł');
-        }
-
+        session()->flash('success', 'Kod rabatowy został zastosowany.');
         return redirect()->route('cart.index');
     }
 
@@ -299,13 +266,8 @@ class DiscountCodeController extends Controller
 
     public function calculateTotal()
     {
-        $cart = session()->get('cart', []);
-        $total = array_reduce($cart, function ($sum, $item) {
-            return $sum + ($item['price'] * $item['quantity']);
-        }, 0);
-
         $discountAmount = session('discount_amount', 0);
-        return max($total - $discountAmount, 0);
+        return $this->cartService->calculateTotal($discountAmount);
     }
 
     public function removeDiscount()

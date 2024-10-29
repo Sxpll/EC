@@ -14,7 +14,6 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-
     @if(session('cart') && count(session('cart')) > 0)
     <div class="custom-cart-actions-top">
         <form action="{{ route('cart.clear') }}" method="POST">
@@ -78,7 +77,7 @@
                     <td colspan="4" class="custom-total-label"><strong>Łącznie:</strong></td>
                     <td colspan="2" class="custom-total-amount">
                         <strong>
-                            {{ number_format($total - session('discount_amount', 0), 2) }} zł
+                            <span id="total-amount">{{ number_format($total - session('discount_amount', 0), 2) }}</span> zł
                         </strong>
                     </td>
                 </tr>
@@ -112,3 +111,50 @@
 </div>
 @endsection
 
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Zwiększ ilość
+        document.querySelectorAll('.custom-btn-increase').forEach(button => {
+            button.addEventListener('click', function() {
+                updateQuantity(this.dataset.id, 1);
+            });
+        });
+
+        // Zmniejsz ilość
+        document.querySelectorAll('.custom-btn-decrease').forEach(button => {
+            button.addEventListener('click', function() {
+                updateQuantity(this.dataset.id, -1);
+            });
+        });
+
+        // Aktualizacja ilości
+        function updateQuantity(id, change) {
+            let quantityInput = document.querySelector(`.custom-quantity-input[data-id='${id}']`);
+            let newQuantity = parseInt(quantityInput.value) + change;
+            if (newQuantity < 1) return;
+            quantityInput.value = newQuantity;
+
+            // Wysłanie żądania AJAX do zaktualizowania ilości na serwerze
+            fetch(`/cart/update/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        quantity: newQuantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Zaktualizuj podsumowanie i łączną cenę
+                        document.querySelector(`tr[data-id='${id}'] .custom-subtotal`).textContent = `${data.item.subtotal.toFixed(2)} zł`;
+                        document.getElementById('total-amount').textContent = data.total_formatted;
+                    }
+                });
+        }
+    });
+</script>
+@endsection

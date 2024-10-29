@@ -4,23 +4,28 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
-use App\Models\DiscountCode;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use App\Services\CartService;
+use App\Http\Controllers\DiscountCodeController;
 
 class CartController extends Controller
 {
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
+
     public function index()
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->getCart();
         return view('cart.index', compact('cart'));
     }
 
     public function add(Request $request, $id)
     {
-
         $product = Product::find($id);
+
         if (!$product) {
             return redirect()->back()->with('error', 'Produkt nie został znaleziony.');
         }
@@ -29,72 +34,43 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Ten produkt jest niedostępny i nie może zostać dodany do koszyka.');
         }
 
-        $cart = session()->get('cart', []);
-
-        // Dodaj produkt do koszyka tylko jeśli nie istnieje, ustawiając domyślną ilość na 1
-        if (!isset($cart[$id])) {
-            $cart[$id] = [
-                'name' => $product->name,
-                'quantity' => 1, // Ustawiamy ilość na 1 przy pierwszym dodaniu
-                'price' => $product->price,
-                'image' => $product->images->first() ? 'data:' . $product->images->first()->mime_type . ';base64,' . $product->images->first()->file_data : 'https://via.placeholder.com/150',
-            ];
-        }
-
-        // Zapisz koszyk w sesji
-        session()->put('cart', $cart);
+        $this->cartService->addProductToCart($product);
 
         return redirect()->back()->with('success', 'Produkt został dodany do koszyka.');
     }
 
-    // Aktualizacja ilości produktu w koszyku
     public function update(Request $request, $id)
     {
-        $cart = session()->get('cart', []);
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = $request->quantity;
-            $cart[$id]['subtotal'] = $cart[$id]['price'] * $cart[$id]['quantity'];
-            session()->put('cart', $cart);
+        $item = $this->cartService->updateProductQuantity($id, $request->quantity);
 
-            // Oblicz łączną kwotę uwzględniając rabat
+        if ($item) {
             $total = app(DiscountCodeController::class)->calculateTotal();
-
             return response()->json([
                 'success' => true,
-                'item' => $cart[$id],
+                'item' => $item,
                 'total_formatted' => number_format($total, 2) . ' zł',
             ]);
         }
+
         return response()->json(['success' => false]);
     }
 
-    // Usuwanie produktu z koszyka
     public function remove(Request $request, $id)
     {
-        $cart = session()->get('cart', []);
-
-        if (isset($cart[$id])) {
-            unset($cart[$id]);
-            session()->put('cart', $cart);
-            return back()->with('success', 'Produkt został usunięty z koszyka!');
-        }
-
-        return back()->with('error', 'Produkt nie znajduje się w koszyku!');
+        $this->cartService->removeProductFromCart($id);
+        return back()->with('success', 'Produkt został usunięty z koszyka!');
     }
 
     public function clear()
     {
-        session()->forget('cart');
-        session()->forget('discount_code');
-        session()->forget('discount_amount');
-        session()->forget('discount_code_id');
+        $this->cartService->clearCart();
         return back()->with('success', 'Koszyk został wyczyszczony!');
     }
 
     public function contents()
     {
         $total = app(DiscountCodeController::class)->calculateTotal();
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->getCart();
 
         return response()->json([
             'cart' => $cart,

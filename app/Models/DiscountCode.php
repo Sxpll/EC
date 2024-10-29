@@ -89,4 +89,6 @@ class DiscountCode extends Model
             ? $this->amount
             : $total * ($this->amount / 100);
     }
+
+    
 }
