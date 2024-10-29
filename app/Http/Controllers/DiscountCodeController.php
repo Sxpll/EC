@@ -68,17 +68,24 @@ class DiscountCodeController extends Controller
             'is_single_use' => 'required|boolean',
             'users' => 'nullable|array',
             'users.*' => 'exists:users,id',
-            'categories' => 'nullable', // Usuwamy walidację 'array'
+            'categories' => 'nullable',
         ]);
 
-        // Tworzenie kodów dla każdego użytkownika lub globalnie dla wszystkich
         $users = $request->has('users') ? User::whereIn('id', $request->input('users'))->get() : User::all();
 
         foreach ($users as $user) {
+            $attempts = 0;
+            $maxAttempts = 100; //tu dalem 100 nie wiem czy nie za duzo
+
             do {
-                $plainCode = Str::upper(Str::random(8));
+                $plainCode = Str::upper(Str::random(10)); // Zmienilem na 10 znakow zeby zmniejszyc ryzyko wyczerpania
                 $codeHash = Hash::make($plainCode);
                 $exists = DiscountCode::where('code_hash', $codeHash)->exists();
+                $attempts++;
+
+                if ($attempts >= $maxAttempts) {
+                    throw new \Exception("Nie udało się wygenerować unikalnego kodu po $maxAttempts probach.");
+                }
             } while ($exists);
 
             $discountCode = new DiscountCode([
@@ -94,26 +101,23 @@ class DiscountCodeController extends Controller
 
             $discountCode->save();
 
-            // Przetwarzanie kategorii, jeśli zostały wybrane
             if ($request->has('categories')) {
                 $categories = json_decode($request->input('categories'), true);
                 foreach ($categories as $categoryId) {
-                    Log::info("Dodawanie kategorii {$categoryId} do kodu rabatowego {$discountCode->id}");
                     $discountCode->categories()->attach($categoryId);
                 }
             }
 
-            // Przypisanie kodu do użytkownika
             $discountCode->users()->attach($user->id);
             $user->has_new_discount = true;
             $user->save();
 
-            // Wysyłanie e-maila z kodem do użytkownika
             Mail::to($user->email)->send(new DiscountCodeMail($plainCode, $discountCode));
         }
 
         return redirect()->route('discount_codes.index')->with('success', 'Kody rabatowe zostały wygenerowane i wysłane do użytkowników.');
     }
+
 
 
 
