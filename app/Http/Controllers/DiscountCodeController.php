@@ -295,19 +295,6 @@ class DiscountCodeController extends Controller
 
 
 
-    private function calculateDiscountAmount(DiscountCode $discountCode)
-    {
-        $cart = session()->get('cart', []);
-        $total = array_reduce($cart, function ($sum, $item) {
-            return $sum + ($item['price'] * $item['quantity']);
-        }, 0);
-
-        $discountAmount = $discountCode->type === 'fixed'
-            ? $discountCode->amount
-            : $total * ($discountCode->amount / 100);
-
-        return min($discountAmount, $total);
-    }
 
 
     public function calculateTotal()
