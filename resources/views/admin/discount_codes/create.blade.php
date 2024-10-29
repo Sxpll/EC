@@ -66,10 +66,11 @@
         <div class="form-group">
             <label for="is_single_use">Typ kodu:</label>
             <select name="is_single_use" id="is_single_use" class="form-control">
-                <option value="1" {{ old('is_single_use', $discountCode->is_single_use ?? false) == 1 ? 'selected' : '' }}>Jednorazowy</option>
-                <option value="0" {{ old('is_single_use', $discountCode->is_single_use ?? false) == 0 ? 'selected' : '' }}>Wielokrotnego użytku</option>
+                <option value="1" {{ old('is_single_use', 1) == 1 ? 'selected' : '' }}>Jednorazowy</option>
+                <option value="0" {{ old('is_single_use', 1) == 0 ? 'selected' : '' }}>Wielokrotnego użytku</option>
             </select>
         </div>
+
 
 
         <!-- Przypisz do użytkowników -->

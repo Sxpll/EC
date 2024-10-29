@@ -47,10 +47,10 @@ class DiscountCodeController extends Controller
 
         $users = User::all();
         $categories = $this->getJsTreeCategories();
-        $discountCode = new DiscountCode();
 
-        return view('admin.discount_codes.create', compact('users', 'categories', 'discountCode'));
+        return view('admin.discount_codes.create', compact('users', 'categories'));
     }
+
 
     public function store(Request $request)
     {
