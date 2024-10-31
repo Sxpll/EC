@@ -18,6 +18,7 @@ class CartService
 
         if (!isset($cart[$productId])) {
             $cart[$productId] = [
+                'id' => $product->id, // Dodajemy id do zapisu
                 'name' => $product->name,
                 'quantity' => 1,
                 'price' => $product->price,
@@ -27,6 +28,7 @@ class CartService
 
         Session::put('cart', $cart);
     }
+
 
     public function updateProductQuantity($productId, $quantity)
     {

@@ -248,8 +248,26 @@ class DiscountCodeController extends Controller
             return redirect()->route('cart.index');
         }
 
-        $totalApplicable = $this->cartService->calculateTotal();
-        $discountAmount = $discountCode->calculateDiscountAmount($totalApplicable);
+        // Oblicz łączną cenę tylko dla produktów zgodnych z kategorią kodu
+        $cart = $this->cartService->getCart();
+        $eligibleTotal = 0;
+
+        foreach ($cart as $productData) {
+            $product = Product::find($productData['id']); // Pobierz produkt na podstawie ID
+
+            if ($discountCode->isApplicableToProduct($product)) {
+                $eligibleTotal += $productData['price'] * $productData['quantity'];
+            }
+        }
+
+        // Jeżeli żaden produkt nie jest zgodny, zwróć błąd
+        if ($eligibleTotal == 0) {
+            session()->flash('error', 'Kod rabatowy nie pasuje do żadnego produktu w koszyku.');
+            return redirect()->route('cart.index');
+        }
+
+        // Oblicz wartość rabatu dla zgodnych produktów
+        $discountAmount = $discountCode->calculateDiscountAmount($eligibleTotal);
 
         session()->put('discount_code', $enteredCode);
         session()->put('discount_amount', $discountAmount);
@@ -258,8 +276,6 @@ class DiscountCodeController extends Controller
         session()->flash('success', 'Kod rabatowy został zastosowany.');
         return redirect()->route('cart.index');
     }
-
-
 
 
 
