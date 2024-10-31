@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 
+
 class Order extends Model
 {
     protected $fillable = [
@@ -12,7 +13,7 @@ class Order extends Model
         'customer_email',
         'customer_address',
         'total',
-        'status',
+        'status_id',
         'user_id',
         'pickup_code',
         'discount_code_id',
@@ -32,5 +33,10 @@ class Order extends Model
     public function discountCode()
     {
         return $this->belongsTo(DiscountCode::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(OrderStatus::class, 'status_id');
     }
 }

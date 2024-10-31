@@ -16,7 +16,6 @@
             </div>
             @endif
 
-            <!-- Dodano kontener dla tabeli -->
             <div class="orders-table-wrapper">
                 <table class="orders-table table table-hover">
                     <thead class="thead-light">
@@ -35,7 +34,8 @@
                             <td>{{ $order->id }}</td>
                             <td>{{ $order->user->name }} {{ $order->user->lastname }}</td>
                             <td>{{ number_format($order->total, 2) }} zł</td>
-                            <td>{{ ucfirst($order->status) }}</td>
+                            <td>{{ $order->status->name ?? 'Brak statusu' }}</td> <!-- Wyświetlanie nazwy statusu z relacji -->
+
                             <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                             <td>
                                 <button class="btn-details btn btn-primary btn-sm">view</button>
@@ -54,20 +54,17 @@
                                     <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="form-inline">
                                         @csrf
                                         <div class="form-group mb-2">
-                                            <label for="status" class="mr-2">Status:</label>
-                                            <select name="status" class="form-control">
-                                                <option value="Oczekujące" {{ $order->status == 'Oczekujące' ? 'selected' : '' }}>Oczekujące</option>
-                                                <option value="W realizacji" {{ $order->status == 'W realizacji' ? 'selected' : '' }}>W realizacji</option>
-                                                <option value="W drodze" {{ $order->status == 'W drodze' ? 'selected' : '' }}>W drodze</option>
-                                                <option value="Zakończone" {{ $order->status == 'Zakończone' ? 'selected' : '' }}>Zakończone</option>
-                                                <option value="Anulowane" {{ $order->status == 'Anulowane' ? 'selected' : '' }}>Anulowane</option>
+                                            <label for="status_id" class="mr-2">Status:</label>
+                                            <select name="status_id" class="form-control">
+                                                @foreach($statuses as $status)
+                                                <option value="{{ $status->id }}" {{ $order->status_id == $status->id ? 'selected' : '' }}>
+                                                    {{ $status->name }}
+                                                </option>
+                                                @endforeach
                                             </select>
                                         </div>
 
                                         <button type="submit" class="btn-update btn btn-success mb-2 ml-2">Zaktualizuj Status</button>
-                                        <!-- Opcjonalny przycisk anulowania
-                                        <button type="button" class="btn-cancel btn btn-danger mb-2 ml-2">Anuluj Zamówienie</button>
-                                        -->
                                     </form>
                                 </div>
                             </td>
@@ -75,8 +72,7 @@
                         @endforeach
                     </tbody>
                 </table>
-            </div> <!-- Koniec kontenera orders-table-wrapper -->
-
+            </div>
         </div>
     </div>
 </div>
