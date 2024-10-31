@@ -87,7 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
     Route::get('/categories/{id}/products', [CategoryController::class, 'getProducts'])->name('categories.getProducts');
     Route::post('/categories/move-products', [CategoryController::class, 'moveProductsToNewSubcategory'])->name('categories.moveProducts');
-    Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
+   
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filterChats');
