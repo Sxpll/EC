@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\OrderStatus;
 
 class CreateOrderStatusesTable extends Migration
 {
@@ -17,7 +16,7 @@ class CreateOrderStatusesTable extends Migration
         });
 
         // Dodanie domyślnych statusów po utworzeniu tabeli
-        OrderStatus::insert([
+        \App\Models\OrderStatus::insert([
             ['name' => 'W realizacji', 'code' => 'in_progress'],
             ['name' => 'W drodze', 'code' => 'on_the_way'],
             ['name' => 'Dostarczono', 'code' => 'delivered'],

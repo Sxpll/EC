@@ -10,13 +10,14 @@ class CreateDiscountCodesTable extends Migration
     {
         Schema::create('discount_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('code_hash'); // zahashowany kod
+            $table->string('code_hash'); // Zahashowany kod
             $table->string('description')->nullable();
             $table->decimal('amount', 8, 2);
             $table->enum('type', ['fixed', 'percentage']);
             $table->dateTime('valid_from')->nullable();
             $table->dateTime('valid_until')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_single_use')->default(true);
             $table->timestamps();
         });
     }

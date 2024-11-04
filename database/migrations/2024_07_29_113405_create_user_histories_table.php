@@ -14,9 +14,10 @@ class CreateUserHistoriesTable extends Migration
             $table->string('admin_name');
             $table->string('admin_lastname');
             $table->string('action');
+            $table->string('field')->nullable();
             $table->unsignedBigInteger('user_id');
-            $table->string('user_name')->nullable(); // Nowa kolumna
-            $table->string('user_lastname')->nullable(); // Nowa kolumna
+            $table->string('user_name')->nullable();
+            $table->string('user_lastname')->nullable();
             $table->text('old_value')->nullable();
             $table->text('new_value')->nullable();
             $table->timestamps();

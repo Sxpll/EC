@@ -13,6 +13,8 @@ class CreateUserChatsTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('admin_id')->nullable();
             $table->string('status')->default('open');
+            $table->boolean('is_taken')->default(false);
+            $table->string('title')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
