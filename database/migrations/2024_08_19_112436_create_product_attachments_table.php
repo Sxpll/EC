@@ -11,12 +11,12 @@ class CreateProductAttachmentsTable extends Migration
         Schema::create('product_attachments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id');
-            $table->binary('file_data'); // Przechowywanie pliku binarnego
-            $table->string('mime_type'); // Typ MIME (np. application/pdf)
-            $table->string('file_name'); // Nazwa pliku (np. instrukcja.pdf)
+            $table->binary('file_data');
+            $table->string('mime_type');
+            $table->string('file_name');
             $table->timestamps();
 
-            // Relacja z tabelą products
+            
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }

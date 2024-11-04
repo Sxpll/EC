@@ -15,12 +15,12 @@ class CreateProductCategoryHistoryTable extends Migration
     {
         Schema::create('product_category_history', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade'); // Klucz obcy do tabeli produktów
-            $table->foreignId('category_id')->constrained()->onDelete('cascade'); // Klucz obcy do tabeli kategorii
-            $table->enum('status', ['active', 'inactive'])->default('active'); // Status przypisania kategorii
-            $table->timestamp('assigned_at')->useCurrent(); // Data przypisania kategorii
-            $table->timestamp('removed_at')->nullable(); // Data usunięcia lub deaktywacji kategorii
-            $table->timestamps(); // Standardowe znaczniki czasu
+            $table->foreignId('product_id')->constrained()->onDelete('cascade'); 
+            $table->foreignId('category_id')->constrained()->onDelete('cascade');
+            $table->timestamp('assigned_at')->useCurrent();
+            $table->timestamp('removed_at')->nullable();
+            $table->string('path')->nullable();
+            $table->timestamps();
         });
     }
 
