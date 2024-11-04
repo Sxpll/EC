@@ -4,20 +4,28 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Services\CartService;
+use App\Http\Controllers\DiscountCodeController;
 
 class CartController extends Controller
 {
-    // Wyświetlanie koszyka
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
+
     public function index()
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->getCart();
         return view('cart.index', compact('cart'));
     }
 
     public function add(Request $request, $id)
     {
-        // Znajdź produkt
         $product = Product::find($id);
+
         if (!$product) {
             return redirect()->back()->with('error', 'Produkt nie został znaleziony.');
         }
@@ -26,81 +34,44 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Ten produkt jest niedostępny i nie może zostać dodany do koszyka.');
         }
 
-        // Pobierz koszyk z sesji
-        $cart = session()->get('cart', []);
+        $this->cartService->addProductToCart($product);
 
-        // Dodaj lub zaktualizuj produkt w koszyku
-        // Dodaj lub zaktualizuj produkt w koszyku
-        if (!isset($cart[$id])) {
-            $cart[$id] = [
-                'name' => $product->name,
-                'quantity' => 1,
-                'price' => $product->price,
-                'image' => $product->images->first() ? 'data:' . $product->images->first()->mime_type . ';base64,' . $product->images->first()->file_data : 'https://via.placeholder.com/150',
-            ];
-        } else {
-            $cart[$id]['quantity'] = $cart[$id]['quantity'] === 1 ? 1 : ++$cart[$id]['quantity'];
-        }
-
-
-
-        // Zapisz koszyk w sesji
-        session()->put('cart', $cart);
-
-        // Przekieruj z komunikatem sukcesu
         return redirect()->back()->with('success', 'Produkt został dodany do koszyka.');
     }
 
-
-    // Aktualizacja ilości produktu w koszyku
     public function update(Request $request, $id)
     {
-        $cart = session()->get('cart');
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = $request->quantity;
-            $cart[$id]['subtotal'] = $cart[$id]['price'] * $cart[$id]['quantity'];
-            session()->put('cart', $cart);
+        $item = $this->cartService->updateProductQuantity($id, $request->quantity);
 
-            $total = array_sum(array_column($cart, 'subtotal'));
+        if ($item) {
+            $total = app(DiscountCodeController::class)->calculateTotal();
             return response()->json([
                 'success' => true,
-                'item' => $cart[$id],
-                'total' => $total
+                'item' => $item,
+                'total_formatted' => number_format($total, 2) . ' zł',
             ]);
         }
+
         return response()->json(['success' => false]);
     }
 
-
-
-    // Usuwanie produktu z koszyka
     public function remove(Request $request, $id)
     {
-        $cart = session()->get('cart', []);
-
-        if (isset($cart[$id])) {
-            unset($cart[$id]);
-            session()->put('cart', $cart);
-            return back()->with('success', 'Produkt został usunięty z koszyka!');
-        }
-
-        return back()->with('error', 'Produkt nie znajduje się w koszyku!');
+        $this->cartService->removeProductFromCart($id);
+        return back()->with('success', 'Produkt został usunięty z koszyka!');
     }
 
-    // Czyszczenie koszyka
     public function clear()
     {
-        session()->forget('cart');
+        $this->cartService->clearCart();
         return back()->with('success', 'Koszyk został wyczyszczony!');
     }
 
     public function contents()
     {
-        $cart = session()->get('cart', []);
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
+        $total = app(DiscountCodeController::class)->calculateTotal();
+        $cart = $this->cartService->getCart();
+
         return response()->json([
             'cart' => $cart,
             'total' => $total,

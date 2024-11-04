@@ -63,7 +63,7 @@
                     <input id="password-confirm" type="password" class="form-control" name="password_confirmation">
                 </div>
 
-                <div class="form-group">
+                <div class="text-right mb-3">
                     <button type="submit" class="btn btn-primary">
                         Update Account
                     </button>
@@ -73,6 +73,10 @@
             <div class="text-right mb-3">
                 <a href="{{ route('orders.myOrders') }}" class="btn btn-primary">My Orders</a>
             </div>
+            <div class="text-right mb-3">
+                <a href="{{ route('discount_codes.my_codes') }}" class="btn btn-primary">Moje Kody Rabatowe</a>
+            </div>
+
 
         </div>
     </div>

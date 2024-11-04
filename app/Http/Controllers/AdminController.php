@@ -19,13 +19,11 @@ class AdminController extends Controller
             return redirect('/home')->with('error', 'Unauthorized access');
         }
 
-        // Użytkownicy, którzy nie są usunięci
         $totalUsers = User::where('is_deleted', false)->count();
         $activeUsers = User::where('is_deleted', false)->where('isActive', true)->count();
         $inactiveUsers = User::where('is_deleted', false)->where('isActive', false)->count();
         $deletedUsers = User::where('is_deleted', true)->count();
 
-        // Produkty
         $totalProducts = Product::count();
 
         return view('admin.dashboard', compact('totalUsers', 'activeUsers', 'inactiveUsers', 'deletedUsers', 'totalProducts'));

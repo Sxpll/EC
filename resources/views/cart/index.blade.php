@@ -3,9 +3,18 @@
 @section('content')
 <div class="custom-cart-container">
     <h1>Twój Koszyk</h1>
-    @if(session('cart') && count(session('cart')) > 0)
 
-    <!-- Przycisk "Wyczyść Koszyk" nad koszykiem -->
+    @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if(session('info'))
+    <div class="alert alert-info">{{ session('info') }}</div>
+    @endif
+    @if(session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
+    @if(session('cart') && count(session('cart')) > 0)
     <div class="custom-cart-actions-top">
         <form action="{{ route('cart.clear') }}" method="POST">
             @csrf
@@ -13,7 +22,6 @@
         </form>
     </div>
 
-    <!-- Kontener przewijalny dla tabeli koszyka -->
     <div class="custom-cart-table-wrapper">
         <table class="custom-cart-table">
             <thead>
@@ -42,9 +50,9 @@
                     </td>
                     <td>
                         <div class="custom-quantity-control">
-                            <button class="custom-btn-decrease" data-id="{{ $id }}">-</button>
+                            <button type="button" class="custom-btn-decrease" data-id="{{ $id }}">-</button>
                             <input type="number" class="custom-quantity-input" data-id="{{ $id }}" value="{{ $item['quantity'] }}" min="1">
-                            <button class="custom-btn-increase" data-id="{{ $id }}">+</button>
+                            <button type="button" class="custom-btn-increase" data-id="{{ $id }}">+</button>
                         </div>
                     </td>
                     <td>{{ number_format($item['price'], 2) }} zł</td>
@@ -57,15 +65,43 @@
                     </td>
                 </tr>
                 @endforeach
+
+                @if(session('discount_amount'))
+                <tr class="custom-discount-row">
+                    <td colspan="4" class="custom-total-label"><strong>Rabat:</strong></td>
+                    <td colspan="2" class="custom-total-amount"><strong>-{{ number_format(session('discount_amount'), 2) }} zł</strong></td>
+                </tr>
+                @endif
+
                 <tr class="custom-total-row">
                     <td colspan="4" class="custom-total-label"><strong>Łącznie:</strong></td>
-                    <td colspan="2" class="custom-total-amount"><strong>{{ number_format($total, 2) }} zł</strong></td>
+                    <td colspan="2" class="custom-total-amount">
+                        <strong>
+                            <span id="total-amount">{{ number_format($total - session('discount_amount', 0), 2) }}</span> zł
+                        </strong>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Przyciski akcji poniżej koszyka -->
+    <div class="custom-discount-code-form">
+        @if(session('discount_code'))
+        <p>Zastosowano kod rabatowy: <strong>{{ session('discount_code') }}</strong></p>
+        <form action="{{ route('cart.removeDiscount') }}" method="POST">
+            @csrf
+            <button type="submit" class="custom-btn-remove-discount">Usuń kod rabatowy</button>
+        </form>
+        @else
+        <form action="{{ route('cart.applyDiscount') }}" method="POST">
+            @csrf
+            <label for="discount_code">Kod rabatowy:</label>
+            <input type="text" name="discount_code" id="discount_code" required>
+            <button type="submit" class="custom-btn-apply-discount">Zastosuj</button>
+        </form>
+        @endif
+    </div>
+
     <div class="custom-cart-actions-bottom">
         <a href="{{ route('orders.create') }}" class="custom-btn-place-order">Złóż Zamówienie</a>
     </div>
@@ -78,7 +114,28 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const updateCart = (id, quantity) => {
+        // Zwiększ ilość
+        document.querySelectorAll('.custom-btn-increase').forEach(button => {
+            button.addEventListener('click', function() {
+                updateQuantity(this.dataset.id, 1);
+            });
+        });
+
+        // Zmniejsz ilość
+        document.querySelectorAll('.custom-btn-decrease').forEach(button => {
+            button.addEventListener('click', function() {
+                updateQuantity(this.dataset.id, -1);
+            });
+        });
+
+        // Aktualizacja ilości
+        function updateQuantity(id, change) {
+            let quantityInput = document.querySelector(`.custom-quantity-input[data-id='${id}']`);
+            let newQuantity = parseInt(quantityInput.value) + change;
+            if (newQuantity < 1) return;
+            quantityInput.value = newQuantity;
+
+            // Wysłanie żądania AJAX do zaktualizowania ilości na serwerze
             fetch(`/cart/update/${id}`, {
                     method: 'POST',
                     headers: {
@@ -86,58 +143,18 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        quantity: quantity
+                        quantity: newQuantity
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const row = document.querySelector(`tr[data-id="${id}"]`);
-                        row.querySelector('.custom-quantity-input').value = data.item.quantity;
-                        row.querySelector('.custom-subtotal').innerText = data.item.subtotal.toFixed(2) + ' zł';
-                        document.querySelector('.custom-total-amount').innerText = data.total.toFixed(2) + ' zł';
+                        // Zaktualizuj podsumowanie i łączną cenę
+                        document.querySelector(`tr[data-id='${id}'] .custom-subtotal`).textContent = `${data.item.subtotal.toFixed(2)} zł`;
+                        document.getElementById('total-amount').textContent = data.total_formatted;
                     }
                 });
-        };
-
-        // Obsługa przycisków zwiększania ilości
-        document.querySelectorAll('.custom-btn-increase').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.dataset.id;
-                const quantityInput = document.querySelector(`.custom-quantity-input[data-id="${id}"]`);
-                let quantity = parseInt(quantityInput.value) || 1;
-                quantity += 1;
-                quantityInput.value = quantity;
-                updateCart(id, quantity);
-            });
-        });
-
-        // Obsługa przycisków zmniejszania ilości
-        document.querySelectorAll('.custom-btn-decrease').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.dataset.id;
-                const quantityInput = document.querySelector(`.custom-quantity-input[data-id="${id}"]`);
-                let quantity = parseInt(quantityInput.value) || 1;
-                if (quantity > 1) {
-                    quantity -= 1;
-                    quantityInput.value = quantity;
-                    updateCart(id, quantity);
-                }
-            });
-        });
-
-        // Obsługa zmiany wartości w polu input
-        document.querySelectorAll('.custom-quantity-input').forEach(input => {
-            input.addEventListener('change', () => {
-                const id = input.dataset.id;
-                let quantity = parseInt(input.value);
-                if (quantity < 1 || isNaN(quantity)) {
-                    quantity = 1;
-                    input.value = 1;
-                }
-                updateCart(id, quantity);
-            });
-        });
+        }
     });
 </script>
 @endsection

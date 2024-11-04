@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h1>Place Order</h1>
+    <h1>Złóż Zamówienie</h1>
     <form action="{{ route('orders.store') }}" method="POST">
         @csrf
         <div class="form-group">
@@ -17,8 +17,8 @@
             <label for="customer_address">Adres:</label>
             <textarea name="customer_address" class="form-control" required></textarea>
         </div>
+
         <button type="submit" class="btn btn-success">Złóż zamówienie</button>
     </form>
-
 </div>
 @endsection

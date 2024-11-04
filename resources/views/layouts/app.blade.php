@@ -25,125 +25,12 @@
     <!-- Przekazanie URL trasy do JavaScript -->
     <script type="text/javascript">
         const cartContentsUrl = "{{ route('cart.contents') }}";
+        const clearCartUrl = "{{ route('cart.clear') }}"; // Dodana trasa do czyszczenia koszyka
     </script>
 
     <!-- Dodajemy style dla pop-upu koszyka -->
     <style>
-        /* Styl dla ikony koszyka i liczby produktów */
-        .cart-container {
-            position: relative;
-        }
-
-        .cart-item-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: red;
-            color: white;
-            font-size: 12px;
-            padding: 2px 5px;
-            border-radius: 50%;
-        }
-
-        /* Styl dla dropdownu koszyka */
-        .cart-dropdown {
-            position: absolute;
-            top: 40px;
-            right: 0;
-            width: 350px;
-            background-color: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            display: none;
-        }
-
-        .cart-dropdown::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            right: 20px;
-            border-width: 0 10px 10px 10px;
-            border-style: solid;
-            border-color: transparent transparent white transparent;
-        }
-
-        .cart-dropdown h6 {
-            margin: 0;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .cart-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .cart-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .cart-item img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            margin-right: 10px;
-        }
-
-        .cart-item-details {
-            flex-grow: 1;
-        }
-
-        .cart-item-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-        }
-
-        .quantity-controls button {
-            background-color: #e9ecef;
-            border: none;
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        .quantity-controls input {
-            width: 40px;
-            text-align: center;
-            border: 1px solid #ccc;
-            margin: 0 5px;
-        }
-
-        .cart-total {
-            padding: 10px;
-            font-weight: bold;
-            text-align: right;
-            border-top: 1px solid #ccc;
-        }
-
-        .btn-go-to-cart {
-            display: block;
-            width: calc(100% - 20px);
-            margin: 10px auto;
-            text-align: center;
-            padding: 10px;
-        }
-
-        /* Responsywność dla mniejszych ekranów */
-        @media (max-width: 576px) {
-            .cart-dropdown {
-                width: 90%;
-                right: 5%;
-            }
-        }
+        
     </style>
 </head>
 
@@ -174,8 +61,15 @@
                         </label>
                     </div>
 
-                    <!-- Account Icon -->
-                    <a href="{{ route('account.edit') }}" class="account-icon"><i class="fa fa-user"></i></a>
+                    <!-- Ikona My Account -->
+                    <a href="{{ route('account.edit') }}" class="account-icon">
+                        <i class="fa fa-user"></i>
+                        @if(Auth::check() && Auth::user()->has_new_discount)
+                        <span class="new-discount-indicator">!</span> <!-- Wykrzyknik, jeśli jest nowy kod -->
+                        @endif
+                    </a>
+
+
 
                     <!-- Cart Icon -->
                     <div class="cart-container">
@@ -190,6 +84,7 @@
                                 <strong>Łączna kwota:</strong> <span id="cartTotal">0.00</span> zł
                             </div>
                             <a href="{{ route('cart.index') }}" class="btn btn-primary btn-go-to-cart">Przejdź do koszyka</a>
+                            <button id="clearCartBtn" class="btn btn-clear btn-clear-cart">Wyczyść koszyk</button>
                         </div>
                     </div>
 
@@ -378,9 +273,7 @@
                             cartItemCount.style.display = itemCount > 0 ? 'inline-block' : 'none';
                         }
                     })
-                    .catch(error => {
-                        console.error('Błąd podczas aktualizacji liczby produktów w koszyku:', error);
-                    });
+                    .catch(error => console.error('Error updating cart item count:', error));
             }
 
             // Wywołaj funkcję po załadowaniu strony
@@ -399,12 +292,17 @@
                     }
                 });
             }
+            const clearCartBtn = document.getElementById('clearCartBtn');
+            clearCartBtn.addEventListener('click', function() {
+                axios.post(clearCartUrl)
+                    .then(() => {
+                        fetchCartContents();
+                        updateCartItemCount();
+                    })
+                    .catch(error => console.error('Error clearing cart:', error));
+            });
 
-            // Funkcja fetchCartContents()
             function fetchCartContents() {
-                const cartList = document.getElementById('cartList');
-                const cartTotal = document.getElementById('cartTotal');
-
                 axios.get(cartContentsUrl)
                     .then(response => {
                         const cart = response.data.cart;
@@ -417,7 +315,6 @@
                                 const itemDiv = document.createElement('div');
                                 itemDiv.classList.add('cart-item');
 
-                                // Tworzenie elementów
                                 const img = document.createElement('img');
                                 img.src = item.image || 'https://via.placeholder.com/50';
                                 img.alt = item.name;
@@ -434,7 +331,6 @@
 
                                 const minusBtn = document.createElement('button');
                                 minusBtn.innerText = '-';
-                                minusBtn.classList.add('btn-quantity');
                                 minusBtn.addEventListener('click', function() {
                                     updateCartItemQuantity(id, item.quantity - 1);
                                 });
@@ -449,7 +345,6 @@
 
                                 const plusBtn = document.createElement('button');
                                 plusBtn.innerText = '+';
-                                plusBtn.classList.add('btn-quantity');
                                 plusBtn.addEventListener('click', function() {
                                     updateCartItemQuantity(id, item.quantity + 1);
                                 });
@@ -472,24 +367,19 @@
                             cartTotal.innerText = '0.00';
                         }
                     })
-                    .catch(error => {
-                        console.error('Błąd podczas pobierania zawartości koszyka:', error);
-                    });
+                    .catch(error => console.error('Error fetching cart contents:', error));
             }
-
-            // Funkcja do aktualizacji ilości produktu w koszyku
+            // Update Cart Item Quantity
             function updateCartItemQuantity(productId, quantity) {
                 if (quantity < 1) return;
                 axios.post(`/cart/update/${productId}`, {
-                        quantity: quantity
+                        quantity
                     })
-                    .then(response => {
+                    .then(() => {
                         fetchCartContents();
                         updateCartItemCount();
                     })
-                    .catch(error => {
-                        console.error('Błąd podczas aktualizacji ilości produktu w koszyku:', error);
-                    });
+                    .catch(error => console.error('Error updating cart item quantity:', error));
             }
 
             // Zamknięcie dropdownu koszyka po kliknięciu poza nim
@@ -499,26 +389,23 @@
                 }
             });
 
-            // Dodaj event listener do formularzy 'Dodaj do koszyka'
-            const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+            function hideAlerts() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    setTimeout(() => {
+                        // Dodaj klasę do animacji fade
+                        alert.classList.add('fade-out');
 
-            addToCartForms.forEach(function(form) {
-                form.addEventListener('submit', function(event) {
-                    event.preventDefault();
-
-                    const formData = new FormData(form);
-                    const action = form.getAttribute('action');
-
-                    axios.post(action, formData)
-                        .then(response => {
-                            updateCartItemCount();
-                            alert('Produkt dodany do koszyka!');
-                        })
-                        .catch(error => {
-                            console.error('Błąd podczas dodawania do koszyka:', error);
-                        });
+                        // Usuń alert po animacji
+                        setTimeout(() => {
+                            alert.remove();
+                        }, 500); // Czas trwania animacji w CSS
+                    }, 2000); // 2 sekundy
                 });
-            });
+            }
+
+            // Wywołaj funkcję po załadowaniu strony
+            hideAlerts();
         });
     </script>
 
