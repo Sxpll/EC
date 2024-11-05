@@ -52,13 +52,20 @@ class LoginController extends Controller
         $databaseCart = $this->cartService->getCartFromDatabase();
 
         if (!empty($cookieCart)) {
-            if ($this->cartsAreDifferent($cookieCart, $databaseCart)) {
+            if (!empty($databaseCart)) {
+                // Koszyk w bazie danych nie jest pusty - prezentuj opcje wyboru
                 return redirect()->route('cart.mergeOptions');
             } else {
-                $this->cartService->clearCartInCookies();
+                // Koszyk w bazie danych jest pusty - przenieś koszyk z ciasteczek
+                $this->cartService->useCookieCart();
+                // Dodaj komunikat dla użytkownika
+                session()->flash('success', 'Twój koszyk został przeniesiony.');
             }
         }
+        // Kontynuuj normalne przetwarzanie
+        return redirect()->intended($this->redirectPath());
     }
+
 
     private function cartsAreDifferent($cart1, $cart2)
     {

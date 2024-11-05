@@ -99,6 +99,22 @@ class CartService
         }
     }
 
+    public function useCookieCart()
+    {
+        $cookieCart = $this->getCartFromCookies();
+        $this->clearCartInDatabase();
+
+        foreach ($cookieCart as $productId => $quantity) {
+            $product = Product::find($productId);
+            if ($product) {
+                $this->addProductToCartInDatabase($product, $quantity);
+            }
+        }
+
+        $this->clearCartInCookies();
+    }
+
+
 
     public function updateProductQuantityInDatabase($productId, $quantity)
     {
