@@ -10,7 +10,7 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable(false);
+            $table->unsignedBigInteger('user_id')->nullable(true);
             $table->decimal('total', 10, 2);
             $table->string('status')->default('pending');
             $table->string('customer_name');

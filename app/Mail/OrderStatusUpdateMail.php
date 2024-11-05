@@ -11,14 +11,16 @@ class OrderStatusUpdateMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $order; // Allows access to the order in the email view
+    public $order;
+    public $statusName;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Order $order)
+    public function __construct(Order $order, $statusName)
     {
         $this->order = $order;
+        $this->statusName = $statusName;
     }
 
     /**
@@ -28,6 +30,10 @@ class OrderStatusUpdateMail extends Mailable
     {
         return $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
             ->subject('Aktualizacja statusu zamówienia')
-            ->view('emails.order_status_update');
+            ->view('emails.order_status_update')
+            ->with([
+                'order' => $this->order,
+                'statusName' => $this->statusName,
+            ]);
     }
 }

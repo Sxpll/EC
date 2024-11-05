@@ -54,7 +54,12 @@ class OrderController extends Controller
         $order->customer_email = $request->input('customer_email');
         $order->customer_address = $request->input('customer_address');
         $order->total = $total;
-        $order->user_id = auth()->id();
+
+        // Przypisz user_id tylko dla zalogowanych użytkowników
+        if (Auth::check()) {
+            $order->user_id = auth()->id();
+        }
+
         $order->discount_code_id = $discountCodeId;
         $order->discount_amount = $discountAmount;
 
@@ -71,7 +76,8 @@ class OrderController extends Controller
             $orderItem->save();
         }
 
-        if ($discountCodeId) {
+        // Tylko dla zalogowanych użytkowników: zapis użycia kodu rabatowego
+        if ($discountCodeId && Auth::check()) {
             DiscountCodeUsage::create([
                 'discount_code_id' => $discountCodeId,
                 'user_id' => auth()->user()->id,
@@ -86,8 +92,10 @@ class OrderController extends Controller
             }
         }
 
+        // Wysyłanie e-maila z potwierdzeniem na podany adres e-mail
         Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
 
+        // Czyszczenie sesji koszyka i kodu rabatowego
         session()->forget('cart');
         session()->forget('discount_code');
         session()->forget('discount_amount');
@@ -112,10 +120,17 @@ class OrderController extends Controller
 
     public function adminIndex()
     {
-        $orders = Order::with('user', 'orderItems.product', 'status')->get();
+
+        $orders = Order::with(['user', 'orderItems.product', 'status'])->get();
+
         $statuses = OrderStatus::all();
+
+
         return view('admin.orders.index', compact('orders', 'statuses'));
     }
+
+
+
 
 
 
@@ -135,7 +150,11 @@ class OrderController extends Controller
 
             $order->save();
 
-            Mail::to($order->customer_email)->send(new OrderStatusUpdateMail($order));
+            
+            $newStatusName = $order->status->name;
+
+
+            Mail::to($order->customer_email)->send(new OrderStatusUpdateMail($order, $newStatusName));
 
             if ($newStatusId == $statusOnTheWay->id) {
                 Mail::to($order->customer_email)->send(new OrderPickupCodeMail($order));
@@ -146,6 +165,7 @@ class OrderController extends Controller
 
         return redirect()->route('admin.orders')->with('info', 'Status zamówienia pozostał bez zmian.');
     }
+
 
     public function resetPickupCode(Request $request, $orderId)
     {

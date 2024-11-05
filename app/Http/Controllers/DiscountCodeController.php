@@ -25,9 +25,10 @@ class DiscountCodeController extends Controller
 
     public function __construct(CartService $cartService)
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['applyDiscountCode', 'removeDiscount']);
         $this->cartService = $cartService;
     }
+
 
 
     // Wyświetlanie listy kodów rabatowych (dla administratora)
@@ -233,6 +234,7 @@ class DiscountCodeController extends Controller
 
     public function applyDiscountCode(Request $request)
     {
+        Log::info('applyDiscountCode accessed');
         $enteredCode = $request->input('discount_code');
         $discountCode = DiscountCode::where('is_active', true)->get()->first(function ($code) use ($enteredCode) {
             return Hash::check($enteredCode, $code->code_hash);
@@ -243,12 +245,12 @@ class DiscountCodeController extends Controller
             return redirect()->route('cart.index');
         }
 
-        if (!$discountCode->users->contains(Auth::id())) {
+        // Sprawdzenie przypisania kodu do użytkownika tylko dla zalogowanych
+        if (Auth::check() && !$discountCode->users->contains(Auth::id())) {
             session()->flash('error', 'Nieprawidłowy kod rabatowy');
             return redirect()->route('cart.index');
         }
 
-        // Oblicz łączną cenę tylko dla produktów zgodnych z kategorią kodu
         $cart = $this->cartService->getCart();
         $eligibleTotal = 0;
 
@@ -260,13 +262,11 @@ class DiscountCodeController extends Controller
             }
         }
 
-        // Jeżeli żaden produkt nie jest zgodny, zwróć błąd
         if ($eligibleTotal == 0) {
             session()->flash('error', 'Kod rabatowy nie pasuje do żadnego produktu w koszyku.');
             return redirect()->route('cart.index');
         }
 
-        // Oblicz wartość rabatu dla zgodnych produktów
         $discountAmount = $discountCode->calculateDiscountAmount($eligibleTotal);
 
         session()->put('discount_code', $enteredCode);
@@ -276,6 +276,7 @@ class DiscountCodeController extends Controller
         session()->flash('success', 'Kod rabatowy został zastosowany.');
         return redirect()->route('cart.index');
     }
+
 
 
 

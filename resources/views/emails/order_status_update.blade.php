@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 
 <head>
-    <title>Aktualizacja statusu zamówienia</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aktualizacja Statusu Zamówienia</title>
 </head>
 
 <body>
     <h1>Aktualizacja statusu Twojego zamówienia #{{ $order->id }}</h1>
-    <p>Twój zamówienie jest teraz w statusie: <strong>{{ ucfirst($order->status) }}</strong></p>
+    <p>Twoje zamówienie jest teraz w statusie: <strong>{{ $statusName }}</strong></p>
 
     <p>Możesz sprawdzić szczegóły zamówienia tutaj:</p>
-    <p><a href="{{ route('orders.myOrders') }}">Panel zarządzania zamówieniami</a></p>
+    <a href="{{ route('orders.myOrders') }}">Panel zarządzania zamówieniami</a>
 
     <p>Dziękujemy za zakupy w naszym sklepie!</p>
 </body>
