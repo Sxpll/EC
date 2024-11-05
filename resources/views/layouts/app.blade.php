@@ -30,7 +30,7 @@
 
     <!-- Dodajemy style dla pop-upu koszyka -->
     <style>
-        
+
     </style>
 </head>
 
@@ -166,6 +166,9 @@
 
             // Ustaw token CSRF w nagłówkach Axios
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+
+            axios.defaults.withCredentials = true;
+
 
             // Theme switch logic
             const themeToggleNavbar = document.getElementById('theme-toggle-navbar');

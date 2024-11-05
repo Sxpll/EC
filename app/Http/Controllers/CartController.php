@@ -22,6 +22,8 @@ class CartController extends Controller
         return view('cart.index', compact('cart'));
     }
 
+
+
     public function add(Request $request, $id)
     {
         $product = Product::find($id);
@@ -44,7 +46,7 @@ class CartController extends Controller
         $item = $this->cartService->updateProductQuantity($id, $request->quantity);
 
         if ($item) {
-            $total = app(DiscountCodeController::class)->calculateTotal();
+            $total = $this->cartService->calculateTotal();
             return response()->json([
                 'success' => true,
                 'item' => $item,
@@ -69,12 +71,59 @@ class CartController extends Controller
 
     public function contents()
     {
-        $total = app(DiscountCodeController::class)->calculateTotal();
+        $total = $this->cartService->calculateTotal();
         $cart = $this->cartService->getCart();
 
         return response()->json([
             'cart' => $cart,
             'total' => $total,
         ]);
+    }
+
+    public function mergeOptions()
+    {
+        return view('cart.merge_options');
+    }
+
+    public function useCookieCart()
+    {
+        $cookieCart = $this->cartService->getCartFromCookies();
+        $this->cartService->clearCartInDatabase();
+
+        foreach ($cookieCart as $productId => $quantity) {
+            $product = Product::find($productId);
+            if ($product) {
+                $this->cartService->addProductToCartInDatabase($product, $quantity);
+            }
+        }
+
+        $this->cartService->clearCartInCookies();
+        return redirect()->route('cart.index')->with('success', 'Twój koszyk został zaktualizowany.');
+    }
+
+    public function useDatabaseCart()
+    {
+        $this->cartService->clearCartInCookies();
+        return redirect()->route('cart.index')->with('success', 'Używasz koszyka zapisanego w koncie.');
+    }
+
+    public function mergeCarts()
+    {
+        $cookieCart = $this->cartService->getCartFromCookies();
+        $databaseCart = $this->cartService->getCartFromDatabase();
+
+        $mergedCart = $this->cartService->mergeCarts($databaseCart, $cookieCart);
+
+        $this->cartService->clearCartInDatabase();
+
+        foreach ($mergedCart as $item) {
+            $product = Product::find($item['id']);
+            if ($product) {
+                $this->cartService->addProductToCartInDatabase($product, $item['quantity']);
+            }
+        }
+
+        $this->cartService->clearCartInCookies();
+        return redirect()->route('cart.index')->with('success', 'Twoje koszyki zostały połączone.');
     }
 }

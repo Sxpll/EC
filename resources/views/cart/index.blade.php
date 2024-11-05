@@ -14,7 +14,7 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-    @if(session('cart') && count(session('cart')) > 0)
+    @if($cart && count($cart) > 0)
     <div class="custom-cart-actions-top">
         <form action="{{ route('cart.clear') }}" method="POST">
             @csrf
@@ -36,7 +36,7 @@
             </thead>
             <tbody>
                 @php $total = 0; @endphp
-                @foreach(session('cart') as $id => $item)
+                @foreach($cart as $id => $item)
                 @php
                 $subtotal = $item['price'] * $item['quantity'];
                 $total += $subtotal;
@@ -110,6 +110,7 @@
     @endif
 </div>
 @endsection
+
 
 @section('scripts')
 <script>

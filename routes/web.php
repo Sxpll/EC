@@ -34,14 +34,20 @@ Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.
 Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
+// Trasy dotyczące wyboru koszyka przy logowaniu
+Route::get('/cart/merge-options', [CartController::class, 'mergeOptions'])->name('cart.mergeOptions');
+Route::post('/cart/use-cookie-cart', [CartController::class, 'useCookieCart'])->name('cart.useCookieCart');
+Route::post('/cart/use-database-cart', [CartController::class, 'useDatabaseCart'])->name('cart.useDatabaseCart');
+Route::post('/cart/merge-carts', [CartController::class, 'mergeCarts'])->name('cart.mergeCarts');
+
 // Zamówienia - dostępne dla niezalogowanych i zalogowanych użytkowników
 Route::get('/order/create', [OrderController::class, 'create'])->name('orders.create');
 Route::post('/order/store', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/order/thankyou', [OrderController::class, 'thankyou'])->name('orders.thankyou');
 Route::get('/test-status', [OrderController::class, 'testStatusRelation']);
-
-
-
+// Trasa do wyświetlania produktów w danej kategorii
+Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
+Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
 
 
 // Kod rabatowy - dostępny dla niezalogowanych i zalogowanych użytkowników
@@ -78,6 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
 
+
     Route::get('/admin/chats', [ChatController::class, 'index'])->name('admin.chats');
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/manage-users', [AdminController::class, 'manageUsers'])->name('admin.manageUsers');
@@ -93,8 +100,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/orders/{id}', [AdminController::class, 'orderDetails'])->name('admin.orderDetails');
 
     // Zarządzanie kategoriami
+
     Route::resource('categories', CategoryController::class)->except(['show']);
-    Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
+
     Route::post('/categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');

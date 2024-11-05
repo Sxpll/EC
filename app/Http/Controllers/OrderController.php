@@ -13,14 +13,24 @@ use App\Mail\OrderPickupCodeMail;
 use App\Mail\OrderStatusUpdateMail;
 use App\Models\DiscountCode;
 use App\Models\DiscountCodeUsage;
+use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+
 class OrderController extends Controller
 {
+
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService; // Wstrzyknięcie usługi koszyka
+    }
+
     public function create()
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->getCart(); // Użycie CartService do pobrania koszyka
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Twój koszyk jest pusty.');
         }
@@ -30,7 +40,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->getCart(); // Użycie CartService do pobrania koszyka
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Twój koszyk jest pusty.');
         }
@@ -95,8 +105,8 @@ class OrderController extends Controller
         // Wysyłanie e-maila z potwierdzeniem na podany adres e-mail
         Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
 
-        // Czyszczenie sesji koszyka i kodu rabatowego
-        session()->forget('cart');
+        // Czyszczenie koszyka i kodu rabatowego po złożeniu zamówienia
+        $this->cartService->clearCart(); // Wyczyść koszyk za pomocą CartService
         session()->forget('discount_code');
         session()->forget('discount_amount');
         session()->forget('discount_code_id');
@@ -108,7 +118,6 @@ class OrderController extends Controller
     {
         return view('orders.thankyou');
     }
-
     public function myOrders()
     {
         $orders = Order::where('user_id', auth()->id())
@@ -150,7 +159,7 @@ class OrderController extends Controller
 
             $order->save();
 
-            
+
             $newStatusName = $order->status->name;
 
 
