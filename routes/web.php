@@ -47,7 +47,6 @@ Route::get('/order/thankyou', [OrderController::class, 'thankyou'])->name('order
 Route::get('/test-status', [OrderController::class, 'testStatusRelation']);
 // Trasa do wyświetlania produktów w danej kategorii
 Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
-Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
 
 
 // Kod rabatowy - dostępny dla niezalogowanych i zalogowanych użytkowników
@@ -99,6 +98,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/orders/{order}/update', [OrderController::class, 'update'])->name('admin.orders.update');
     Route::get('/admin/orders/{id}', [AdminController::class, 'orderDetails'])->name('admin.orderDetails');
 
+
+    Route::post('/cart/use-selected-cart', [CartController::class, 'useSelectedCart'])->name('cart.useSelectedCart');
+
     // Zarządzanie kategoriami
 
     Route::resource('categories', CategoryController::class)->except(['show']);
@@ -108,6 +110,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
     Route::get('/categories/{id}/products', [CategoryController::class, 'getProducts'])->name('categories.getProducts');
     Route::post('/categories/move-products', [CategoryController::class, 'moveProductsToNewSubcategory'])->name('categories.moveProducts');
+    Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
 });
 
 // Chat - tylko dla zalogowanych

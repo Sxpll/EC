@@ -2,22 +2,44 @@
 
 @section('content')
 <div class="container">
-    <h1>Wybierz koszyk</h1>
-    <p>Masz produkty w koszyku z poprzedniej sesji. Wybierz, który koszyk chcesz użyć:</p>
+    <h2>Masz dwa koszyki</h2>
+    <p>Wybierz, z którym koszykiem chcesz kontynuować:</p>
 
-    <form action="{{ route('cart.useCookieCart') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-primary">Użyj koszyka z tej sesji</button>
-    </form>
+    <h3>Koszyk 1 (zalogowany użytkownik)</h3>
+    @if (!empty($databaseCart))
+    <ul>
+        @foreach ($databaseCart as $item)
+        <li>{{ $item['name'] }} - Ilość: {{ $item['quantity'] }} - Cena: {{ number_format($item['price'], 2) }} zł</li>
+        @endforeach
+    </ul>
+    @else
+    <p>Koszyk jest pusty.</p>
+    @endif
 
-    <form action="{{ route('cart.useDatabaseCart') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-primary">Użyj koszyka z konta</button>
-    </form>
+    <h3>Koszyk 2 (przed zalogowaniem)</h3>
+    @if (!empty($cookieCart))
+    <ul>
+        @foreach ($cookieCart as $item)
+        <li>{{ $item['name'] }} - Ilość: {{ $item['quantity'] }} - Cena: {{ number_format($item['price'], 2) }} zł</li>
+        @endforeach
+    </ul>
+    @else
+    <p>Koszyk jest pusty.</p>
+    @endif
 
-    <form action="{{ route('cart.mergeCarts') }}" method="POST">
+    <form action="{{ route('cart.useSelectedCart') }}" method="POST">
         @csrf
-        <button type="submit" class="btn btn-primary">Połącz koszyki</button>
+        <p>Wybierz opcję:</p>
+        <input type="radio" name="cart_option" value="database" id="database" required>
+        <label for="database">Kontynuuj z koszykiem 1</label><br>
+
+        <input type="radio" name="cart_option" value="cookie" id="cookie">
+        <label for="cookie">Kontynuuj z koszykiem 2</label><br>
+
+        <input type="radio" name="cart_option" value="merge" id="merge">
+        <label for="merge">Połącz oba koszyki</label><br><br>
+
+        <button type="submit" class="btn btn-primary">Kontynuuj</button>
     </form>
 </div>
 @endsection

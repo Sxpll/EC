@@ -48,20 +48,28 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
-        $cookieCart = $this->cartService->getCartFromCookies();
-        $databaseCart = $this->cartService->getCartFromDatabase();
+        $cartService = app(CartService::class);
 
-        if (!empty($cookieCart)) {
-            if (!empty($databaseCart)) {
-                // Koszyk w bazie danych nie jest pusty - prezentuj opcje wyboru
-                return redirect()->route('cart.mergeOptions');
-            } else {
-                // Koszyk w bazie danych jest pusty - przenieś koszyk z ciasteczek
-                $this->cartService->useCookieCart();
-                // Dodaj komunikat dla użytkownika
-                session()->flash('success', 'Twój koszyk został przeniesiony.');
-            }
+        $cookieCart = $cartService->getCartFromCookies();
+        $databaseCart = $cartService->getCartFromDatabase();
+
+        if (!empty($cookieCart) && !empty($databaseCart)) {
+            // Przechowaj koszyki w sesji, aby przekazać je do widoku
+            session([
+                'cookieCart' => $cookieCart,
+                'databaseCart' => $databaseCart,
+            ]);
+
+            // Przekieruj do widoku z opcjami wyboru
+            return redirect()->route('cart.mergeOptions');
+        } elseif (!empty($cookieCart) && empty($databaseCart)) {
+            // Koszyk w bazie danych jest pusty - przenieś koszyk z ciasteczek
+            $cartService->useCookieCart();
+        } elseif (empty($cookieCart) && !empty($databaseCart)) {
+            // Koszyk w ciasteczkach jest pusty - nic nie robimy
         }
+        // Jeśli oba koszyki są puste - nic nie robimy
+
         // Kontynuuj normalne przetwarzanie
         return redirect()->intended($this->redirectPath());
     }

@@ -102,7 +102,6 @@ class CartService
     public function useCookieCart()
     {
         $cookieCart = $this->getCartFromCookies();
-        $this->clearCartInDatabase();
 
         foreach ($cookieCart as $productId => $quantity) {
             $product = Product::find($productId);
@@ -113,6 +112,7 @@ class CartService
 
         $this->clearCartInCookies();
     }
+
 
 
 
@@ -223,15 +223,23 @@ class CartService
 
     public function mergeCarts($databaseCart, $cookieCart)
     {
+        $mergedCart = [];
+
+        // Dodaj produkty z koszyka w bazie danych
+        foreach ($databaseCart as $productId => $item) {
+            $mergedCart[$productId] = $item;
+        }
+
+        // Dodaj lub zaktualizuj produkty z koszyka z ciasteczek
         foreach ($cookieCart as $productId => $quantity) {
-            if (isset($databaseCart[$productId])) {
-                // Sumowanie ilości
-                $databaseCart[$productId]['quantity'] += $quantity;
+            if (isset($mergedCart[$productId])) {
+                // Sumujemy ilości
+                $mergedCart[$productId]['quantity'] += $quantity;
             } else {
-                // Pobranie szczegółów produktu
+                // Pobieramy szczegóły produktu
                 $product = Product::find($productId);
                 if ($product) {
-                    $databaseCart[$productId] = [
+                    $mergedCart[$productId] = [
                         'id' => $product->id,
                         'name' => $product->name,
                         'quantity' => $quantity,
@@ -243,8 +251,10 @@ class CartService
                 }
             }
         }
-        return $databaseCart;
+
+        return $mergedCart;
     }
+
 
 
     public function calculateTotal($discountAmount = 0)

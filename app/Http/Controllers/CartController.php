@@ -82,8 +82,35 @@ class CartController extends Controller
 
     public function mergeOptions()
     {
-        return view('cart.merge_options');
+        $cartService = $this->cartService;
+
+        // Pobierz koszyki z sesji
+        $cookieCartItems = session('cookieCart', []);
+        $databaseCartItems = session('databaseCart', []);
+
+        // Pobierz szczegóły produktów dla koszyka z ciasteczek
+        $cookieCart = [];
+        if (!empty($cookieCartItems)) {
+            $productIds = array_keys($cookieCartItems);
+            $products = Product::whereIn('id', $productIds)->get();
+
+            foreach ($products as $product) {
+                $quantity = $cookieCartItems[$product->id];
+                $cookieCart[$product->id] = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'quantity' => $quantity,
+                    'price' => $product->price,
+                ];
+            }
+        }
+
+        // Koszyk z bazy danych już zawiera szczegóły produktów
+        $databaseCart = $databaseCartItems;
+
+        return view('cart.merge_options', compact('cookieCart', 'databaseCart'));
     }
+
 
     public function useCookieCart()
     {
@@ -125,5 +152,56 @@ class CartController extends Controller
 
         $this->cartService->clearCartInCookies();
         return redirect()->route('cart.index')->with('success', 'Twoje koszyki zostały połączone.');
+    }
+
+    public function useSelectedCart(Request $request)
+    {
+        $option = $request->input('cart_option');
+        $cartService = $this->cartService;
+
+        switch ($option) {
+            case 'database':
+                // Użyj koszyka z bazy danych - czyścimy koszyk z ciasteczek
+                $cartService->clearCartInCookies();
+                $message = 'Kontynuujesz z koszykiem zapisanym na koncie.';
+                break;
+
+            case 'cookie':
+                // Użyj koszyka z ciasteczek - przenosimy go do bazy danych
+                $cartService->clearCartInDatabase();
+                $cartService->useCookieCart();
+                $message = 'Kontynuujesz z koszykiem sprzed zalogowania.';
+                break;
+
+            case 'merge':
+                // Scal oba koszyki
+                $cookieCart = session('cookieCart', []);
+                $databaseCart = session('databaseCart', []);
+
+                $mergedCart = $cartService->mergeCarts($databaseCart, $cookieCart);
+
+                $cartService->clearCartInDatabase();
+
+                foreach ($mergedCart as $item) {
+                    $product = Product::find($item['id']);
+                    if ($product) {
+                        $cartService->addProductToCartInDatabase($product, $item['quantity']);
+                    }
+                }
+
+                $cartService->clearCartInCookies();
+                $message = 'Twoje koszyki zostały połączone.';
+                break;
+
+            default:
+                // Nieznana opcja - przekieruj z powrotem z błędem
+                return redirect()->back()->with('error', 'Nie wybrano prawidłowej opcji.');
+        }
+
+        // Czyść koszyki z sesji
+        session()->forget('cookieCart');
+        session()->forget('databaseCart');
+
+        return redirect()->route('cart.index')->with('success', $message);
     }
 }
