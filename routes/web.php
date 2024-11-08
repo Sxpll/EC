@@ -44,7 +44,6 @@ Route::post('/cart/merge-carts', [CartController::class, 'mergeCarts'])->name('c
 Route::get('/order/create', [OrderController::class, 'create'])->name('orders.create');
 Route::post('/order/store', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/order/thankyou', [OrderController::class, 'thankyou'])->name('orders.thankyou');
-Route::get('/test-status', [OrderController::class, 'testStatusRelation']);
 // Trasa do wyświetlania produktów w danej kategorii
 Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
 
