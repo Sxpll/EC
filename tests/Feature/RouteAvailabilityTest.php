@@ -41,18 +41,15 @@ class RouteAvailabilityTest extends TestCase
 
         $routes = Route::getRoutes();
 
-        $counter = 0; // Licznik przetestowanych tras
-        $maxRoutes = 1; // Maksymalna liczba tras do przetestowania (możesz zmienić na większą)
+        $counter = 0;
+        $maxRoutes = 1;
 
         foreach ($routes as $route) {
             $methods = $route->methods();
             $uri = $route->uri();
             $middlewares = $route->gatherMiddleware();
 
-            // Pomijamy trasy do debugowania (opcjonalnie)
-            // if (strpos($uri, 'api') !== false) {
-            //     continue;
-            // }
+
 
             // Przygotowanie parametrów
             $parameters = [];
@@ -72,7 +69,7 @@ class RouteAvailabilityTest extends TestCase
                             $parameters[$param] = $this->order->id;
                             break;
                         default:
-                            $parameters[$param] = 1; // Domyślna wartość
+                            $parameters[$param] = 1; 
                     }
                 }
             }
