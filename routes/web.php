@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/cart/cont241241412ents', [CartController::class, 'contents'])->name('cart.contents');
 
 Auth::routes();
 Route::get('/cart/contents', [CartController::class, 'contents'])->name('cart.contents');

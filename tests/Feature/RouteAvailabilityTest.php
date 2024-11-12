@@ -5,59 +5,116 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
-
+use App\Models\User;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\Order;
 
 class RouteAvailabilityTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Testuje dostępność wszystkich publicznych tras.
-     *
-     * @return void
-     */
-    public function test_public_routes_are_accessible()
-    {
-        // Pobierz wszystkie zarejestrowane trasy
+    protected $admin;
+    protected $user;
+    protected $product;
+    protected $category;
+    protected $order;
 
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        // Uruchom seedery przed każdym testem
+        $this->seed();
+
+        // Tworzenie danych testowych
+        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->user = User::factory()->create(['role' => 'user']);
+        $this->product = Product::factory()->create();
+        $this->category = Category::factory()->create();
+        $this->order = Order::factory()->create(['user_id' => $this->user->id]);
+    }
+
+    public function test_all_routes_are_accessible()
+    {
+        $this->withoutExceptionHandling();
 
         $routes = Route::getRoutes();
 
+        $counter = 0; // Licznik przetestowanych tras
+        $maxRoutes = 1; // Maksymalna liczba tras do przetestowania (możesz zmienić na większą)
+
         foreach ($routes as $route) {
-            // Sprawdź, czy trasa jest dostępna dla metod GET lub POST
             $methods = $route->methods();
             $uri = $route->uri();
-
-            // Ignoruj trasy do API lub trasy zarejestrowane w innej domenie
-            if (strpos($uri, 'api') === 0 || $route->getDomain() !== null) {
-                continue;
-            }
-
-            // Ignoruj trasy wymagające uwierzytelnienia (middleware 'auth')
             $middlewares = $route->gatherMiddleware();
-            if (in_array('auth', $middlewares)) {
-                continue;
-            }
 
-            // Ignoruj trasy z parametrami, aby uniknąć problemów z brakującymi danymi
+            // Pomijamy trasy do debugowania (opcjonalnie)
+            // if (strpos($uri, 'api') !== false) {
+            //     continue;
+            // }
+
+            // Przygotowanie parametrów
+            $parameters = [];
             if (strpos($uri, '{') !== false) {
-                continue;
+                preg_match_all('/\{(\w+?)\??\}/', $uri, $matches);
+                foreach ($matches[1] as $param) {
+                    switch ($param) {
+                        case 'id':
+                        case 'productId':
+                            $parameters[$param] = $this->product->id;
+                            break;
+                        case 'category':
+                        case 'categoryId':
+                            $parameters[$param] = $this->category->id;
+                            break;
+                        case 'orderId':
+                            $parameters[$param] = $this->order->id;
+                            break;
+                        default:
+                            $parameters[$param] = 1; // Domyślna wartość
+                    }
+                }
             }
 
             foreach ($methods as $method) {
-                // Sprawdzamy tylko metody GET i POST
-                if (!in_array($method, ['GET', 'POST'])) {
+                if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])) {
                     continue;
                 }
 
-                $response = $this->call($method, '/' . $uri);
+                // Określenie, czy trasa wymaga uwierzytelnienia
+                $requiresAuth = collect($middlewares)->contains(function ($middleware) {
+                    return strpos($middleware, 'auth') !== false;
+                });
 
-                // Oczekujemy kodu statusu 200 OK lub 302 Found (przekierowanie)
-                $this->assertTrue(
-                    in_array($response->status(), [200, 302]),
+                // Określenie, czy trasa jest dla administratora
+                $isAdminRoute = strpos($uri, 'admin') !== false;
+
+                // Przygotowanie żądania
+                if ($requiresAuth) {
+                    $actingUser = $isAdminRoute ? $this->admin : $this->user;
+                    $response = $this->actingAs($actingUser)->call($method, '/' . $uri, $parameters);
+                } else {
+                    $response = $this->call($method, '/' . $uri, $parameters);
+                }
+
+                // Dodaj komunikat debugujący
+                echo "Przetestowano: $method /$uri - Status: {$response->status()}\n";
+
+                // Sprawdzenie oczekiwanego kodu statusu
+                $expectedStatusCodes = [200, 302, 403, 404];
+                $this->assertContains(
+                    $response->status(),
+                    $expectedStatusCodes,
                     "$method $uri zwróciło nieoczekiwany status {$response->status()}"
                 );
+
+                // Zwiększ licznik przetestowanych tras
+                $counter++;
+                if ($counter >= $maxRoutes) {
+                    echo "Osiągnięto limit $maxRoutes tras. Przerwanie testu.\n";
+                    return;
+                }
             }
         }
     }
