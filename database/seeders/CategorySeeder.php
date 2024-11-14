@@ -10,6 +10,6 @@ class CategorySeeder extends Seeder
     public function run()
     {
         // Tworzenie kilku kategorii
-        Category::factory()->count(5)->create();
+        Category::factory()->count(1)->create();
     }
 }

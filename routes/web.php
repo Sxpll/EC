@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
 
+    Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
     Route::get('/admin/chats', [ChatController::class, 'index'])->name('admin.chats');
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
