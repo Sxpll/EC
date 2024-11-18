@@ -16,44 +16,37 @@ use App\Http\Controllers\{
 };
 use Illuminate\Support\Facades\Auth;
 
+// Trasy publiczne (dostępne dla wszystkich)
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/cart/cont241241412ents', [CartController::class, 'contents'])->name('cart.contents');
 
 Auth::routes();
-Route::get('/cart/contents', [CartController::class, 'contents'])->name('cart.contents');
 
-// Trasy dostępne bez logowania
 Route::get('/products2', [ProductController::class, 'publicIndex'])->name('products.publicIndex');
 Route::get('/public/products/{id}', [ProductController::class, 'showProduct'])->name('products.show');
 
-// Koszyk - dostępny dla niezalogowanych i zalogowanych użytkowników
+// Koszyk - publiczne
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::get('/cart/contents', [CartController::class, 'contents'])->name('cart.contents');
 Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
-// Trasy dotyczące wyboru koszyka przy logowaniu
-Route::get('/cart/merge-options', [CartController::class, 'mergeOptions'])->name('cart.mergeOptions');
-Route::post('/cart/use-cookie-cart', [CartController::class, 'useCookieCart'])->name('cart.useCookieCart');
-Route::post('/cart/use-database-cart', [CartController::class, 'useDatabaseCart'])->name('cart.useDatabaseCart');
-Route::post('/cart/merge-carts', [CartController::class, 'mergeCarts'])->name('cart.mergeCarts');
-
-// Zamówienia - dostępne dla niezalogowanych i zalogowanych użytkowników
+// Zamówienia (publiczne)
 Route::get('/order/create', [OrderController::class, 'create'])->name('orders.create');
 Route::post('/order/store', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/order/thankyou', [OrderController::class, 'thankyou'])->name('orders.thankyou');
-// Trasa do wyświetlania produktów w danej kategorii
-Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
 
-
-// Kod rabatowy - dostępny dla niezalogowanych i zalogowanych użytkowników
+// Kody rabatowe (publiczne)
 Route::post('/cart/apply-discount', [DiscountCodeController::class, 'applyDiscountCode'])->name('cart.applyDiscount');
 Route::post('/cart/remove-discount', [DiscountCodeController::class, 'removeDiscount'])->name('cart.removeDiscount');
 
-// Trasy dostępne tylko dla zalogowanych
+// Kategorie publiczne
+Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name('categories.getTree');
+
+// Trasy wymagające zalogowania
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/orders/my-orders', [OrderController::class, 'myOrders'])->name('orders.myOrders');
@@ -61,6 +54,13 @@ Route::middleware('auth')->group(function () {
     // Konto użytkownika
     Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
     Route::put('/account', [AccountController::class, 'update'])->name('account.update');
+
+    // Zarządzanie koszykiem przy logowaniu
+    Route::get('/cart/merge-options', [CartController::class, 'mergeOptions'])->name('cart.mergeOptions');
+    Route::post('/cart/use-cookie-cart', [CartController::class, 'useCookieCart'])->name('cart.useCookieCart');
+    Route::post('/cart/use-database-cart', [CartController::class, 'useDatabaseCart'])->name('cart.useDatabaseCart');
+    Route::post('/cart/merge-carts', [CartController::class, 'mergeCarts'])->name('cart.mergeCarts');
+    Route::post('/cart/use-selected-cart', [CartController::class, 'useSelectedCart'])->name('cart.useSelectedCart');
 
     // Kody rabatowe dla zalogowanych użytkowników
     Route::resource('discount_codes', DiscountCodeController::class)->except(['show']);
@@ -82,9 +82,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
-
     Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
+    // Admin panel
     Route::get('/admin/chats', [ChatController::class, 'index'])->name('admin.chats');
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/manage-users', [AdminController::class, 'manageUsers'])->name('admin.manageUsers');
@@ -99,13 +99,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/orders/{order}/update', [OrderController::class, 'update'])->name('admin.orders.update');
     Route::get('/admin/orders/{id}', [AdminController::class, 'orderDetails'])->name('admin.orderDetails');
 
-
-    Route::post('/cart/use-selected-cart', [CartController::class, 'useSelectedCart'])->name('cart.useSelectedCart');
-
-    // Zarządzanie kategoriami
-
+    // Kategorie - zarządzanie
     Route::resource('categories', CategoryController::class)->except(['show']);
-
     Route::post('/categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
     Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
@@ -114,7 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
 });
 
-// Chat - tylko dla zalogowanych
+// Trasy chatów (tylko zalogowani)
 Route::middleware('auth')->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/chat/filter', [ChatController::class, 'filterChats'])->name('chat.filterChats');
@@ -131,4 +126,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
 });
 
+// Dashboard użytkownika (tylko zalogowani)
 Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard')->middleware('auth');

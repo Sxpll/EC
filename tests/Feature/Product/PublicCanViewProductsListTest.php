@@ -1,0 +1,24 @@
+<?php
+
+namespace Tests\Feature\Product;
+
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Product;
+use PHPUnit\Framework\Attributes\Test;
+
+class PublicCanViewProductsListTest extends TestCase
+{
+    use RefreshDatabase;
+
+    #[Test]
+    public function public_can_view_products_list()
+    {
+        $product = Product::factory()->create(['name' => 'Test Product']);
+
+        $response = $this->get('/products2');
+
+        $response->assertStatus(200);
+        $response->assertSee('Test Product'); // Sprawdza, czy produkt jest widoczny na stronie
+    }
+}

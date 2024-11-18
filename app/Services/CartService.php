@@ -12,7 +12,7 @@ use App\Models\Product;
 
 class CartService
 {
-    public function getCart()
+    public function getCart(): array
     {
         if (Auth::check()) {
             return $this->getCartFromDatabase();
@@ -194,8 +194,11 @@ class CartService
                 ];
             }
         }
-        return null;
+        return ['error' => 'Produkt nie znaleziony w koszyku'];
     }
+
+
+
 
 
 
@@ -257,24 +260,34 @@ class CartService
 
 
 
-    public function calculateTotal($discountAmount = 0)
+    public function calculateTotal($cart = null, $discountAmount = 0)
     {
-        if (Auth::check()) {
-            $cart = $this->getCartFromDatabase();
-            $total = array_reduce($cart, function ($sum, $item) {
-                return $sum + ($item['price'] * $item['quantity']);
-            }, 0);
-        } else {
-            $cartItems = $this->getCartFromCookies();
-            $productIds = array_keys($cartItems);
-            $products = Product::whereIn('id', $productIds)->get();
+        if ($cart === null) {
+            if (Auth::check()) {
+                $cart = $this->getCartFromDatabase();
+            } else {
+                $cartItems = $this->getCartFromCookies();
+                $productIds = array_keys($cartItems);
+                $products = Product::whereIn('id', $productIds)->get();
 
-            $total = 0;
-            foreach ($products as $product) {
-                $quantity = $cartItems[$product->id];
-                $total += $product->price * $quantity;
+                $cart = [];
+                foreach ($products as $product) {
+                    $quantity = $cartItems[$product->id];
+                    $cart[$product->id] = [
+                        'price' => $product->price,
+                        'quantity' => $quantity,
+                    ];
+                }
             }
         }
+
+        \Log::info('Koszyk przed obliczeniem total', ['cart' => $cart]);
+
+        $total = array_reduce($cart, function ($sum, $item) {
+            return $sum + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        \Log::info('Obliczony total', ['total' => $total, 'discountAmount' => $discountAmount]);
 
         return max($total - $discountAmount, 0);
     }

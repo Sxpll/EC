@@ -35,12 +35,7 @@
                 </tr>
             </thead>
             <tbody>
-                @php $total = 0; @endphp
                 @foreach($cart as $id => $item)
-                @php
-                $subtotal = $item['price'] * $item['quantity'];
-                $total += $subtotal;
-                @endphp
                 <tr data-id="{{ $id }}">
                     <td>{{ $item['name'] }}</td>
                     <td>
@@ -56,7 +51,7 @@
                         </div>
                     </td>
                     <td>{{ number_format($item['price'], 2) }} zł</td>
-                    <td class="custom-subtotal">{{ number_format($subtotal, 2) }} zł</td>
+                    <td class="custom-subtotal">{{ number_format($item['price'] * $item['quantity'], 2) }} zł</td>
                     <td>
                         <form action="{{ route('cart.remove', $id) }}" method="POST">
                             @csrf
@@ -77,7 +72,7 @@
                     <td colspan="4" class="custom-total-label"><strong>Łącznie:</strong></td>
                     <td colspan="2" class="custom-total-amount">
                         <strong>
-                            <span id="total-amount">{{ number_format($total - session('discount_amount', 0), 2) }}</span> zł
+                            <span id="total-amount">{{ number_format($total, 2) }}</span> zł
                         </strong>
                     </td>
                 </tr>
@@ -111,32 +106,27 @@
 </div>
 @endsection
 
-
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Zwiększ ilość
         document.querySelectorAll('.custom-btn-increase').forEach(button => {
             button.addEventListener('click', function() {
                 updateQuantity(this.dataset.id, 1);
             });
         });
 
-        // Zmniejsz ilość
         document.querySelectorAll('.custom-btn-decrease').forEach(button => {
             button.addEventListener('click', function() {
                 updateQuantity(this.dataset.id, -1);
             });
         });
 
-        // Aktualizacja ilości
         function updateQuantity(id, change) {
             let quantityInput = document.querySelector(`.custom-quantity-input[data-id='${id}']`);
             let newQuantity = parseInt(quantityInput.value) + change;
             if (newQuantity < 1) return;
             quantityInput.value = newQuantity;
 
-            // Wysłanie żądania AJAX do zaktualizowania ilości na serwerze
             fetch(`/cart/update/${id}`, {
                     method: 'POST',
                     headers: {
@@ -147,14 +137,15 @@
                         quantity: newQuantity
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
+                .then(response => response.json()).then(data => {
                     if (data.success) {
-                        // Zaktualizuj podsumowanie i łączną cenę
                         document.querySelector(`tr[data-id='${id}'] .custom-subtotal`).textContent = `${data.item.subtotal.toFixed(2)} zł`;
-                        document.getElementById('total-amount').textContent = data.total_formatted;
+                        document.getElementById('total-amount').textContent = `${data.total_formatted}`; // Usunięto dodatkowe "zł"
+                    } else {
+                        alert('Błąd przy aktualizacji ilości.');
                     }
                 });
+
         }
     });
 </script>

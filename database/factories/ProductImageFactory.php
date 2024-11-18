@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ProductImage;
-use Illuminate\Support\Str;
+use App\Models\Product;
 
 class ProductImageFactory extends Factory
 {
@@ -13,9 +13,9 @@ class ProductImageFactory extends Factory
     public function definition()
     {
         return [
-            'product_id' => null, 
-            'file_data' => $this->faker->image(),
-            'mime_type' => 'image/jpeg',
+            'product_id' => Product::factory(),
+            'file_data' => $this->faker->image(storage_path('app/public'), 640, 480, null, false),
+            'mime_type' => 'image/jpeg', 
         ];
     }
 }
