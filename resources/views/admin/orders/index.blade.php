@@ -32,9 +32,19 @@
                         @foreach($orders as $order)
                         <tr class="order-row" onclick="toggleOrderDetails(this)">
                             <td>{{ $order->id }}</td>
-                            <td>{{ $order->user->name }} {{ $order->user->lastname }}</td>
+                            <td>
+                                @if($order->user)
+                                {{ $order->user->name }} {{ $order->user->lastname }}
+                                @else
+                                Niezalogowany
+                                @endif
+                            </td>
                             <td>{{ number_format($order->total, 2) }} zł</td>
-                            <td>{{ $order->status->name ?? 'Brak statusu' }}</td> <!-- Wyświetlanie nazwy statusu z relacji -->
+                            <td>
+                                {{ $order->status->name ?? 'Brak statusu' }}
+                            </td>
+
+
 
                             <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                             <td>
@@ -47,7 +57,9 @@
                                 <h5>Pozycje Zamówienia:</h5>
                                 <ul>
                                     @foreach($order->orderItems as $item)
-                                    <li>{{ $item->product->name }} x {{ $item->quantity }} - {{ number_format($item->price * $item->quantity, 2) }} zł</li>
+                                    <li>
+                                        {{ $item->product->name ?? 'Produkt usunięty' }} x {{ $item->quantity }} - {{ number_format($item->price * $item->quantity, 2) }} zł
+                                    </li>
                                     @endforeach
                                 </ul>
                                 <div class="order-management">

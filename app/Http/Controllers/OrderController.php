@@ -13,14 +13,24 @@ use App\Mail\OrderPickupCodeMail;
 use App\Mail\OrderStatusUpdateMail;
 use App\Models\DiscountCode;
 use App\Models\DiscountCodeUsage;
+use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+
 class OrderController extends Controller
 {
+
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService; // Wstrzyknięcie usługi koszyka
+    }
+
     public function create()
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->getCart(); // Użycie CartService do pobrania koszyka
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Twój koszyk jest pusty.');
         }
@@ -30,7 +40,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->getCart(); // Użycie CartService do pobrania koszyka
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Twój koszyk jest pusty.');
         }
@@ -54,7 +64,12 @@ class OrderController extends Controller
         $order->customer_email = $request->input('customer_email');
         $order->customer_address = $request->input('customer_address');
         $order->total = $total;
-        $order->user_id = auth()->id();
+
+        // Przypisz user_id tylko dla zalogowanych użytkowników
+        if (Auth::check()) {
+            $order->user_id = auth()->id();
+        }
+
         $order->discount_code_id = $discountCodeId;
         $order->discount_amount = $discountAmount;
 
@@ -71,7 +86,8 @@ class OrderController extends Controller
             $orderItem->save();
         }
 
-        if ($discountCodeId) {
+        // Tylko dla zalogowanych użytkowników: zapis użycia kodu rabatowego
+        if ($discountCodeId && Auth::check()) {
             DiscountCodeUsage::create([
                 'discount_code_id' => $discountCodeId,
                 'user_id' => auth()->user()->id,
@@ -86,9 +102,11 @@ class OrderController extends Controller
             }
         }
 
+        // Wysyłanie e-maila z potwierdzeniem na podany adres e-mail
         Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
 
-        session()->forget('cart');
+        // Czyszczenie koszyka i kodu rabatowego po złożeniu zamówienia
+        $this->cartService->clearCart(); // Wyczyść koszyk za pomocą CartService
         session()->forget('discount_code');
         session()->forget('discount_amount');
         session()->forget('discount_code_id');
@@ -100,7 +118,6 @@ class OrderController extends Controller
     {
         return view('orders.thankyou');
     }
-
     public function myOrders()
     {
         $orders = Order::where('user_id', auth()->id())
@@ -112,10 +129,17 @@ class OrderController extends Controller
 
     public function adminIndex()
     {
-        $orders = Order::with('user', 'orderItems.product', 'status')->get();
+
+        $orders = Order::with(['user', 'orderItems.product', 'status'])->get();
+
         $statuses = OrderStatus::all();
+
+
         return view('admin.orders.index', compact('orders', 'statuses'));
     }
+
+
+
 
 
 
@@ -135,7 +159,11 @@ class OrderController extends Controller
 
             $order->save();
 
-            Mail::to($order->customer_email)->send(new OrderStatusUpdateMail($order));
+
+            $newStatusName = $order->status->name;
+
+
+            Mail::to($order->customer_email)->send(new OrderStatusUpdateMail($order, $newStatusName));
 
             if ($newStatusId == $statusOnTheWay->id) {
                 Mail::to($order->customer_email)->send(new OrderPickupCodeMail($order));
@@ -146,6 +174,7 @@ class OrderController extends Controller
 
         return redirect()->route('admin.orders')->with('info', 'Status zamówienia pozostał bez zmian.');
     }
+
 
     public function resetPickupCode(Request $request, $orderId)
     {
