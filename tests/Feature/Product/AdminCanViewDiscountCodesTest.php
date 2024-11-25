@@ -14,9 +14,10 @@ class AdminCanViewDiscountCodesTest extends TestCase
         $admin = \App\Models\User::factory()->create(['role' => 'admin']);
         \App\Models\DiscountCode::factory()->count(5)->create();
 
-        $response = $this->actingAs($admin)->get('/discount_codes');
+
+        $response = $this->actingAs($admin)->get('/admin/discount_codes');
 
         $response->assertStatus(200);
-        $response->assertViewIs('discount_codes.index');
+        $response->assertViewIs('admin.discount_codes.index');
     }
 }

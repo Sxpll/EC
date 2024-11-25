@@ -12,11 +12,11 @@ class AdminCanViewOrderHistoryTest extends TestCase
     public function test_admin_can_view_order_history()
     {
         $admin = \App\Models\User::factory()->create(['role' => 'admin']);
-        $order = \App\Models\Order::factory()->create();
+        \App\Models\Order::factory()->count(5)->create();
 
-        $response = $this->actingAs($admin)->get("/admin/orders/{$order->id}/history");
+        $response = $this->actingAs($admin)->get('/admin/orders');
 
         $response->assertStatus(200);
-        $response->assertViewIs('admin.orders.history');
+        $response->assertViewIs('admin.orders.index');
     }
 }

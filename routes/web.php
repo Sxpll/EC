@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     // Kody rabatowe dla zalogowanych użytkowników
     Route::resource('discount_codes', DiscountCodeController::class)->except(['show']);
     Route::get('/my-discount-codes', [DiscountCodeController::class, 'myDiscountCodes'])->name('discount_codes.my_codes');
+    Route::get('/admin/discount_codes', [\App\Http\Controllers\DiscountCodeController::class, 'index'])->name('discount_codes.index');
 
     // Reset kodu odbioru zamówienia
     Route::post('/orders/{orderId}/reset-pickup-code', [OrderController::class, 'resetPickupCode'])->name('orders.resetPickupCode');

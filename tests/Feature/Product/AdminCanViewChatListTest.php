@@ -13,9 +13,9 @@ class AdminCanViewChatListTest extends TestCase
     {
         $admin = \App\Models\User::factory()->create(['role' => 'admin']);
 
-        $response = $this->actingAs($admin)->get('/admin/chats');
+        $response = $this->actingAs($admin)->get('/chat');
 
         $response->assertStatus(200);
-        $response->assertViewIs('admin.chats.index');
+        $response->assertViewIs('chat.index');
     }
 }

@@ -13,6 +13,7 @@ class AdminCanViewChatMessagesTest extends TestCase
     {
         $admin = \App\Models\User::factory()->create(['role' => 'admin']);
         $chat = \App\Models\Chat::factory()->create();
+        \App\Models\Message::factory()->count(3)->create(['chat_id' => $chat->id]);
 
         $response = $this->actingAs($admin)->get("/chat/{$chat->id}/messages");
 

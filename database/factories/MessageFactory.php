@@ -3,13 +3,13 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\ChatMessage;
+use App\Models\Message;
 use App\Models\Chat;
 use App\Models\User;
 
-class ChatMessageFactory extends Factory
+class MessageFactory extends Factory
 {
-    protected $model = ChatMessage::class;
+    protected $model = Message::class;
 
     public function definition()
     {
@@ -17,6 +17,7 @@ class ChatMessageFactory extends Factory
             'chat_id' => Chat::factory(),
             'user_id' => User::factory(),
             'message' => $this->faker->paragraph(),
+            'is_read' => false,
             'created_at' => now(),
             'updated_at' => now(),
         ];

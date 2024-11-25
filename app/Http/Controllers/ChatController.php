@@ -261,10 +261,11 @@ class ChatController extends Controller
             return response()->json(['error' => 'Unauthorized access'], 403);
         }
 
-        $messages = Message::with('user')->where('chat_id', $id)
+        $messages = Message::where('chat_id', $id)
             ->orderBy('created_at', 'asc')
-            ->get();
+            ->get(['id', 'message', 'created_at']);
 
-        return response()->json($messages);
+        
+        return response()->json(['data' => $messages], 200);
     }
 }

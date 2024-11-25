@@ -12,13 +12,14 @@ class DiscountCodeFactory extends Factory
     public function definition()
     {
         return [
-            'code' => $this->faker->unique()->bothify('DISCOUNT-####'),
+            'code_hash' => bcrypt($this->faker->unique()->bothify('DISCOUNT-####')),
             'description' => $this->faker->sentence(),
-            'discount_percent' => $this->faker->numberBetween(5, 50),
+            'amount' => $this->faker->randomFloat(2, 10, 100), // Kwota zniżki
+            'type' => $this->faker->randomElement(['fixed', 'percentage']), // Typ zniżki
             'valid_from' => now(),
-            'valid_to' => now()->addDays($this->faker->numberBetween(7, 30)),
-            'usage_limit' => $this->faker->randomElement([null, $this->faker->numberBetween(1, 10)]),
-            'used_count' => 0,
+            'valid_until' => now()->addDays($this->faker->numberBetween(7, 30)), // Ważność
+            'is_active' => $this->faker->boolean(80), // Aktywny w 80% przypadków
+            'is_single_use' => $this->faker->boolean(50), // Jednorazowy
         ];
     }
 }
