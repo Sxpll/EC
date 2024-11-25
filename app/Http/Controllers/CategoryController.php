@@ -45,16 +45,16 @@ class CategoryController extends Controller
 
             Log::info('Category created successfully', ['category_id' => $category->id]);
 
-            if ($request->ajax()) {
-                return response()->json(['success' => 'Category added successfully', 'category_id' => $category->id]);
-            }
-
-            return redirect()->route('categories.index')->with('success', 'Category added successfully');
+            return response()->json([
+                'success' => true,
+                'category_id' => $category->id
+            ], 201);
         } catch (\Exception $e) {
             Log::error('Error creating category: ' . $e->getMessage());
             return response()->json(['error' => 'Error creating category: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function edit(Category $category)
     {
@@ -125,18 +125,18 @@ class CategoryController extends Controller
 
 
 
+    //admin nie ma mozliwosci aktywacji kategorii ...
+    // public function activate($id)
+    // {
+    //     if (!Auth::check() || Auth::user()->role !== 'admin') {
+    //         return redirect('/home')->with('error', 'Unauthorized access');
+    //     }
 
-    public function activate($id)
-    {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Unauthorized access');
-        }
+    //     $category = Category::findOrFail($id);
+    //     $category->update(['isActive' => 1]);
 
-        $category = Category::findOrFail($id);
-        $category->update(['isActive' => 1]);
-
-        return redirect()->route('categories.index')->with('success', 'Category activated successfully.');
-    }
+    //     return redirect()->route('categories.index')->with('success', 'Category activated successfully.');
+    // }
 
     public function updateHierarchy(Request $request)
     {

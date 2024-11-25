@@ -18,6 +18,10 @@ class AdminCanCreateCategoryTest extends TestCase
         ]);
 
         $response->assertStatus(201);
-        $response->assertJson(['success' => true]);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $this->assertDatabaseHas('categories', ['name' => 'New Category']);
     }
 }

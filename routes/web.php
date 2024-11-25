@@ -103,7 +103,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::post('/categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
-    Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
+    // Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
     Route::get('/categories/{id}/products', [CategoryController::class, 'getProducts'])->name('categories.getProducts');
     Route::post('/categories/move-products', [CategoryController::class, 'moveProductsToNewSubcategory'])->name('categories.moveProducts');
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');

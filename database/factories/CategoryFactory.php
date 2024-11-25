@@ -16,7 +16,6 @@ class CategoryFactory extends Factory
         return [
             'name' => $this->faker->word,
             'parent_id' => null,
-            'isActive' => true,
             'order' => $this->faker->numberBetween(1, 10),
         ];
     }
