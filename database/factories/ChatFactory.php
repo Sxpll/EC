@@ -14,8 +14,10 @@ class ChatFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'subject' => $this->faker->sentence(),
+            'admin_id' => null,
             'status' => $this->faker->randomElement(['open', 'resolved', 'pending']),
+            'is_taken' => false,
+            'title' => $this->faker->sentence(),
             'created_at' => now(),
             'updated_at' => now(),
         ];

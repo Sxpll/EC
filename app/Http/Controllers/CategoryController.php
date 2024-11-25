@@ -69,7 +69,7 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Unauthorized access');
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $request->validate([
@@ -77,17 +77,19 @@ class CategoryController extends Controller
             'parent_id' => 'nullable|exists:categories,id',
         ]);
 
-        $category->update([
-            'name' => $request->name,
-            'parent_id' => $request->parent_id,
-        ]);
+        try {
+            $category->update([
+                'name' => $request->name,
+                'parent_id' => $request->parent_id,
+            ]);
 
-        if ($request->ajax()) {
-            return response()->json(['success' => 'Category renamed successfully.']);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Error updating category: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to update category.'], 500);
         }
-
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
+
 
     public function destroy($id)
     {
@@ -125,82 +127,85 @@ class CategoryController extends Controller
 
 
 
-    //admin nie ma mozliwosci aktywacji kategorii ...
-    // public function activate($id)
-    // {
-    //     if (!Auth::check() || Auth::user()->role !== 'admin') {
-    //         return redirect('/home')->with('error', 'Unauthorized access');
-    //     }
 
-    //     $category = Category::findOrFail($id);
-    //     $category->update(['isActive' => 1]);
-
-    //     return redirect()->route('categories.index')->with('success', 'Category activated successfully.');
-    // }
 
     public function updateHierarchy(Request $request)
     {
-        $categories = $request->input('hierarchy');
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'new_parent_id' => 'nullable|exists:categories,id',
+        ]);
 
         try {
-            foreach ($categories as $index => $categoryData) {
-                $category = Category::findOrFail($categoryData['id']);
-                $category->update([
-                    'parent_id' => $categoryData['parent_id'] ?? null,
-                    'order' => $index,
-                ]);
+            $category = Category::findOrFail($request->input('category_id'));
+            $newParentId = $request->input('new_parent_id');
 
-                if ($categoryData['isActive'] == 0) {
-                    $this->deactivateChildren($category);
-                }
-
-                if (!empty($categoryData['children'])) {
-                    $this->updateChildCategories($categoryData['children'], $category->id);
-                }
+            // Zapobieganie przenoszeniu kategorii do jej potomka
+            if ($this->isChildCategory($category->id, $newParentId)) {
+                return response()->json(['error' => 'Cannot move category to its own child.'], 400);
             }
-            return response()->json(['success' => true]);
+
+            // Aktualizacja parent_id
+            $category->update(['parent_id' => $newParentId]);
+
+            return response()->json(['success' => true, 'message' => 'Category hierarchy updated successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            Log::error('Error updating category hierarchy: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to update category hierarchy.'], 500);
         }
     }
 
 
-    private function updateChildCategories($children, $parentId)
+    /**
+     * Sprawdza, czy dana kategoria jest podkategorią innej kategorii.
+     */
+    private function isChildCategory($categoryId, $parentId)
     {
-        foreach ($children as $index => $childData) {
-            $childCategory = Category::findOrFail($childData['id']);
-            $childCategory->update([
-                'parent_id' => $parentId,
-                'order' => $index,
-            ]);
-
-            if (!empty($childData['children'])) {
-                $this->updateChildCategories($childData['children'], $childCategory->id);
-            }
+        if (!$parentId) {
+            return false;
         }
+
+        $parent = Category::find($parentId);
+
+        while ($parent) {
+            if ($parent->id === $categoryId) {
+                return true;
+            }
+            $parent = $parent->parent;
+        }
+
+        return false;
     }
+
+
+
+
 
     public function getTree()
     {
-        $categories = Category::where('isActive', 1)->whereNull('parent_id')->with('childrenRecursive')->get();
-        $treeData = $this->buildTree($categories);
+        $categories = Category::where('isActive', 1)
+            ->whereNull('parent_id')
+            ->with(['childrenRecursive' => function ($query) {
+                $query->where('isActive', 1);
+            }])
+            ->get();
 
+        $treeData = $this->buildTree($categories);
         return response()->json($treeData);
     }
 
+
     private function buildTree($categories)
     {
-        $tree = [];
-        foreach ($categories as $category) {
-            $node = [
+        return $categories->map(function ($category) {
+            return [
                 'id' => $category->id,
                 'text' => $category->name,
                 'children' => $this->buildTree($category->childrenRecursive)
             ];
-            $tree[] = $node;
-        }
-        return $tree;
+        })->toArray();
     }
+
 
     public function moveProductsToNewSubcategory(Request $request)
     {

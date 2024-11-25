@@ -14,6 +14,6 @@ class AdminCanManageProductsTest extends TestCase
         $response = $this->actingAs($admin)->get('/admin/products');
 
         $response->assertStatus(200);
-        $response->assertViewIs('admin.products.index');
+        $response->assertViewIs('products.manage-products');
     }
 }

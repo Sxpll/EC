@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/orders/my-orders', [OrderController::class, 'myOrders'])->name('orders.myOrders');
 
+
     // Konto użytkownika
     Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
     Route::put('/account', [AccountController::class, 'update'])->name('account.update');
@@ -75,6 +76,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::get('/products/{id}/images', [ProductController::class, 'showImages']);
     Route::get('/products/{id}/attachments', [ProductController::class, 'showAttachments']);
+    Route::put('/admin/products/{id}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::delete('/products/{productId}/images/{imageId}', [ProductController::class, 'deleteImage'])->name('products.images.delete');
     Route::delete('/products/{productId}/attachments/{attachmentId}', [ProductController::class, 'deleteAttachment'])->name('products.attachments.delete');
     Route::post('/products/{product}/images', [ProductController::class, 'storeImages']);
@@ -82,7 +85,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
     Route::get('/products/{id}/history', [ProductController::class, 'fetchHistory'])->name('products.history');
     Route::get('/products/{id}/archived-categories', [ProductController::class, 'getArchivedCategories']);
-    Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
     // Admin panel
     Route::get('/admin/chats', [ChatController::class, 'index'])->name('admin.chats');
@@ -103,7 +105,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::post('/categories/update-hierarchy', [CategoryController::class, 'updateHierarchy'])->name('categories.updateHierarchy');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
-    // Route::patch('/categories/{id}/activate', [CategoryController::class, 'activate'])->name('categories.activate');
     Route::get('/categories/{id}/products', [CategoryController::class, 'getProducts'])->name('categories.getProducts');
     Route::post('/categories/move-products', [CategoryController::class, 'moveProductsToNewSubcategory'])->name('categories.moveProducts');
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');

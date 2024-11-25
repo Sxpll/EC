@@ -19,7 +19,6 @@ class AdminCanDeleteProductTest extends TestCase
     {
         parent::setUp();
 
-
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->product = Product::factory()->create();
     }
@@ -27,9 +26,9 @@ class AdminCanDeleteProductTest extends TestCase
     #[Test]
     public function admin_can_delete_product()
     {
-        $response = $this->actingAs($this->admin)->delete('/products/' . $this->product->id);
+        $response = $this->actingAs($this->admin)->delete('/admin/products/' . $this->product->id);
 
         $response->assertStatus(302);
-        $this->assertDatabaseMissing('products', ['id' => $this->product->id]);
+        $this->assertDatabaseMissing('products', ['id' => $this->product->id, 'isActive' => true]);
     }
 }

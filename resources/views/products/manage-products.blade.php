@@ -2,10 +2,12 @@
 
 @section('content')
 
+<!-- CSRF Token -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <div id="sidebar" class="sidebar">
     <button id="close-sidebar" class="close-sidebar">&times;</button>
-    <nav class="sidebar-nav">
+    <nav class=" sidebar-nav">
         <a href="{{ url('/home') }}">Home</a>
         <a href="{{ route('products.publicIndex') }}">Products</a>
         @if(auth()->check() && auth()->user()->role === 'admin')
@@ -65,20 +67,20 @@
                                 <td>
                                     @switch($product->availability)
                                     @case('available')
-                                    Na stanie
+                                    In Stock
                                     @break
                                     @case('available_in_7_days')
-                                    Dostępny w ciągu 7 dni
+                                    Available within 7 days
                                     @break
                                     @case('available_in_14_days')
-                                    Dostępny w ciągu 14 dni
+                                    Available within 14 days
                                     @break
                                     @default
-                                    Niedostępny
+                                    Unavailable
                                     @endswitch
                                 </td>
                                 <td>
-                                    <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">View</button>
+                                    <button class="btn btn-primary btn-view" data-id="{{ $product->id }}">Edit</button>
                                 </td>
                             </tr>
 
@@ -112,16 +114,16 @@
                     <textarea name="description" id="description" class="form-control" rows="4" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="price">Cena (PLN):</label>
+                    <label for="price">Price (PLN):</label>
                     <input type="number" step="0.01" name="price" id="price" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="availability">Dostępność:</label>
+                    <label for="availability">Availability:</label>
                     <select name="availability" id="availability" class="form-control">
-                        <option value="available">Dostępny</option>
-                        <option value="available_in_7_days">Dostępny w ciągu 7 dni</option>
-                        <option value="available_in_14_days">Dostępny w ciągu 14 dni</option>
-                        <option value="unavailable">Niedostępny</option>
+                        <option value="available">Available</option>
+                        <option value="available_in_7_days">Available within 7 days</option>
+                        <option value="available_in_14_days">Available within 14 days</option>
+                        <option value="unavailable">Unavailable</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -133,7 +135,7 @@
         </div>
     </div>
 
-    <!-- View Product Modal -->
+    <!-- Edit Product Modal -->
     <div id="viewProductModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -148,11 +150,10 @@
                 <button class="tab-link" data-tab="ArchivedCategories">Archived Categories</button>
             </div>
 
-            <!-- Info tab -->
+            <!-- Info Tab -->
             <div id="Info" class="tab-content active">
                 <form id="viewProductForm" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <input type="hidden" name="_method" value="PUT">
                     <input type="hidden" id="viewProductId" name="id">
                     <div class="form-group">
                         <label for="viewName">Name:</label>
@@ -168,27 +169,27 @@
                         <textarea id="viewDescription" name="description" class="form-control" rows="4" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="viewPrice">Cena (PLN):</label>
+                        <label for="viewPrice">Price (PLN):</label>
                         <input type="number" step="0.01" id="viewPrice" name="price" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label for="viewAvailability">Dostępność:</label>
+                        <label for="viewAvailability">Availability:</label>
                         <select name="availability" id="viewAvailability" class="form-control">
-                            <option value="available">Dostępny</option>
-                            <option value="available_in_7_days">Dostępny w ciągu 7 dni</option>
-                            <option value="available_in_14_days">Dostępny w ciągu 14 dni</option>
-                            <option value="unavailable">Niedostępny</option>
+                            <option value="available">Available</option>
+                            <option value="available_in_7_days">Available within 7 days</option>
+                            <option value="available_in_14_days">Available within 14 days</option>
+                            <option value="unavailable">Unavailable</option>
                         </select>
                     </div>
                     <div class="form-group d-flex justify-content-center">
                         <button type="submit" class="btn btn-primary mx-2">Update Product</button>
-                        <button type="button" id="deleteProductBtn" class="btn btn-danger mx-2">Delete Product</button>
+                        <button type="button" id="deleteProductBtn" class="btn btn-danger mx-2">Deactivate Product</button>
                         <button type="button" id="activateProductBtn" class="btn btn-success mx-2">Activate Product</button>
                     </div>
                 </form>
             </div>
 
-            <!-- Images tab -->
+            <!-- Images Tab -->
             <div id="Images" class="tab-content">
                 <div id="productImages" class="d-flex flex-wrap gallery-container"></div>
                 <form id="addImageForm" enctype="multipart/form-data">
@@ -200,7 +201,7 @@
                 </form>
             </div>
 
-            <!-- Attachments tab -->
+            <!-- Attachments Tab -->
             <div id="Attachments" class="tab-content">
                 <div id="productAttachments" class="d-flex flex-wrap"></div>
                 <form id="addAttachmentForm" enctype="multipart/form-data">
@@ -212,7 +213,7 @@
                 </form>
             </div>
 
-            <!-- History tab -->
+            <!-- History Tab -->
             <div id="History" class="tab-content">
                 <table id="historyTable" class="table table-hover">
                     <thead>
@@ -226,12 +227,12 @@
                         </tr>
                     </thead>
                     <tbody id="historyTableBody">
-                        <!-- Dane historii zostaną wstawione tutaj dynamicznie przez JavaScript -->
+                        <!-- History data will be inserted here dynamically by JavaScript -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- Archived Categories tab -->
+            <!-- Archived Categories Tab -->
             <div id="ArchivedCategories" class="tab-content">
                 <div id="archivedCategoriesContainer">
                     <h4>Archived Categories</h4>
@@ -239,11 +240,6 @@
                 </div>
             </div>
 
-            <!-- Modal for image preview -->
-            <div id="imagePreviewModal">
-                <span class="close-custom" id="closePreviewModal">&times;</span>
-                <img id="previewImage" src="">
-            </div>
         </div>
     </div>
 </main>
@@ -256,337 +252,20 @@
         <a href="#">Careers</a>
     </div>
 </footer>
-@endsection
 
-
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
 
-
+<!-- Define categoriesGetTreeUrl before including product.js -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var addProductModal = document.getElementById("addProductModal");
-        var viewProductModal = document.getElementById("viewProductModal");
-        var addProductBtn = document.getElementById("openModalBtn");
-        var closeBtns = document.getElementsByClassName("close");
-        var viewBtns = document.getElementsByClassName("btn-view");
-        var deleteProductBtn = document.getElementById("deleteProductBtn");
-        var activateProductBtn = document.getElementById("activateProductBtn");
-
-
-
-
-        // Inicjalizacja drzewa kategorii do wyboru
-        $('#category-tree').jstree({
-            'core': {
-                'data': {
-                    "url": "{{ route('categories.getTree') }}",
-                    "dataType": "json"
-                },
-                "check_callback": true,
-                "themes": {
-                    "variant": "large"
-                }
-            },
-            "plugins": ["checkbox", "wholerow"],
-            "checkbox": {
-                "three_state": false,
-                "cascade": ""
-            }
-        });
-
-        $('#category-tree-view').jstree({
-            'core': {
-                'data': {
-                    "url": "{{ route('categories.getTree') }}",
-                    "dataType": "json",
-                    "data": function(node) {
-                        return {
-                            "assignedCategories": $('#selectedCategoriesView').val()
-                        };
-                    }
-                },
-                "check_callback": true,
-                "themes": {
-                    "variant": "large"
-                }
-            },
-            "plugins": ["checkbox", "wholerow"],
-            "checkbox": {
-                "three_state": false,
-                "cascade": ""
-            }
-        });
-
-        $('#category-tree').on("changed.jstree", function(e, data) {
-            var selectedCategories = data.selected;
-            $('#selectedCategories').val(selectedCategories.join(','));
-        });
-
-        $('#category-tree-view').on("changed.jstree", function(e, data) {
-            var selectedCategoriesView = data.selected;
-            $('#selectedCategoriesView').val(selectedCategoriesView.join(','));
-        });
-
-        addProductBtn.onclick = function() {
-            addProductModal.style.display = "block";
-        };
-
-        for (var i = 0; i < closeBtns.length; i++) {
-            closeBtns[i].onclick = function() {
-                addProductModal.style.display = "none";
-                viewProductModal.style.display = "none";
-            };
-        }
-
-        activateProductBtn.onclick = function() {
-            var productId = $('#viewProductId').val();
-            axios.post(`/products/${productId}/activate`, {
-                    _token: '{{ csrf_token() }}'
-                })
-                .then(function(response) {
-                    alert('Product activated successfully');
-                    location.reload();
-                })
-                .catch(function(error) {
-                    console.error('Error activating product:', error);
-                    alert('Failed to activate product');
-                });
-        };
-
-        function loadArchivedCategories() {
-            var productId = $('#viewProductId').val();
-            axios.get(`/products/${productId}/archived-categories`)
-                .then(function(response) {
-                    var archivedCategories = response.data.archivedCategories || [];
-                    var container = $('#archivedCategoriesList');
-                    container.empty();
-
-                    archivedCategories.forEach(function(category) {
-                        var item = `<li>${category.path}</li>`;
-                        container.append(item);
-                    });
-                })
-                .catch(function(error) {
-                    console.error('Error fetching archived categories:', error);
-                });
-        }
-
-        for (var i = 0; i < viewBtns.length; i++) {
-            viewBtns[i].onclick = function() {
-                var productId = $(this).data('id');
-                axios.get(`/products/${productId}`)
-                    .then(function(response) {
-                        var product = response.data.product;
-                        $('#viewProductId').val(product.id);
-                        $('#viewName').val(product.name);
-                        $('#viewDescription').val(product.description);
-                        $('#viewPrice').val(product.price);
-                        $('#viewAvailability').val(product.availability);
-                        $('#category-tree-view').jstree(true).deselect_all(true);
-
-                        if (product.categories) {
-                            product.categories.forEach(function(category) {
-                                $('#category-tree-view').jstree(true).select_node(category.id);
-                            });
-                        }
-
-                        viewProductModal.style.display = "block";
-
-                        var histories = response.data.histories || [];
-                        var historyTableBody = $('#historyTableBody');
-                        historyTableBody.empty();
-
-                        histories.sort(function(a, b) {
-                            return new Date(b.created_at) - new Date(a.created_at);
-                        });
-
-                        histories.forEach(function(history) {
-                            var row = `<tr>
-                                        <td>${history.admin_name}</td>
-                                        <td>${history.action}</td>
-                                        <td>${history.field}</td>
-                                        <td>${history.old_value}</td>
-                                        <td>${history.new_value}</td>
-                                        <td>${new Date(history.created_at).toLocaleString()}</td>
-                                    </tr>`;
-                            historyTableBody.append(row);
-                        });
-
-                        var productImages = response.data.product.images || [];
-                        var imagesContainer = $('#productImages');
-                        imagesContainer.empty();
-                        productImages.forEach(function(image) {
-                            var imgElement = `<div class="gallery-item">
-                                        <img src="data:${image.mime_type};base64,${image.file_data}" class="img-thumbnail" />
-                                        <button class="btn btn-danger btn-sm delete-image" data-id="${image.id}">Delete</button>
-                                    </div>`;
-                            imagesContainer.append(imgElement);
-                        });
-
-                        var productAttachments = response.data.product.attachments || [];
-                        var attachmentsContainer = $('#productAttachments');
-                        attachmentsContainer.empty();
-                        productAttachments.forEach(function(attachment) {
-                            var attachmentElement = `<div class="attachment-item">
-                                        <a href="data:${attachment.mime_type};base64,${attachment.file_data}" download="${attachment.file_name}">${attachment.file_name}</a>
-                                        <button class="btn btn-danger btn-sm delete-attachment" data-id="${attachment.id}">Delete</button>
-                                    </div>`;
-                            attachmentsContainer.append(attachmentElement);
-                        });
-
-                        loadArchivedCategories();
-                    })
-                    .catch(function(error) {
-                        console.error('Error fetching product details:', error);
-                    });
-            };
-        }
-
-        $('.tab-link').click(function() {
-            var tab = $(this).data('tab');
-            $('.tab-link').removeClass('active');
-            $(this).addClass('active');
-            $('.tab-content').removeClass('active');
-            $('#' + tab).addClass('active');
-
-            if (tab === 'ArchivedCategories') {
-                loadArchivedCategories();
-            }
-        });
-
-        $('#saveNewImagesBtn').click(function() {
-            var formData = new FormData($('#addImageForm')[0]);
-            var productId = $('#viewProductId').val();
-            axios.post(`/products/${productId}/images`, formData)
-                .then(function(response) {
-                    alert('Images uploaded successfully');
-                    location.reload();
-                })
-                .catch(function(error) {
-                    if (error.response && error.response.status === 422) {
-                        const errors = error.response.data.errors;
-                        let errorMessages = [];
-                        for (const field in errors) {
-                            if (errors.hasOwnProperty(field)) {
-                                errorMessages.push(errors[field].join(' '));
-                            }
-                        }
-                        alert('Validation errors: \n' + errorMessages.join('\n'));
-                    } else {
-                        console.error('Error uploading images:', error.message);
-                        alert('Error uploading images. Please try again.');
-                    }
-                });
-        });
-
-        $('#saveNewAttachmentsBtn').click(function() {
-            var formData = new FormData($('#addAttachmentForm')[0]);
-            var productId = $('#viewProductId').val();
-            axios.post(`/products/${productId}/attachments`, formData)
-                .then(function(response) {
-                    alert('Attachments uploaded successfully');
-                    location.reload();
-                })
-                .catch(function(error) {
-                    if (error.response && error.response.status === 422) {
-                        const errors = error.response.data.errors;
-                        let errorMessages = [];
-                        for (const field in errors) {
-                            if (errors.hasOwnProperty(field)) {
-                                errorMessages.push(errors[field].join(' '));
-                            }
-                        }
-                        alert('Validation errors: \n' + errorMessages.join('\n'));
-                    } else {
-                        console.error('Error uploading attachments:', error.message);
-                        alert('Error uploading attachments. Please try again.');
-                    }
-                });
-        });
-
-        $('#deleteProductBtn').click(function() {
-            var productId = $('#viewProductId').val();
-            axios.delete(`/products/${productId}`, {
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    }
-                })
-                .then(function(response) {
-                    alert('Product deleted successfully');
-                    location.reload();
-                })
-                .catch(function(error) {
-                    console.error('Error deleting product:', error);
-                    alert('Failed to delete product');
-                });
-        });
-
-        $('#productImages').on('click', '.delete-image', function() {
-            var imageId = $(this).data('id');
-            var productId = $('#viewProductId').val();
-            axios.delete(`/products/${productId}/images/${imageId}`, {
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    }
-                })
-                .then(function(response) {
-                    alert('Image deleted successfully');
-                    location.reload();
-                })
-                .catch(function(error) {
-                    console.error('Error deleting image:', error);
-                });
-        });
-
-        $('#productAttachments').on('click', '.delete-attachment', function() {
-            var attachmentId = $(this).data('id');
-            var productId = $('#viewProductId').val();
-            axios.delete(`/products/${productId}/attachments/${attachmentId}`, {
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    }
-                })
-                .then(function(response) {
-                    alert('Attachment deleted successfully');
-                    location.reload();
-                })
-                .catch(function(error) {
-                    console.error('Error deleting attachment:', error);
-                });
-        });
-
-
-
-
-        $('#viewProductForm').submit(function(event) {
-            event.preventDefault();
-            var productId = $('#viewProductId').val();
-            var formData = new FormData(this);
-            axios.post(`/products/${productId}`, formData)
-                .then(function(response) {
-                    alert('Product updated successfully');
-                    location.reload();
-                })
-                .catch(function(error) {
-                    if (error.response && error.response.status === 422) {
-                        const errors = error.response.data.errors;
-                        let errorMessages = [];
-                        for (const field in errors) {
-                            if (errors.hasOwnProperty(field)) {
-                                errorMessages.push(errors[field].join(' '));
-                            }
-                        }
-                        alert('Validation errors: \n' + errorMessages.join('\n'));
-                    } else {
-                        console.error('Error updating product:', error.message);
-                        alert('Error updating product. Please try again.');
-                    }
-                });
-        });
-    });
+    var categoriesGetTreeUrl = "{{ route('categories.getTree') }}";
 </script>
+<!-- Your JavaScript file -->
+<script src="{{ asset('js/product.js') }}"></script>
+
+@endsection

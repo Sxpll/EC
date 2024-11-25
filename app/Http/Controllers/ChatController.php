@@ -67,18 +67,19 @@ class ChatController extends Controller
                     ->update(['is_read' => true]);
             }
 
-            Log::info('Chat details fetched', ['chat' => $chat]);
-
             return response()->json([
                 'messages' => $chat->messages,
-                'admin' => $chat->admin, // Upewnij się, że pełne dane o adminie są zwracane
+                'admin' => $chat->admin,
                 'is_admin' => Auth::user()->role === 'admin',
             ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['error' => 'Chat not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error fetching chat: ' . $e->getMessage());
-            return response()->json(['error' => 'An error occurred while fetching the chat'], 500);
+            return response()->json(['error' => 'An error occurred.'], 500);
         }
     }
+
 
 
 
@@ -172,22 +173,33 @@ class ChatController extends Controller
     public function createChat(Request $request)
     {
         try {
+            $request->validate([
+                'title' => 'required|string|max:255',
+            ]);
+
+            // Tworzenie nowego czatu
             $chat = new Chat();
             $chat->user_id = Auth::id();
             $chat->title = $request->title;
             $chat->save();
 
+            // Tworzenie domyślnej wiadomości w czacie
             $message = new Message();
             $message->chat_id = $chat->id;
             $message->message = 'Hello!';
+            $message->user_id = Auth::id();
             $message->save();
 
-            return response()->json(['success' => true, 'chat' => $chat]);
+            // Przekierowanie do widoku czatu
+            return redirect()->route('chat.show', ['id' => $chat->id]);
         } catch (\Exception $e) {
             Log::error('Chat creation failed: ' . $e->getMessage());
-            return response()->json(['success' => false, 'error' => 'Chat creation failed'], 500);
+            return redirect()->back()->with('error', 'Failed to create chat.');
         }
     }
+
+
+
 
     public function updateChatStatus(Request $request, $id)
     {
@@ -208,13 +220,15 @@ class ChatController extends Controller
     public function manageChat(Request $request, $id)
     {
         $chat = Chat::findOrFail($id);
+
         $chat->status = $request->status;
         $chat->is_taken = $request->input('is_taken', false);
         $chat->admin_id = $request->input('admin_id', null);
         $chat->save();
 
-        return redirect()->back()->with('success', 'Chat status has been successfully updated.');
+        return response()->json(['success' => true]);
     }
+
 
     public function filterChats(Request $request)
     {

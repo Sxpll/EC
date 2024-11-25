@@ -24,15 +24,18 @@ class AdminCanCreateProductTest extends TestCase
     #[Test]
     public function admin_can_create_a_new_product()
     {
+        $category = \App\Models\Category::factory()->create();
+
         $response = $this->actingAs($this->admin)->post('/admin/products', [
             'name' => 'Test Product',
             'description' => 'Test Description',
             'price' => 10.00,
-            'availability' => 1,
+            'availability' => 'available',
+            'categories' => [$category->id],
             'isActive' => 1,
         ]);
 
-        $response->assertStatus(302); 
+        $response->assertStatus(302);
         $this->assertDatabaseHas('products', ['name' => 'Test Product']);
     }
 }

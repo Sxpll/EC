@@ -17,6 +17,7 @@ class CategoryFactory extends Factory
             'name' => $this->faker->word,
             'parent_id' => null,
             'order' => $this->faker->numberBetween(1, 10),
+            'isActive' => 1,
         ];
     }
 }

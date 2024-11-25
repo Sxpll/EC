@@ -89,25 +89,26 @@ class ProductController extends Controller
     }
 
 
-
     public function update(Request $request, $id)
     {
-        $product = Product::findOrFail($id);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'availability' => 'required|string|in:available,available_in_7_days,available_in_14_days,unavailable',
-            'categories' => 'required|array|min:1',
-            'categories.*' => 'exists:categories,id',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
-            'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
-        ]);
-
-        Log::info('Update Product: Received input', $request->all());
-
         try {
+            $product = Product::findOrFail($id);
+
+            // Walidacja danych wejściowych
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'required|string',
+                'price' => 'required|numeric|min:0',
+                'availability' => 'required|string|in:available,available_in_7_days,available_in_14_days,unavailable',
+                'categories' => 'required|array|min:1',
+                'categories.*' => 'exists:categories,id',
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+                'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
+            ]);
+
+            Log::info('Update Product: Received input', $request->all());
+
+            // Zapisz stare dane produktu do logów/historii
             $oldProductData = $product->only(['name', 'description', 'price', 'availability']);
             $newProductData = $request->only(['name', 'description', 'price', 'availability']);
 
@@ -128,15 +129,14 @@ class ProductController extends Controller
                 }
             }
 
+            // Aktualizacja danych produktu
             $product->update($newProductData);
 
-            $selectedCategoryIds = array_map('intval', explode(',', implode(',', $request->input('categories'))));
-
-            $validCategoryIds = Category::whereIn('id', $selectedCategoryIds)
-                ->pluck('id')
-                ->toArray();
-
+            // Synchronizacja kategorii
+            $selectedCategoryIds = $request->input('categories');
             $oldCategories = $product->categories->pluck('id')->toArray();
+            $validCategoryIds = Category::whereIn('id', $selectedCategoryIds)->pluck('id')->toArray();
+
             if (array_diff($validCategoryIds, $oldCategories) || array_diff($oldCategories, $validCategoryIds)) {
                 $newCategories = Category::whereIn('id', $validCategoryIds)->pluck('name')->toArray();
                 $oldCategoriesNames = Category::whereIn('id', $oldCategories)->pluck('name')->toArray();
@@ -153,15 +153,18 @@ class ProductController extends Controller
 
                 Log::info('Update Product: Categories updated from [' . implode(', ', $oldCategoriesNames) . '] to [' . implode(', ', $newCategories) . ']');
                 $product->categories()->sync($validCategoryIds);
+
+                // Archiwizacja kategorii, jeśli są nieaktywne
                 $this->archiveCategories($product, $validCategoryIds);
             }
 
+            // Dodanie nowych obrazów i załączników
             $this->addImagesAndAttachments($request, $product);
 
-            return redirect()->route('products.index')->with('success', 'Product updated successfully');
+            return redirect()->route('products.index')->with('success', 'Produkt zaktualizowany pomyślnie');
         } catch (\Exception $e) {
-            Log::error("Error updating product: " . $e->getMessage());
-            return response()->json(['error' => 'Error updating product'], 500);
+            Log::error("Błąd podczas aktualizacji produktu o ID: $id - " . $e->getMessage());
+            return redirect()->route('products.index')->with('error', 'Nie udało się zaktualizować produktu');
         }
     }
 
@@ -169,8 +172,7 @@ class ProductController extends Controller
 
 
 
-
-    private function archiveCategories($product, $leafCategoryIds)
+    public function archiveCategories($product, $leafCategoryIds)
     {
         foreach ($leafCategoryIds as $categoryId) {
             $path = $this->getCategoryPath($categoryId);
@@ -200,7 +202,8 @@ class ProductController extends Controller
 
 
 
-    private function addImagesAndAttachments($request, $product)
+
+    public function addImagesAndAttachments($request, $product)
     {
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -232,7 +235,7 @@ class ProductController extends Controller
     public function show($id)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Unauthorized access');
+            return redirect('/home')->with('error', 'Brak autoryzacji');
         }
 
         try {
@@ -244,8 +247,8 @@ class ProductController extends Controller
                 'histories' => $histories
             ]);
         } catch (\Exception $e) {
-            Log::error("Error fetching product details: " . $e->getMessage());
-            return response()->json(['error' => 'Error fetching product details'], 500);
+            Log::error("Błąd podczas pobierania szczegółów produktu: " . $e->getMessage());
+            return response()->json(['error' => 'Błąd podczas pobierania szczegółów produktu'], 500);
         }
     }
 
@@ -256,24 +259,30 @@ class ProductController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
-            $oldData = $product->toArray();
-            $product->update(['isActive' => false]);
 
+            // Save history before change
             ProductHistory::create([
                 'admin_id' => Auth::user()->id,
                 'admin_name' => Auth::user()->name,
-                'action' => 'deleted',
+                'action' => 'deactivated',
                 'product_id' => $id,
-                'field' => 'Product',
-                'old_value' => json_encode($oldData),
+                'field' => 'isActive',
+                'old_value' => $product->isActive,
+                'new_value' => 0,
             ]);
 
-            return response()->json(['success' => true]);
+            
+            $product->isActive = 0;
+            $product->save();
+
+            return redirect()->route('products.index')->with('success', 'Product has been deactivated successfully.');
         } catch (\Exception $e) {
-            Log::error("Error deactivating product with ID: $id - " . $e->getMessage());
-            return response()->json(['error' => 'Error deactivating product'], 500);
+            Log::error("Failed to deactivate product with ID: $id - " . $e->getMessage());
+            return redirect()->route('products.index')->with('error', 'Failed to deactivate product.');
         }
     }
+
+
 
     public function activate($id)
     {
@@ -304,11 +313,10 @@ class ProductController extends Controller
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error("Error uploading images: " . $e->getMessage());
-            return response()->json(['error' => 'Error uploading images'], 500);
+            Log::error("Błąd podczas przesyłania obrazów: " . $e->getMessage());
+            return response()->json(['error' => 'Błąd podczas przesyłania obrazów'], 500);
         }
     }
-
     public function storeAttachments(Request $request, $id)
     {
         $request->validate([
@@ -332,10 +340,11 @@ class ProductController extends Controller
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error("Error uploading attachments: " . $e->getMessage());
-            return response()->json(['error' => 'Error uploading attachments'], 500);
+            Log::error("Błąd podczas przesyłania załączników: " . $e->getMessage());
+            return response()->json(['error' => 'Błąd podczas przesyłania załączników'], 500);
         }
     }
+
 
     public function deleteImage($productId, $imageId)
     {
@@ -344,7 +353,7 @@ class ProductController extends Controller
             $image->delete();
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error deleting image'], 500);
+            return response()->json(['error' => 'Błąd podczas usuwania obrazu'], 500);
         }
     }
 
@@ -355,7 +364,7 @@ class ProductController extends Controller
             $attachment->delete();
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error deleting attachment'], 500);
+            return response()->json(['error' => 'Błąd podczas usuwania załącznika'], 500);
         }
     }
     public function getArchivedCategories($id)
@@ -370,8 +379,8 @@ class ProductController extends Controller
 
             return response()->json(['archivedCategories' => $archivedCategories]);
         } catch (\Exception $e) {
-            Log::error("Error fetching archived categories for product ID: $id - " . $e->getMessage());
-            return response()->json(['error' => 'Error fetching archived categories'], 500);
+            Log::error("Błąd podczas pobierania archiwalnych kategorii dla produktu o ID: $id - " . $e->getMessage());
+            return response()->json(['error' => 'Błąd podczas pobierania archiwalnych kategorii'], 500);
         }
     }
 
@@ -455,47 +464,5 @@ class ProductController extends Controller
     {
         $product = Product::with(['categories', 'images', 'attachments'])->findOrFail($id);
         return view('products.show', compact('product'));
-    }
-
-    private function resizeImage($image, $width, $height)
-    {
-        list($originalWidth, $originalHeight) = getimagesize($image->getRealPath());
-
-
-        $ratio = $originalWidth / $originalHeight;
-        if ($width / $height > $ratio) {
-            $width = $height * $ratio;
-        } else {
-            $height = $width / $ratio;
-        }
-
-
-        $imageResource = null;
-        $extension = strtolower($image->getClientOriginalExtension());
-        if ($extension === 'jpeg' || $extension === 'jpg') {
-            $imageResource = imagecreatefromjpeg($image->getRealPath());
-        } elseif ($extension === 'png') {
-            $imageResource = imagecreatefrompng($image->getRealPath());
-        } elseif ($extension === 'gif') {
-            $imageResource = imagecreatefromgif($image->getRealPath());
-        }
-
-        if ($imageResource) {
-            $resizedImage = imagecreatetruecolor($width, $height);
-            imagecopyresampled($resizedImage, $imageResource, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
-
-            ob_start();
-            if ($extension === 'jpeg' || $extension === 'jpg') {
-                imagejpeg($resizedImage);
-            } elseif ($extension === 'png') {
-                imagepng($resizedImage);
-            } elseif ($extension === 'gif') {
-                imagegif($resizedImage);
-            }
-            $imageContents = ob_get_clean();
-            return base64_encode($imageContents);
-        }
-
-        return null;
     }
 }
