@@ -117,18 +117,20 @@
                 url: '{{ route("categories.updateHierarchy") }}',
                 method: 'POST',
                 data: {
-                    hierarchy: $('#category-tree').jstree("get_json"),
+                    category_id: nodeId,
+                    new_parent_id: parentId,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
-                    alert('Hierarchy updated successfully');
+                    alert(response.message || 'Hierarchy updated successfully');
                 },
                 error: function(error) {
                     console.error('Error updating hierarchy:', error);
-                    alert('Failed to update hierarchy');
+                    alert(error.responseJSON.error || 'Failed to update hierarchy');
                 }
             });
         }
+
 
         $('#category-tree').on('rename_node.jstree', function(e, data) {
             $.ajax({

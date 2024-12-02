@@ -65,7 +65,7 @@ class OrderController extends Controller
         $order->customer_address = $request->input('customer_address');
         $order->total = $total;
 
-        // Przypisz user_id tylko dla zalogowanych użytkowników
+        
         if (Auth::check()) {
             $order->user_id = auth()->id();
         }

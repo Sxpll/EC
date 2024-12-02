@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 
 class DiscountCode extends Model
 {
+
+    use HasFactory;
     protected $fillable = [
         'code',
         'code_hash',
@@ -89,6 +92,4 @@ class DiscountCode extends Model
             ? $this->amount
             : $total * ($this->amount / 100);
     }
-
-    
 }

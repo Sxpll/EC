@@ -16,6 +16,7 @@
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('css/responsive.css') }}" rel="stylesheet">
 
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -304,6 +305,8 @@
                     })
                     .catch(error => console.error('Error clearing cart:', error));
             });
+
+
 
             function fetchCartContents() {
                 axios.get(cartContentsUrl)

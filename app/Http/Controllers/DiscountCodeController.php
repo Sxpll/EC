@@ -231,6 +231,8 @@ class DiscountCodeController extends Controller
         return view('discount_codes.my_codes', compact('discountCodes', 'usages'));
     }
 
+  
+
 
     public function applyDiscountCode(Request $request)
     {
@@ -280,12 +282,6 @@ class DiscountCodeController extends Controller
 
 
 
-
-    public function calculateTotal()
-    {
-        $discountAmount = session('discount_amount', 0);
-        return $this->cartService->calculateTotal($discountAmount);
-    }
 
     public function removeDiscount()
     {

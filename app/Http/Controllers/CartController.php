@@ -19,8 +19,15 @@ class CartController extends Controller
     public function index()
     {
         $cart = $this->cartService->getCart();
-        return view('cart.index', compact('cart'));
+
+
+        $total = count($cart) > 0
+            ? $this->cartService->calculateTotal($cart, session('discount_amount', 0))
+            : 0;
+
+        return view('cart.index', compact('cart', 'total'));
     }
+
 
 
 
@@ -43,19 +50,28 @@ class CartController extends Controller
 
     public function update(Request $request, $id)
     {
-        $item = $this->cartService->updateProductQuantity($id, $request->quantity);
+        $quantity = $request->input('quantity', 1);
 
-        if ($item) {
+        $item = $this->cartService->updateProductQuantity($id, $quantity);
+
+        if ($item && !isset($item['error'])) {
             $total = $this->cartService->calculateTotal();
             return response()->json([
                 'success' => true,
                 'item' => $item,
-                'total_formatted' => number_format($total, 2) . ' zł',
+                'total_formatted' => number_format($total, 2),
             ]);
         }
 
-        return response()->json(['success' => false]);
+        return response()->json([
+            'success' => false,
+            'message' => $item['error'] ?? 'Nie udało się zaktualizować koszyka.'
+        ]);
     }
+
+
+
+
 
     public function remove(Request $request, $id)
     {
@@ -71,8 +87,9 @@ class CartController extends Controller
 
     public function contents()
     {
-        $total = $this->cartService->calculateTotal();
         $cart = $this->cartService->getCart();
+
+        $total = $this->cartService->calculateTotal($cart, session('discount_amount', 0));
 
         return response()->json([
             'cart' => $cart,

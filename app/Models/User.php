@@ -56,4 +56,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(DiscountCode::class, 'discount_code_user');
     }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
 }
