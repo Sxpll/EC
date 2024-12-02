@@ -13,7 +13,9 @@ window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
  */
 import Echo from "laravel-echo";
 
+window.Pusher = require("pusher-js");
+
 window.Echo = new Echo({
     broadcaster: "reverb",
-    host: `${window.location.hostname}:6001`, // Port 6001 musi odpowiadać Twojemu Reverb App Port
+    host: `${window.location.hostname}:6001`,
 });

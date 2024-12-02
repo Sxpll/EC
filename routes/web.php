@@ -15,6 +15,9 @@ use App\Http\Controllers\{
     DiscountCodeController
 };
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use App\Events\MessageSent;
+
 
 // Trasy publiczne (dostępne dla wszystkich)
 Route::get('/', function () {
@@ -50,6 +53,18 @@ Route::get('/categories/get-tree', [CategoryController::class, 'getTree'])->name
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/orders/my-orders', [OrderController::class, 'myOrders'])->name('orders.myOrders');
+
+
+
+    Route::post('/send-message', function (Request $request) {
+        $message = $request->input('message');
+        $user = $request->input('user');
+
+        // Emituj zdarzenie
+        event(new MessageSent($user, $message));
+
+        return response()->json(['status' => 'Message sent!']);
+    });
 
 
     // Konto użytkownika
