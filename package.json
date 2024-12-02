@@ -3,18 +3,20 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "serve": "concurrently \"php artisan serve\" \"php artisan reverb:start\" \"vite\""
     },
     "devDependencies": {
         "@popperjs/core": "^2.11.6",
         "@vitejs/plugin-vue": "^4.5.0",
         "axios": "^1.7.3",
-        "bootstrap": "^5.2.3",
+        "bootstrap": "^5.3.3",
+        "concurrently": "^9.1.0",
         "laravel-echo": "^1.17.1",
         "laravel-vite-plugin": "^1.0",
         "purgecss": "^6.0.0",
         "pusher-js": "^8.4.0-rc2",
-        "sass": "^1.56.1",
+        "sass": "^1.81.0",
         "vite": "^5.0",
         "vue": "^3.2.37"
     },

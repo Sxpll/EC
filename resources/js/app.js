@@ -1,20 +1,14 @@
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
+import "./bootstrap";
 
-import './bootstrap';
-import { createApp } from 'vue';
+import Echo from "laravel-echo";
+window.Pusher = require("pusher-js");
 
-axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-
-const app = createApp({});
-
-import ExampleComponent from './components/ExampleComponent.vue';
-app.component('example-component', ExampleComponent);
-
-
-
-app.mount('#app');
+window.Echo = new Echo({
+    broadcaster: "reverb",
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST || window.location.hostname,
+    wsPort: import.meta.env.VITE_REVERB_PORT || 6001,
+    wssPort: import.meta.env.VITE_REVERB_PORT || 443,
+    forceTLS: import.meta.env.VITE_REVERB_SCHEME === "https",
+    enabledTransports: ["ws", "wss"],
+});

@@ -18,6 +18,9 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/chat.js') }}"></script>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ mix('build/assets/app-Lkbm8zIe.css') }}">
+    <script src="{{ mix('build/assets/app-DDYPKfd6.js') }}" defer></script>
+    @vite(['resources/js/app.js', 'resources/css/app.css'])
 
 
     <!-- Font Awesome Icons -->
