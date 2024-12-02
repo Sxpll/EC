@@ -9,6 +9,7 @@
         "darryldecode/cart": "^4.2",
         "intervention/image": "^3.9",
         "laravel/framework": "^11.9",
+        "laravel/reverb": "^1.4",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
         "pusher/pusher-php-server": "^7.2"

@@ -1042,6 +1042,7 @@ footer.footer-bar {
     padding: 10px 0;
     margin-top: auto; /* Umieszcza stopkę na dole strony */
     width: 100%;
+    z-index: 99999;
 }
 
 footer.footer-bar-content {
