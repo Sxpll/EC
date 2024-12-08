@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Log;
+use App\Events\MessageSent;
+
 
 
 class ChatController extends Controller
@@ -82,73 +84,35 @@ class ChatController extends Controller
 
 
 
-
-    public function sendMessage(Request $request, $id)
+    public function __construct()
     {
-        Log::info('Start sendMessage function for chat ID: ' . $id);
+        $this->middleware('auth');
+    }
 
-        $request->validate([
+
+
+    public function sendMessage(Request $request, $chatId)
+    {
+        $validated = $request->validate([
             'message' => 'required|string|max:1000',
         ]);
 
-        try {
-            $chat = Chat::findOrFail($id);
-            Log::info('Chat found: ' . $chat->id);
+        $chat = Chat::findOrFail($chatId);
 
-            if ($chat->status === 'completed') {
-                Log::warning('Cannot send messages to a completed chat.');
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot send messages to a completed chat.'
-                ], 400);
-            }
+        $message = new Message([
+            'chat_id' => $chat->id,
+            'user_id' => auth()->id(),
+            'message' => $validated['message'],
+        ]);
 
-            $message = new Message();
-            $message->chat_id = $chat->id;
-            $message->message = $request->message;
+        $message->save();
 
-            if (Auth::user()->role === 'admin') {
-                $message->admin_id = Auth::id();
-            } else {
-                $message->user_id = Auth::id();
-            }
+        broadcast(new MessageSent($message))->toOthers();
 
-            $message->is_read = false;
-            $message->save();
-            Log::info('Message saved for chat: ' . $chat->id);
-
-            if ($message->admin_id) {
-                if ($chat->admin_id && $chat->admin_id !== $message->admin_id) {
-                    Notification::create([
-                        'chat_id' => $chat->id,
-                        'user_id' => $chat->admin_id,
-                        'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
-                        'read' => false,
-                    ]);
-                    Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
-                }
-            } else {
-                if ($chat->admin_id) {
-                    Notification::create([
-                        'chat_id' => $chat->id,
-                        'user_id' => $chat->admin_id,
-                        'message' => 'Nowa wiadomość w czacie: ' . $chat->title,
-                        'read' => false,
-                    ]);
-                    Log::info('Notification sent to assigned admin ID: ' . $chat->admin_id);
-                }
-            }
-
-            return response()->json(['success' => true], 200);
-        } catch (\Exception $e) {
-            Log::error('Error in sendMessage: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error'
-            ], 500);
-        }
+        return response()->json(['success' => true, 'message' => $message]);
     }
+
+
 
 
 
@@ -263,9 +227,19 @@ class ChatController extends Controller
 
         $messages = Message::where('chat_id', $id)
             ->orderBy('created_at', 'asc')
-            ->get(['id', 'message', 'created_at']);
+            ->get(['id', 'message', 'created_at', 'user_id'])
+            ->map(function ($message) {
+                return [
+                    'id' => $message->id,
+                    'message' => $message->message,
+                    'created_at' => $message->created_at->toDateTimeString(),
+                    'user' => $message->user ? [
+                        'id' => $message->user->id,
+                        'name' => $message->user->name,
+                    ] : null,
+                ];
+            });
 
-        
-        return response()->json(['data' => $messages], 200);
+        return response()->json($messages);
     }
 }

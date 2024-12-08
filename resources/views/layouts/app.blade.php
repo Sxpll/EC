@@ -15,12 +15,14 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('css/responsive.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('js/chat.js') }}"></script>
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="{{ mix('build/assets/app-Lkbm8zIe.css') }}">
-    <script src="{{ mix('build/assets/app-DDYPKfd6.js') }}" defer></script>
-    @vite(['resources/js/app.js', 'resources/css/app.css'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+
+    @vite(['resources/js/app.js', 'resources/js/chat.js'])
+
+
 
 
     <!-- Font Awesome Icons -->
@@ -164,6 +166,7 @@
 
     <!-- Scripts -->
     <script>
+        // let notificationBannerShown = false;
         document.addEventListener('DOMContentLoaded', function() {
             // Ustawienie domyślnych nagłówków dla Axios
             axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
