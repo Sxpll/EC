@@ -113,6 +113,10 @@
     </div>
 </div>
 
+
+
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const chatWindowModal = document.getElementById('chatWindowModal');
@@ -148,7 +152,8 @@
                     const messages = data.messages;
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
-                        let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
+                        let messageClass = (msg.user && msg.user.id === userId) ? 'user' : 'admin';
+
                         messageDiv.classList.add('message', messageClass);
 
                         let senderName = 'Unknown';
@@ -234,7 +239,8 @@
                         chatWindow.innerHTML = '';
                         messages.forEach(msg => {
                             let messageDiv = document.createElement('div');
-                            let messageClass = (msg.admin_id === userId) ? 'user' : 'admin';
+                            let messageClass = (msg.user && msg.user.id === userId) ? 'user' : 'admin';
+
                             messageDiv.classList.add('message', messageClass);
 
                             const senderName = msg.admin_id === userId ? 'You' : (msg.user ? `${msg.user.name} ${msg.user.lastname}` : 'Unknown');

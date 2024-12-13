@@ -21,6 +21,8 @@
         <button type="submit" class="btn btn-primary">Send</button>
     </form>
 </div>
+@vite(['resources/js/chat.js'])
+
 
 <script>
     document.getElementById('sendMessageForm').addEventListener('submit', function(e) {

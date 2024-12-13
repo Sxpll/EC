@@ -93,24 +93,46 @@ class ChatController extends Controller
 
     public function sendMessage(Request $request, $chatId)
     {
-        $validated = $request->validate([
-            'message' => 'required|string|max:1000',
-        ]);
+        try {
+            $validated = $request->validate([
+                'message' => 'required|string|max:1000',
+            ]);
 
-        $chat = Chat::findOrFail($chatId);
+            $chat = Chat::findOrFail($chatId);
 
-        $message = new Message([
-            'chat_id' => $chat->id,
-            'user_id' => auth()->id(),
-            'message' => $validated['message'],
-        ]);
+            $message = new Message([
+                'chat_id' => $chat->id,
+                'user_id' => auth()->id(),
+                'message' => $validated['message'],
+            ]);
 
-        $message->save();
+            $message->save();
 
-        broadcast(new MessageSent($message))->toOthers();
+            $message->load('user'); // Ładowanie danych użytkownika
 
-        return response()->json(['success' => true, 'message' => $message]);
+            broadcast(new MessageSent($message))->toOthers();
+
+            return response()->json([
+                'success' => true,
+                'message' => [
+                    'id' => $message->id,
+                    'message' => $message->message,
+                    'created_at' => $message->created_at->toDateTimeString(),
+                    'user' => [
+                        'id' => $message->user->id ?? null,
+                        'name' => $message->user->name ?? 'Anonymous',
+                        'lastname' => $message->user->lastname ?? null,
+                    ],
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Error sending message: {$e->getMessage()}");
+            return response()->json(['success' => false, 'error' => 'Failed to send message'], 500);
+        }
     }
+
+
+
 
 
 
@@ -236,6 +258,7 @@ class ChatController extends Controller
                     'user' => $message->user ? [
                         'id' => $message->user->id,
                         'name' => $message->user->name,
+                        'lastname' => $message->user->lastname,
                     ] : null,
                 ];
             });

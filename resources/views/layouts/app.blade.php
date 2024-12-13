@@ -15,12 +15,10 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('css/responsive.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 
 
-    @vite(['resources/js/app.js', 'resources/js/chat.js'])
+    @vite(['resources/js/app.js'])
 
 
 
@@ -28,8 +26,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <!-- Axios Library -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 
     <!-- Przekazanie URL trasy do JavaScript -->
     <script type="text/javascript">
@@ -166,7 +163,7 @@
 
     <!-- Scripts -->
     <script>
-        // let notificationBannerShown = false;
+        let notificationBannerShown = false;
         document.addEventListener('DOMContentLoaded', function() {
             // Ustawienie domyślnych nagłówków dla Axios
             axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -178,6 +175,7 @@
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 
             axios.defaults.withCredentials = true;
+
 
 
             // Theme switch logic
