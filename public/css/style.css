@@ -1042,6 +1042,7 @@ footer.footer-bar {
     padding: 10px 0;
     margin-top: auto; /* Umieszcza stopkę na dole strony */
     width: 100%;
+    z-index: 99999;
 }
 
 footer.footer-bar-content {
@@ -3814,4 +3815,44 @@ body.dark-mode .btn-go-to-cart:hover {
         width: 90%;
         right: 5%;
     }
+}
+
+.message {
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 70%;
+    clear: both;
+    word-wrap: break-word;
+}
+
+.message.user {
+    background-color: #007bff;
+    color: white;
+    float: right; /* Wyrównanie wiadomości użytkownika do prawej */
+    text-align: left;
+}
+
+.message.other {
+    background-color: #f0f0f0;
+    color: black;
+    float: left; /* Wyrównanie wiadomości innych użytkowników do lewej */
+    text-align: left;
+}
+
+.message-time {
+    display: block;
+    font-size: 0.8em;
+    margin-top: 5px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.message.other {
+    text-align: left;
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    max-width: 70%;
 }

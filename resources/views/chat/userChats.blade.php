@@ -70,7 +70,10 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -123,28 +126,28 @@
 
         function openChatWindow(chatId) {
             fetch(`/chat/${chatId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     if (!data || !data.messages) {
                         console.error('Invalid data format:', data);
                         return;
                     }
 
-                    const isAdmin = data.is_admin;
                     chatWindow.innerHTML = '';
                     const messages = data.messages;
 
                     messages.forEach(msg => {
                         let messageDiv = document.createElement('div');
-                        let messageClass = msg.admin_id ? 'admin' : (msg.user && msg.user.id === userId) ? 'user' : 'other';
+                        let messageClass = (msg.admin_id && msg.admin_id !== userId) ? 'admin' : (msg.user && msg.user.id === userId) ? 'user' : 'other';
                         messageDiv.classList.add('message', messageClass);
 
-                        let senderName = msg.admin_id ? 'Admin' : (msg.user ? `${msg.user.name} ${msg.user.lastname}` : 'Unknown');
+                        // Logika przypisywania nadawcy
+                        let senderName = msg.admin_id ?
+                            'Admin' :
+                            (msg.user && msg.user.id === userId ?
+                                'You' :
+                                `${msg.user.name} ${msg.user.lastname}`);
+
                         const messageContent = `<strong>${senderName}:</strong> ${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
 
                         messageDiv.innerHTML = messageContent;
@@ -162,6 +165,8 @@
                 });
         }
 
+
+
         function startAutoRefresh(chatId) {
             if (refreshInterval) {
                 clearInterval(refreshInterval);
@@ -174,23 +179,18 @@
                         chatWindow.innerHTML = '';
                         messages.forEach(msg => {
                             let messageDiv = document.createElement('div');
-                            let messageClass = msg.admin_id ? 'admin' : (msg.user && msg.user.id === userId) ? 'user' : 'other';
+                            let messageClass = (msg.admin_id && msg.admin_id !== userId) ? 'admin' : (msg.user && msg.user.id === userId) ? 'user' : 'other';
                             messageDiv.classList.add('message', messageClass);
 
-                            let senderName = msg.admin_id ? 'Admin' : (msg.user ? `${msg.user.name} ${msg.user.lastname}` : 'Unknown');
-                            messageDiv.innerHTML = `<strong>${senderName}:</strong> ${msg.message}`;
+                            // Logika przypisywania nadawcy
+                            let senderName = msg.admin_id ?
+                                'Admin' :
+                                (msg.user && msg.user.id === userId ?
+                                    'You' :
+                                    `${msg.user.name} ${msg.user.lastname}`);
 
-                            let messageTime = document.createElement('div');
-                            messageTime.classList.add('message-time');
-                            messageTime.textContent = new Date(msg.created_at).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                            messageTime.style.display = 'none';
-                            messageDiv.appendChild(messageTime);
-                            messageDiv.addEventListener('click', () => {
-                                messageTime.style.display = messageTime.style.display === 'block' ? 'none' : 'block';
-                            });
+                            messageDiv.innerHTML = `<strong>${senderName}:</strong> ${msg.message} <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
+
                             chatWindow.appendChild(messageDiv);
                         });
                         chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -198,6 +198,7 @@
                     .catch(error => console.error('Error refreshing messages:', error));
             }, 3000);
         }
+
 
         const sendMessageForm = document.getElementById('sendMessageForm');
         if (sendMessageForm) {

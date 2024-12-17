@@ -1,20 +1,34 @@
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
+import "./bootstrap";
 
-import './bootstrap';
-import { createApp } from 'vue';
+// Toastr Configuration
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
+window.toastr = toastr;
 
-axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// Laravel Echo Configuration
+import Echo from "laravel-echo";
 
+window.Echo = new Echo({
+    broadcaster: "reverb",
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST || window.location.hostname,
+    wsPort: import.meta.env.VITE_REVERB_PORT || 8080,
+    wssPort: import.meta.env.VITE_REVERB_PORT || 443,
+    forceTLS: import.meta.env.VITE_REVERB_SCHEME === "https",
+    enabledTransports: ["ws", "wss"],
+});
 
-const app = createApp({});
-
-import ExampleComponent from './components/ExampleComponent.vue';
-app.component('example-component', ExampleComponent);
-
-
-
-app.mount('#app');
+// Toastr Options
+toastr.options = {
+    closeButton: true,
+    progressBar: true,
+    positionClass: "toast-top-right",
+    showDuration: 300,
+    hideDuration: 1000,
+    timeOut: 5000,
+    extendedTimeOut: 1000,
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+};
