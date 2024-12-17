@@ -44,7 +44,7 @@
             <div class="product-card col-md-4 mb-4">
                 <div class="card">
                     <!-- Obrazek produktu z linkiem -->
-                    <a href="{{ route('products.show', $product->id) }}" class="product-link">
+                    <a href="{{ route('products.show', $product->id) }}" data-testid="product-image" class="product-link">
                         @if($product->images->count())
                         <img src="data:{{ $product->images->first()->mime_type }};base64,{{ $product->images->first()->file_data }}" class="card-img-top" alt="{{ $product->name }}">
                         @else
@@ -77,7 +77,7 @@
                         <form action="{{ route('cart.add', $product->id) }}" method="POST" class="add-to-cart-form">
                             @csrf
                             <button type="submit" class="btn btn-primary add-to-cart-btn">
-                                <i class="fas fa-shopping-cart"></i> Dodaj do koszyka
+                                <i data-testid="add-to-cart-button" class=" fas fa-shopping-cart"></i> Dodaj do koszyka
                             </button>
                         </form>
                     </div>

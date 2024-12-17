@@ -18,7 +18,7 @@
     <div class="custom-cart-actions-top">
         <form action="{{ route('cart.clear') }}" method="POST">
             @csrf
-            <button type="submit" class="custom-btn-clear-cart">Wyczyść Koszyk</button>
+            <button type="submit" data-testid="clear-cart-button" class="custom-btn-clear-cart">Wyczyść Koszyk</button>
         </form>
     </div>
 
@@ -45,9 +45,9 @@
                     </td>
                     <td>
                         <div class="custom-quantity-control">
-                            <button type="button" class="custom-btn-decrease" data-id="{{ $id }}">-</button>
+                            <button type="button" data-testid="decrease-quantity-button" class="custom-btn-decrease" data-id="{{ $id }}">-</button>
                             <input type="number" class="custom-quantity-input" data-id="{{ $id }}" value="{{ $item['quantity'] }}" min="1">
-                            <button type="button" class="custom-btn-increase" data-id="{{ $id }}">+</button>
+                            <button type="button" data-testid="increase-quantity-button" class="custom-btn-increase" data-id="{{ $id }}">+</button>
                         </div>
                     </td>
                     <td>{{ number_format($item['price'], 2) }} zł</td>
@@ -91,14 +91,14 @@
         <form action="{{ route('cart.applyDiscount') }}" method="POST">
             @csrf
             <label for="discount_code">Kod rabatowy:</label>
-            <input type="text" name="discount_code" id="discount_code" required>
-            <button type="submit" class="custom-btn-apply-discount">Zastosuj</button>
+            <input type="text" data-testid="discount-code-input" name="discount_code" id="discount_code" required>
+            <button type="submit" data-testid="apply-discount-button" class="custom-btn-apply-discount">Zastosuj</button>
         </form>
         @endif
     </div>
 
     <div class="custom-cart-actions-bottom">
-        <a href="{{ route('orders.create') }}" class="custom-btn-place-order">Złóż Zamówienie</a>
+        <a href="{{ route('orders.create') }}" data-testid="place-order-button" class="custom-btn-place-order">Złóż Zamówienie</a>
     </div>
     @else
     <p>Twój koszyk jest pusty.</p>

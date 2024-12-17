@@ -50,7 +50,7 @@
                 </a>
                 <nav class="navbar-links">
                     <a href="{{ url('/home') }}">Home</a>
-                    <a href="{{ route('products.publicIndex') }}">Products</a>
+                    <a href="{{ route('products.publicIndex') }}" data-testid="products-link">Products</a>
                     @if(auth()->check() && auth()->user()->role == 'admin')
                     <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
                     @endif
@@ -79,7 +79,7 @@
 
                     <!-- Cart Icon -->
                     <div class="cart-container">
-                        <a href="#" id="cartIcon"><i class="fa fa-shopping-cart"></i></a>
+                        <a href="#" data-testid="cart-icon" id="cartIcon"><i class="fa fa-shopping-cart"></i></a>
                         <span id="cartItemCount" class="cart-item-count" style="display: none;">0</span>
 
                         <!-- Cart Dropdown -->
@@ -89,8 +89,8 @@
                             <div class="cart-total">
                                 <strong>Łączna kwota:</strong> <span id="cartTotal">0.00</span> zł
                             </div>
-                            <a href="{{ route('cart.index') }}" class="btn btn-primary btn-go-to-cart">Przejdź do koszyka</a>
-                            <button id="clearCartBtn" class="btn btn-clear btn-clear-cart">Wyczyść koszyk</button>
+                            <a href="{{ route('cart.index') }}" data-testid="proceed-to-checkout-button" class="btn btn-primary btn-go-to-cart">Przejdź do koszyka</a>
+                            <button id="clearCartBtn" data-testid="clear-cart-button" class="btn btn-clear btn-clear-cart">Wyczyść koszyk</button>
                         </div>
                     </div>
 
@@ -125,7 +125,7 @@
             <button id="close-sidebar" class="close-sidebar">&times;</button>
             <nav class="sidebar-nav">
                 <a href="{{ url('/home') }}">Home</a>
-                <a href="{{ route('products.publicIndex') }}">Products</a>
+                <a href="{{ route('products.publicIndex') }}" data-testid="products-link">Products</a>
                 @if(auth()->check() && auth()->user()->role == 'admin')
                 <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
                 @endif

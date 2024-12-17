@@ -14,7 +14,7 @@ class ProductSeeder extends Seeder
         $categories = Category::all();
 
         // Tworzenie produktów i przypisywanie do kategorii
-        Product::factory()->count(1)->create()->each(function ($product) use ($categories) {
+        Product::factory()->count(10)->create()->each(function ($product) use ($categories) {
             // Przypisz produkt do losowej kategorii
             $product->categories()->attach($categories->random()->id);
         });

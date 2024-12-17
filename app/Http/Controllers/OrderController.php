@@ -65,7 +65,6 @@ class OrderController extends Controller
         $order->customer_address = $request->input('customer_address');
         $order->total = $total;
 
-        
         if (Auth::check()) {
             $order->user_id = auth()->id();
         }
@@ -86,33 +85,22 @@ class OrderController extends Controller
             $orderItem->save();
         }
 
-        // Tylko dla zalogowanych użytkowników: zapis użycia kodu rabatowego
-        if ($discountCodeId && Auth::check()) {
-            DiscountCodeUsage::create([
-                'discount_code_id' => $discountCodeId,
-                'user_id' => auth()->user()->id,
-                'order_id' => $order->id,
-                'discount_amount' => $discountAmount,
-            ]);
+        // Treść e-maila
+        $subject = 'Potwierdzenie zamówienia';
+        $body = view('emails.order_confirmation', ['order' => $order])->render();
 
-            $discountCode = DiscountCode::find($discountCodeId);
-            if ($discountCode->users()->count() > 0) {
-                $discountCode->is_active = false;
-                $discountCode->save();
-            }
-        }
+        // Wysyłanie e-maila przez PHPMailerService
+        \App\Services\PHPMailerService::sendMail($order->customer_email, $subject, $body);
 
-        // Wysyłanie e-maila z potwierdzeniem na podany adres e-mail
-        Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
-
-        // Czyszczenie koszyka i kodu rabatowego po złożeniu zamówienia
-        $this->cartService->clearCart(); // Wyczyść koszyk za pomocą CartService
+        // Czyszczenie koszyka i sesji z kodem rabatowym
+        $this->cartService->clearCart();
         session()->forget('discount_code');
         session()->forget('discount_amount');
         session()->forget('discount_code_id');
 
         return redirect()->route('orders.thankyou')->with('success', 'Zamówienie zostało złożone pomyślnie!');
     }
+
 
     public function thankyou()
     {
@@ -159,14 +147,18 @@ class OrderController extends Controller
 
             $order->save();
 
-
             $newStatusName = $order->status->name;
 
-
-            Mail::to($order->customer_email)->send(new OrderStatusUpdateMail($order, $newStatusName));
+            // Wysłanie e-maila o zmianie statusu
+            $subject = 'Aktualizacja statusu zamówienia';
+            $body = view('emails.order_status_update', ['order' => $order, 'statusName' => $newStatusName])->render();
+            \App\Services\PHPMailerService::sendMail($order->customer_email, $subject, $body);
 
             if ($newStatusId == $statusOnTheWay->id) {
-                Mail::to($order->customer_email)->send(new OrderPickupCodeMail($order));
+                // Wysłanie kodu odbioru
+                $subject = 'Zamówienie w drodze - Kod odbioru';
+                $body = view('emails.order_pickup_code', ['order' => $order])->render();
+                \App\Services\PHPMailerService::sendMail($order->customer_email, $subject, $body);
             }
 
             return redirect()->route('admin.orders')->with('success', 'Status zamówienia został zaktualizowany.');
@@ -174,6 +166,7 @@ class OrderController extends Controller
 
         return redirect()->route('admin.orders')->with('info', 'Status zamówienia pozostał bez zmian.');
     }
+
 
 
     public function resetPickupCode(Request $request, $orderId)
@@ -193,7 +186,11 @@ class OrderController extends Controller
         $order->pickup_code = $pickupCode;
         $order->save();
 
-        Mail::to($order->customer_email)->send(new OrderPickupCodeMail($order));
+        $subject = 'Zamówienie w drodze - Nowy kod odbioru';
+        $body = view('emails.order_pickup_code', ['order' => $order])->render();
+
+        // Wysyłanie e-maila
+        \App\Services\PHPMailerService::sendMail($order->customer_email, $subject, $body);
 
         return redirect()->back()->with('success', 'Nowy kod odbioru został wysłany na Twój adres e-mail.');
     }

@@ -18,7 +18,7 @@
             <textarea name="customer_address" class="form-control" required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-success">Złóż zamówienie</button>
+        <button type="submit" data-testid="place-order-button2" class=" btn btn-success">Złóż zamówienie</button>
     </form>
 </div>
 @endsection
