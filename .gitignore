@@ -19,3 +19,4 @@ yarn-error.log
 /.idea
 /.vscode
 /.env.testing
+tests/Browser/console/*.log
