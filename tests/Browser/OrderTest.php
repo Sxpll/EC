@@ -13,7 +13,6 @@ class OrderTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $faker = Faker::create();
 
-            // Przejdź na stronę główną i do produktów
             $browser->visit('/')
                 ->assertSee('Products')
                 ->click('[data-testid="products-link"]')
