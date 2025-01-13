@@ -75,7 +75,7 @@
                 <label for="isActive">Active:</label>
                 <input type="checkbox" name="isActive" id="isActive" value="1">
             </div>
-            <button type="submit" class="btn btn-success">Add User</button>
+            <button type="submit" class="btn btn-success" data-testid="add-user-button">Add User</button>
         </form>
     </div>
 </div>

@@ -108,6 +108,8 @@ class AdminController extends Controller
             'isActive' => 'nullable|boolean',
         ]);
 
+        // $validatedData['lastname'] .= ' ';
+
         $isActive = $request->has('isActive') ? true : false;
 
         $user = User::create([

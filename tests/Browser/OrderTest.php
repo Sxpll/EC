@@ -19,11 +19,9 @@ class OrderTest extends DuskTestCase
                 ->assertPathIs('/products2')
                 ->assertSee('Products');
 
-
             $browser->click('[data-testid="product-image"]')
                 ->assertPathBeginsWith('/public/products/')
                 ->assertSee('Dodaj do koszyka');
-
 
             $browser->click('[data-testid="add-to-cart-button"]')
                 ->pause(1000)
@@ -32,7 +30,6 @@ class OrderTest extends DuskTestCase
                 ->assertVisible('[data-testid="proceed-to-checkout-button"]')
                 ->click('[data-testid="proceed-to-checkout-button"]');
 
-
             $browser->assertPathIs('/cart')
                 ->type('discount_code', 'test')
                 ->click('[data-testid="apply-discount-button"]')
@@ -40,7 +37,6 @@ class OrderTest extends DuskTestCase
 
             $browser->click('[data-testid="place-order-button"]')
                 ->assertPathIs('/order/create');
-
 
             $email = $faker->userName . '@exmaple.com';
 

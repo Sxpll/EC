@@ -64,7 +64,7 @@
                 </div>
 
                 <div class="text-right mb-3">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" data-testid="update-account-button" class="btn btn-primary">
                         Update Account
                     </button>
                 </div>

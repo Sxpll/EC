@@ -52,7 +52,7 @@
                     <a href="{{ url('/home') }}">Home</a>
                     <a href="{{ route('products.publicIndex') }}" data-testid="products-link">Products</a>
                     @if(auth()->check() && auth()->user()->role == 'admin')
-                    <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
+                    <a href="{{ route('admin.dashboard') }} " data-testid="admin-panel-link">Admin Panel</a>
                     @endif
                     <a href="{{ route('chat.index') }}">Chat</a>
                 </nav>
@@ -101,7 +101,7 @@
 
                     <!-- Logout Icon -->
                     @if(auth()->check())
-                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-icon"><i class="fa fa-sign-out-alt"></i></a>
+                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" data-testid="logout-icon" class="logout-icon"><i class="fa fa-sign-out-alt"></i></a>
                     @endif
 
                     <!-- Hamburger Menu -->

@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" data-testid="login-button">
                             {{ __('Sign in') }}
                         </button>
                     </div>
