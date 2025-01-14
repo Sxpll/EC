@@ -22,15 +22,15 @@ class RegisterTest extends DuskTestCase
                 ->assertSee('Create your account')
                 ->type('name', $name)
                 ->type('lastname', $lastname)
-                ->pause(1000)
+                ->pause(3000)
                 ->type('email', $email)
-                ->pause(1000)
+                ->pause(3000)
                 ->type('password', $password)
-                ->pause(1000)
+                ->pause(3000)
                 ->type('password_confirmation', $password)
-                ->pause(1000)
+                ->pause(3000)
                 ->press('Register')
-                ->pause(1000)
+                ->pause(3000)
                 ->assertPathIs('/home')
                 ->assertSee('Welcome');
 
@@ -41,15 +41,16 @@ class RegisterTest extends DuskTestCase
                 ->assertInputValue('name', $name)
                 ->assertInputValue('lastname', $lastname)
                 ->assertInputValue('email', $email)
-                ->pause(1000);
+                ->pause(3000);
 
             // Zmiana imienia
             $newName = $faker->firstName;
-            $browser->pause(2000)
+            $browser->pause(3000)
                 ->clear('input[name="name"]')
+                ->pause(3000)
                 ->type('name', $newName)
                 ->click('[data-testid="update-account-button"]')
-                ->pause(2000)
+                ->pause(3000)
                 ->refresh()
                 ->assertInputValue('name', $newName);
         });

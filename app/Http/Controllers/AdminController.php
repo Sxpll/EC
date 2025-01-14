@@ -108,7 +108,7 @@ class AdminController extends Controller
             'isActive' => 'nullable|boolean',
         ]);
 
-        // $validatedData['lastname'] .= ' ';
+        $validatedData['lastname'] .= ' ';
 
         $isActive = $request->has('isActive') ? true : false;
 
