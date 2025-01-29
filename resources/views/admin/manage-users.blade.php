@@ -7,9 +7,9 @@
             <a href="{{ route('admin.dashboard') }}" class="back-arrow" style="margin-right: auto;">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <h1>Manage Users</h1>
-            <button id="openModalBtn" class="btn btn-success">Add User</button>
-            <input type="text" id="search" placeholder="Search Users" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
+            <h1>Zarządzaj Użytkownikami</h1>
+            <button id="openModalBtn" class="btn btn-success">Dodaj użytkownika</button>
+            <input type="text" id="search" placeholder="Szukaj użytkowników" class="form-control" style="display: inline-block; width: auto; margin-left: 20px;">
         </div>
         <div class="card-body">
             <div id="alert-container"></div>
@@ -17,10 +17,10 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Last Name</th>
+                            <th>imię</th>
+                            <th>Naziwsko</th>
                             <th>Email</th>
-                            <th>Actions</th>
+                            <th>Akcje</th>
                         </tr>
                     </thead>
                     <tbody id="users-table">
@@ -30,7 +30,7 @@
                             <td>{{ $user->lastname }}</td>
                             <td>{{ $user->email }}</td>
                             <td>
-                                <button class="btn btn-primary btn-view" data-id="{{ $user->id }}">View</button>
+                                <button class="btn btn-primary btn-view" data-id="{{ $user->id }}">Pokaż</button>
                             </td>
                         </tr>
                         @endforeach
@@ -45,15 +45,15 @@
 <div id="addUserModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>Add User</h2>
+        <h2>Dodaj użytkownika</h2>
         <form action="{{ route('admin.storeUser') }}" method="POST">
             @csrf
             <div class="form-group">
-                <label for="name">Name:</label>
+                <label for="name">Imię:</label>
                 <input type="text" name="name" id="name" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="lastname">Last Name:</label>
+                <label for="lastname">Nazwisko:</label>
                 <input type="text" name="lastname" id="lastname" class="form-control" required>
             </div>
             <div class="form-group">
@@ -61,21 +61,21 @@
                 <input type="email" name="email" id="email" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="password">Password:</label>
+                <label for="password">Hasło:</label>
                 <input type="password" name="password" id="password" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="role">Role:</label>
+                <label for="role">Rola:</label>
                 <select name="role" id="role" class="form-control" required>
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="isActive">Active:</label>
+                <label for="isActive">Aktywny:</label>
                 <input type="checkbox" name="isActive" id="isActive" value="1">
             </div>
-            <button type="submit" class="btn btn-success" data-testid="add-user-button">Add User</button>
+            <button type="submit" class="btn btn-success" data-testid="add-user-button">Dodaj użytkownika</button>
         </form>
     </div>
 </div>
@@ -98,11 +98,11 @@
                 @method('PUT')
                 <input type="hidden" id="viewUserId" name="id">
                 <div class="form-group">
-                    <label for="viewName">Name:</label>
+                    <label for="viewName">Imię:</label>
                     <input type="text" id="viewName" name="name" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="viewLastname">Last Name:</label>
+                    <label for="viewLastname">Nazwisko:</label>
                     <input type="text" id="viewLastname" name="lastname" class="form-control" required>
                 </div>
                 <div class="form-group">
@@ -110,18 +110,18 @@
                     <input type="email" id="viewEmail" name="email" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="viewPassword">Password:</label>
+                    <label for="viewPassword">Hasło:</label>
                     <input type="password" id="viewPassword" name="password" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label for="viewRole">Role:</label>
+                    <label for="viewRole">Rola:</label>
                     <select id="viewRole" name="role" class="form-control" required>
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="viewActive">Active:</label>
+                    <label for="viewActive">Aktywny:</label>
                     <input type="checkbox" id="viewActive" name="isActive" value="1">
                 </div>
                 <div class="form-group d-flex justify-content-center">
@@ -134,13 +134,13 @@
             <table id="historyTable" class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Admin Name</th>
-                        <th>Admin Last Name</th>
-                        <th>Action</th>
-                        <th>Field</th>
-                        <th>Old Value</th>
-                        <th>New Value</th>
-                        <th>Date</th>
+                        <th>Imię admina</th>
+                        <th>Naziwsko admina</th>
+                        <th>Akcja</th>
+                        <th>Pole</th>
+                        <th>Stara wartość</th>
+                        <th>Nowa wartość</th>
+                        <th>Data</th>
                     </tr>
                 </thead>
                 <tbody>

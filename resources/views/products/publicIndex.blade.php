@@ -22,14 +22,14 @@
         <div class="filter-sort sort-large d-flex justify-content-between align-items-center flex-wrap">
             <div class="search-container flex-grow-1 mb-2">
                 <form action="{{ route('products.publicIndex') }}" method="GET" class="search-form d-flex align-items-center">
-                    <input type="text" name="search" class="search-input" placeholder="Search products..." value="{{ request()->input('search') }}">
-                    <button class="btn btn-primary ml-2">Search</button>
+                    <input type="text" name="search" class="search-input" placeholder="Wyszukaj produkty" value="{{ request()->input('search') }}">
+                    <button class="btn btn-primary ml-2">Szukaj</button>
                 </form>
             </div>
             <div class="sort-container mb-2">
                 <form action="{{ route('products.publicIndex') }}" method="GET">
                     <select class="filter-select" name="sort_by" onchange="this.form.submit()">
-                        <option value="">Sort by</option>
+                        <option value="">Sortuj po</option>
                         <option value="name_asc" {{ request()->input('sort_by') == 'name_asc' ? 'selected' : '' }}>Name (A-Z)</option>
                         <option value="name_desc" {{ request()->input('sort_by') == 'name_desc' ? 'selected' : '' }}>Name (Z-A)</option>
                         <option value="price_asc" {{ request()->input('sort_by') == 'price_asc' ? 'selected' : '' }}>Price (Low to High)</option>

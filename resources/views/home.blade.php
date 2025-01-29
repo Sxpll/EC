@@ -5,10 +5,10 @@
     <div class="container-center">
         <div class="card login-card">
             <div class="card-header">
-                <h1>{{ __('Home') }}</h1>
+                <h1>{{ __('Strona Główna') }}</h1>
             </div>
             <div class="card-body">
-                <p>Welcome to your personalized homepage!</p>
+                <p>Witaj na stronie głównej!</p>
             </div>
         </div>
     </div>

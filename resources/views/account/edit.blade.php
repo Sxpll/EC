@@ -4,7 +4,7 @@
 <div class="container-center">
     <div class="card login-card">
         <div class="card-header">
-            <h1>My Account</h1>
+            <h1>Moje Dane</h1>
         </div>
         <div class="card-body">
             @if (session('status'))
@@ -19,7 +19,7 @@
                 @method('PUT')
 
                 <div class="form-group">
-                    <label for="name">Name</label>
+                    <label for="name">Imię</label>
                     <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $user->name) }}" required>
                     @error('name')
                     <span class="invalid-feedback" role="alert">
@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="lastname">Last Name</label>
+                    <label for="lastname">Nazwisko</label>
                     <input id="lastname" type="text" class="form-control @error('lastname') is-invalid @enderror" name="lastname" value="{{ old('lastname', $user->lastname) }}" required>
                     @error('lastname')
                     <span class="invalid-feedback" role="alert">
@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password">New Password (leave blank to keep current password)</label>
+                    <label for="password">Nowe Hasło (Pozostaw pustę, aby zachować obecnę hasło)</label>
                     <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password">
                     @error('password')
                     <span class="invalid-feedback" role="alert">
@@ -59,19 +59,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password-confirm">Confirm New Password</label>
+                    <label for="password-confirm">Potwierdź nowe hasło</label>
                     <input id="password-confirm" type="password" class="form-control" name="password_confirmation">
                 </div>
 
                 <div class="text-right mb-3">
                     <button type="submit" data-testid="update-account-button" class="btn btn-primary">
-                        Update Account
+                        Zapisz
                     </button>
                 </div>
             </form>
 
             <div class="text-right mb-3">
-                <a href="{{ route('orders.myOrders') }}" class="btn btn-primary">My Orders</a>
+                <a href="{{ route('orders.myOrders') }}" class="btn btn-primary">Moje Zamówienia</a>
             </div>
             <div class="text-right mb-3">
                 <a href="{{ route('discount_codes.my_codes') }}" class="btn btn-primary">Moje Kody Rabatowe</a>

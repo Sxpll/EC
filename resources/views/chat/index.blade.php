@@ -8,20 +8,20 @@
 </div>
 
 <div class="container">
-    <h1 class="elo">All Chats</h1>
+    <h1 class="elo">Wiadomości</h1>
     <div class="form-group mb-3">
-        <input type="text" id="searchChat" class="form-control" placeholder="Search by title or author...">
+        <input type="text" id="searchChat" class="form-control" placeholder="Szukaj...">
     </div>
 
     <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th>Title</th>
-                    <th>Author</th>
+                    <th>Tytuł</th>
+                    <th>Autor</th>
                     <th>Status</th>
-                    <th class="text-center">Actions</th>
-                    <th class="text-center">Notification</th>
+                    <th class="text-center">Akcje</th>
+                    <th class="text-center">Powiadomienia</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +31,7 @@
                     <td>{{ $chat->user->name }} {{ $chat->user->surname }}</td>
                     <td>{{ $chat->status }}</td>
                     <td class="text-center">
-                        <button class="btn btn-primary btn-view" data-chat-id="{{ $chat->id }}">View</button>
+                        <button class="btn btn-primary btn-view" data-chat-id="{{ $chat->id }}">Pokaż</button>
                     </td>
                     <td class="text-center">
                         @php
@@ -67,7 +67,7 @@
 <div id="chatWindowModal" class="modal">
     <div class="modal-content">
         <div class="modal-header d-flex justify-content-between align-items-center">
-            <h5 class="chat-title" id="chatTitle">Chat</h5>
+            <h5 class="chat-title" id="chatTitle">Czat</h5>
             @if(Auth::user()->is_hr)
             <button id="manageButton" class="btn btn-primary">Manage</button>
             @endif
@@ -78,8 +78,8 @@
         <div class="modal-footer">
             <form id="sendMessageForm" action="" method="POST" class="chat-input">
                 @csrf
-                <textarea name="message" rows="1" class="form-control" placeholder="Type your message..." required></textarea>
-                <button type="submit" class="btn btn-primary mt-2">Send</button>
+                <textarea name="message" rows="1" class="form-control" placeholder="Wpisz wiadomość..." required></textarea>
+                <button type="submit" class="btn btn-primary mt-2">Wyślij</button>
             </form>
         </div>
     </div>

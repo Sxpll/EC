@@ -49,12 +49,12 @@
                     <img src="{{ asset('img/logo.png') }}" alt="Logo" style="height: 40px;">
                 </a>
                 <nav class="navbar-links">
-                    <a href="{{ url('/home') }}">Home</a>
-                    <a href="{{ route('products.publicIndex') }}" data-testid="products-link">Products</a>
+                    <a href="{{ url('/home') }}">Strona główna</a>
+                    <a href="{{ route('products.publicIndex') }}" data-testid="products-link">Produkty</a>
                     @if(auth()->check() && auth()->user()->role == 'admin')
-                    <a href="{{ route('admin.dashboard') }} " data-testid="admin-panel-link">Admin Panel</a>
+                    <a href="{{ route('admin.dashboard') }} " data-testid="admin-panel-link">Panel Administratora</a>
                     @endif
-                    <a href="{{ route('chat.index') }}">Chat</a>
+                    <a href="{{ route('chat.index') }}">Czat</a>
                 </nav>
 
                 <div class="navbar-icons">
@@ -153,10 +153,10 @@
         <!-- Footer -->
         <footer class="footer-bar">
             <div class="footer-bar-content">
-                <a href="#">About Us</a>
-                <a href="#">Privacy</a>
+                <a href="#">O nas</a>
+                <a href="#">Prywatnosc</a>
                 <a href="#">FAQ</a>
-                <a href="#">Careers</a>
+                <a href="#">Kontakt</a>
             </div>
         </footer>
     </div>

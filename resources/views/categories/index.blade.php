@@ -5,10 +5,10 @@
     <a href="{{ route('admin.dashboard') }}" class="back-arrow" style="margin-right: 725px;">
         <i class="fas fa-arrow-left"></i>
     </a>
-    <h1>Manage Categories</h1>
+    <h1>Zarządzaj Kategoriami</h1>
 
 
-    <a href="{{ route('categories.create') }}" class="btn btn-success mb-3">Add New Category</a>
+    <a href="{{ route('categories.create') }}" class="btn btn-success mb-3">Dodaj kategorię</a>
 
 
     @if(session('success'))
@@ -23,7 +23,7 @@
     </div>
 
     <!-- Przycisk do zapisywania zmian -->
-    <button id="saveHierarchy" class="btn btn-primary mt-3">Save Hierarchy</button>
+    <button id="saveHierarchy" class="btn btn-primary mt-3">Zapisz</button>
 </div>
 @endsection
 

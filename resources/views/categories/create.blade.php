@@ -2,16 +2,16 @@
 
 @section('content')
 <div class="container">
-    <h1>Add New Category</h1>
+    <h1>Dodaj nową kategorię</h1>
     <form id="categoryForm" action="{{ route('categories.store') }}" method="POST">
         @csrf
         <div class="form-group">
-            <label for="name">Category Name</label>
+            <label for="name">Nazwa kategorii</label>
             <input type="text" name="name" id="name" class="form-control" required>
         </div>
 
         <div class="form-group">
-            <label for="parent_id">Parent Category</label>
+            <label for="parent_id">Kategoria nadrzędna</label>
             <select name="parent_id" id="parent_id" class="form-control">
                 <option value="">No Parent</option>
                 @foreach($categories as $category)
@@ -20,10 +20,10 @@
             </select>
         </div>
 
-        <button type="button" class="btn btn-success" onclick="handleFormSubmit()">Save and Check Parent Products</button>
+        <button type="button" class="btn btn-success" onclick="handleFormSubmit()">Zapisz</button>
         <div class="row mt-3">
             <div class="col text-center">
-                <a href="{{ route('categories.index') }}" class="btn btn-secondary btn-back">Back</a>
+                <a href="{{ route('categories.index') }}" class="btn btn-secondary btn-back">Wróć</a>
             </div>
         </div>
     </form>
