@@ -85,12 +85,12 @@ class OrderController extends Controller
             $orderItem->save();
         }
 
-        // Treść e-maila
-        $subject = 'Potwierdzenie zamówienia';
-        $body = view('emails.order_confirmation', ['order' => $order])->render();
+        // Wysyłanie e-maila z użyciem Mailtrap
+        Mail::send('emails.order_confirmation', ['order' => $order], function ($message) use ($order) {
+            $message->to($order->customer_email)
+                ->subject('Potwierdzenie zamówienia');
+        });
 
-        // Wysyłanie e-maila przez PHPMailerService
-        \App\Services\PHPMailerService::sendMail($order->customer_email, $subject, $body);
 
         // Czyszczenie koszyka i sesji z kodem rabatowym
         $this->cartService->clearCart();
@@ -149,16 +149,17 @@ class OrderController extends Controller
 
             $newStatusName = $order->status->name;
 
-            // Wysłanie e-maila o zmianie statusu
-            $subject = 'Aktualizacja statusu zamówienia';
-            $body = view('emails.order_status_update', ['order' => $order, 'statusName' => $newStatusName])->render();
-            \App\Services\PHPMailerService::sendMail($order->customer_email, $subject, $body);
+            Mail::send('emails.order_status_update', ['order' => $order, 'statusName' => $newStatusName], function ($message) use ($order) {
+                $message->to($order->customer_email)
+                    ->subject('Aktualizacja statusu zamówienia');
+            });
 
             if ($newStatusId == $statusOnTheWay->id) {
                 // Wysłanie kodu odbioru
-                $subject = 'Zamówienie w drodze - Kod odbioru';
-                $body = view('emails.order_pickup_code', ['order' => $order])->render();
-                \App\Services\PHPMailerService::sendMail($order->customer_email, $subject, $body);
+                Mail::send('emails.order_pickup_code', ['order' => $order], function ($message) use ($order) {
+                    $message->to($order->customer_email)
+                        ->subject('Zamówienie w drodze - Kod odbioru');
+                });
             }
 
             return redirect()->route('admin.orders')->with('success', 'Status zamówienia został zaktualizowany.');

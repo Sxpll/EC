@@ -24,7 +24,7 @@
                     <td>{{ $order->id }}</td>
                     <td>{{ $order->created_at->format('Y-m-d') }}</td>
                     <td>{{ number_format($order->total, 2) }} zł</td>
-                    <td>{{ ucfirst($order->status) }}</td>
+                    <td>{{ ucfirst($order->status->code) }}</td>
                     <td>
                         <button class="btn-details" onclick="toggleDetails({{ $order->id }})">
                             Pokaż Szczegóły <i class="expand-icon" id="expand-icon-{{ $order->id }}"></i>
